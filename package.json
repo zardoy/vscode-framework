@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "esbuild": "^0.12.17",
-    "git-remote-origin-url": "^3.1.0"
+    "git-remote-origin-url": "^3.1.0",
+    "type-fest": "^1.2.3"
   }
 }

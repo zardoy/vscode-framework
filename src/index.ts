@@ -2,15 +2,16 @@ import { modifyJsonFile } from 'modify-json-file';
 import path from 'path';
 import gitRemoteOriginUrl from "git-remote-origin-url"
 import vscode from 'vscode';
+import { ReadonlyDeep } from 'type-fest';
 
 type ContributedCommand = Record<'category' | 'command' | 'title', string>;
 
-export type CommandsExport = {
+export type CommandsExport = ReadonlyDeep<{
     regular: {
         command: string;
         title: string;
     }[]
-}
+}>
 
 interface Options {
     /**
