@@ -6,6 +6,9 @@
   "repository": "https://github.com/zardoy/vscode-tools.git",
   "author": "Vitaly Turovsky <vital2580@icloud.com>",
   "license": "MIT",
+  "bin": {
+    "vscode-tools": "build/bin.ts"
+  },
   "files": [
     "build"
   ],
