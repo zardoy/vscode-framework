@@ -1,9 +1,9 @@
 {
-  "name": "@zardoy/react-util",
+  "name": "@zardoy/vscode-tools",
   "version": "0.0.1",
   "main": "build/index.js",
   "types": "build/index.d.ts",
-  "repository": "https://github.com/zardoy/react-utils.git",
+  "repository": "https://github.com/zardoy/vscode-tools.git",
   "author": "Vitaly Turovsky <vital2580@icloud.com>",
   "license": "MIT",
   "files": [
