@@ -8,6 +8,9 @@ await modifyPackageJsonFile(
     "build/package.json",
     {
         main: "./index.js",
-        types: "./index.d.ts"
+        types: "./index.d.ts",
+        bin: {
+            "vscode-tools": "bin.js"
+        }
     }
 );

@@ -7,7 +7,7 @@
   "author": "Vitaly Turovsky <vital2580@icloud.com>",
   "license": "MIT",
   "bin": {
-    "vscode-tools": "build/bin.ts"
+    "vscode-tools": "build/bin.js"
   },
   "files": [
     "build"
