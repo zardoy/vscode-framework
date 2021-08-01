@@ -5,7 +5,7 @@ import { build } from "./cli";
 
 // TODO use commander or something like that
 
-const [command = "help", arg1 = "", arg2 = ""] = process.argv.slice(2)
+let [command = "help", arg1, arg2] = process.argv.slice(2)
 
 const commands = {
     // doesn't support typescript files
@@ -19,7 +19,9 @@ const commands = {
         })
     },
     "esbuild": async () => {
-        await build(arg1 as any, arg2);
+        if (arg1 === "dev") arg1 = "development";
+        if (arg1 === "prod") arg1 = "production";
+        await build(arg1 as any , arg2);
     }
 }
 
