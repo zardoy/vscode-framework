@@ -67,7 +67,7 @@ export const updatePackageJson = async ({ where, commands, updateFields = [] }: 
     });
 };
 
-export const build = async (NODE_ENV: "development" | "production", entryPoint = "src/index.ts", outfile = path.join(process.cwd(), "out.js"), overrideBuildOptions: BuildOptions) => {
+export const build = async (NODE_ENV: "development" | "production", entryPoint = "src/index.ts", outfile = path.join(process.cwd(), "out.js"), overrideBuildOptions: BuildOptions = {}) => {
     const EXTENSION_NAME = await readFile(path.join(process.cwd(), "package.json")).then(p => p.name)
     
     const result = await esbuildBuild({

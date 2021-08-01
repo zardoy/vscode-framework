@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { posix } from "path";
 import { updatePackageJson } from "./cli"
-import { build } from "./esbuild";
+import { build } from "./cli";
 
 // TODO use commander or something like that
 
