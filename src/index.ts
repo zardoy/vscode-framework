@@ -5,6 +5,7 @@ export type CommandsExport = ReadonlyDeep<{
     regular: {
         command: string;
         title: string;
+        description?: string;
     }[]
 }>
 
