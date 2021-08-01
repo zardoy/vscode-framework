@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { join } from "path/posix";
 import { updatePackageJson } from "."
 import { build } from "./esbuild";
