@@ -1,5 +1,6 @@
 import { join } from "path/posix";
 import { updatePackageJson } from "."
+import { build } from "./esbuild";
 
 // TODO use commander or something like that
 
@@ -16,6 +17,9 @@ const commands = {
             commands
         })
     },
+    "esbuild": async () => {
+        await build(arg1 as any, arg2);
+    }
 }
 
-commands[command]()
+commands[command]().catch(console.error);

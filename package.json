@@ -16,6 +16,7 @@
     "prepublishOnly": "tsc && node scripts/prepare-package-json.mjs"
   },
   "devDependencies": {
+    "@types/jsonfile": "^6.0.1",
     "@types/node": "^16.4.8",
     "@types/vscode": "^1.58.1",
     "@zardoy/tsconfig": "^1.1.0",
@@ -29,6 +30,7 @@
   "dependencies": {
     "esbuild": "^0.12.17",
     "git-remote-origin-url": "^3.1.0",
+    "jsonfile": "^6.1.0",
     "type-fest": "^1.2.3"
   }
 }

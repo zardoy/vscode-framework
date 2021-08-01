@@ -21,7 +21,7 @@ interface Options {
      */
     where: "original" | { path: string }
     commands: CommandsExport
-    /** @default Updates all fields */
+    /** @default [] - Updates all fields */
     updateFields?: ("repository" | "contributes.commands" | "activationEvents" | "engines")[]
 }
 
@@ -80,8 +80,7 @@ export class CommandRegisterer<T extends CommandsExport> {
         public commands: T,
         private ctx: vscode.ExtensionContext
     ) {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports, unicorn/prefer-module
-        this.commandPrefix = require('../../package.json').name; // TODO does it hurt startup times?
+        this.commandPrefix = process.env.EXTENSION_NAME;
     }
 
     public registerCommand(command: T['regular'][number]['command'], callback: () => Promise<void> | void) {
