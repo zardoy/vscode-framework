@@ -3,6 +3,9 @@ import { modifyJsonFile } from 'modify-json-file';
 import path from 'path';
 import gitRemoteOriginUrl from "git-remote-origin-url"
 
+import { build as esbuildBuild, BuildOptions } from "esbuild"
+import { readFile } from "jsonfile";
+
 interface Options {
     /**
      * - original - update root's package.json (changes will be commited)
@@ -63,3 +66,27 @@ export const updatePackageJson = async ({ where, commands, updateFields = [] }: 
         return json;
     });
 };
+
+export const build = async (NODE_ENV: "development" | "production", entryPoint = "src/index.ts", outfile = path.join(process.cwd(), "out.js"), overrideBuildOptions: BuildOptions) => {
+    const EXTENSION_NAME = await readFile(path.join(process.cwd(), "package.json")).then(p => p.name)
+    
+    const result = await esbuildBuild({
+        bundle: true,
+        watch: NODE_ENV === "development",
+        minify: NODE_ENV === "production",
+        entryPoints: [
+            entryPoint
+        ],
+        external: [
+            "vscode"
+        ],
+        platform: "node",
+        outfile,
+        ...overrideBuildOptions,
+        define: {
+            "process.env.NODE_ENV": `"${NODE_ENV}"`,
+            "process.env.EXTENSION_NAME": `"${EXTENSION_NAME}"`,
+            ...overrideBuildOptions.define ? overrideBuildOptions.define : {}
+        },
+    })
+}
