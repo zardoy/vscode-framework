@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { join } from "path/posix";
+import { posix } from "path";
 import { updatePackageJson } from "."
 import { build } from "./esbuild";
 
@@ -12,7 +12,7 @@ const commands = {
     "update-metadata": async () => {
         if (!arg1) throw new TypeError(`Commands export isn't provided`)
         const [path, moduleExport] = arg1.split("#")
-        const commands = (await import(join(__dirname, path!)))[moduleExport!];
+        const commands = (await import(posix.join(__dirname, path!)))[moduleExport!];
         await updatePackageJson({ 
             where: "original",
             commands
