@@ -1,4 +1,5 @@
 node_modules
-build
 *.log
 yarn.lock
+build/**
+!build/client.d.ts

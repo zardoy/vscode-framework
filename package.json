@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "@types/jsonfile": "^6.0.1",
-    "@types/node": "^16.4.8",
-    "@types/vscode": "^1.58.1",
+    "@types/node": "^16.4.13",
+    "@types/vscode": "^1.59.0",
     "@zardoy/tsconfig": "^1.1.0",
     "modify-json-file": "^1.1.0",
     "typescript": "^4.3.5"
@@ -28,9 +28,11 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@zardoy/xo-config": "^0.0.6",
     "esbuild": "^0.12.17",
     "git-remote-origin-url": "^3.1.0",
     "jsonfile": "^6.1.0",
-    "type-fest": "^1.2.3"
+    "type-fest": "^2.0.0",
+    "xo": "^0.43.0"
   }
 }

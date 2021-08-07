@@ -1,6 +1,8 @@
 {
     "extends": "@zardoy/tsconfig/node",
     "compilerOptions": {
-        "declaration": true
-    }
+        "declaration": true,
+        "outDir": "build"
+    },
+    "include": ["src"]
 }
