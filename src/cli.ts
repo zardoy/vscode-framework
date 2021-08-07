@@ -65,7 +65,7 @@ export const updatePackageJson = async ({ where, commands, updateFields = [] }: 
     });
 };
 
-export const build = async (NODE_ENV: 'development' | 'production', entryPoint = 'src/index.ts', outfile = 'out.js', overrideBuildOptions: BuildOptions = {}) => {
+export const build = async (NODE_ENV: 'development' | 'production', entryPoint = 'src/extension.ts', outfile = 'out.js', overrideBuildOptions: BuildOptions = {}) => {
     const packageJson = await readFile(path.join(process.cwd(), 'package.json'));
 
     if (!packageJson.displayName) throw new TypeError(`displayName must be defined in package.json`);
