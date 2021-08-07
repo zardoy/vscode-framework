@@ -27,7 +27,7 @@ export class VscodeFramework<T extends CommandsExport> {
         //     // vscode.window.showErrorMessage(`Extension ${process.env.EXTENSION_DISPLAY_NAME} Crashed`, {
         // process.on("uncaughtExceptionMonitor", (err: Error) => {
 
-        this.commandPrefix = process.env.EXTENSION_ID_NAME;
+        this.commandPrefix = ctx.extension.id.split(".")[1]!;
     }
 
     public registerCommand(command: T['regular'][number]['command'], callback: () => Promise<void> | void) {
