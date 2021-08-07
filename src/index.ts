@@ -36,3 +36,5 @@ export class VscodeFramework<T extends CommandsExport> {
         );
     }
 }
+
+export * from "./quickpick";
