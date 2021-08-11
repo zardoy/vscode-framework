@@ -1,27 +1,37 @@
 #!/usr/bin/env node
-import { posix } from 'path';
-import { updatePackageJson, build } from './cli';
+import { Command } from 'commander';
+import { esbuildBuild, generateTypes, writeManifest } from './cli';
 
-// TODO use commander or something like that
+const program = new Command();
 
-let [command = 'help', arg1, arg2] = process.argv.slice(2);
+// split into two commands
+const generateManifestCommand = program.command('generate-manifest');
+generateManifestCommand.description('Generates package.json for extension. Use this command before consuming extension!');
+generateManifestCommand.option('--overwrite-cwd', 'disable stopping you from occasional main package.json overwriting', false);
+generateManifestCommand.option('--overwrite', 'whether to fully overwrite if target package.json exists', true);
+generateManifestCommand.action(async () => {
+    await writeManifest({ output: 'test.json', overwrite: true });
+});
+const generateTypesCommand = program.command('generate-types');
+generateTypesCommand.description('Generate TypeScript typings (from contribution points) for working with framework');
 
-const commands = {
-    // doesn't support typescript files
-    'update-metadata': async () => {
-        if (!arg1) throw new TypeError('Commands export isn\'t provided');
-        const [path, moduleExport] = arg1.split('#');
-        const commands = (await import(posix.join(__dirname, path!)))[moduleExport!];
-        await updatePackageJson({
-            where: 'original',
-            commands,
-        });
-    },
-    esbuild: async () => {
-        if (arg1 === 'dev') arg1 = 'development';
-        if (arg1 === 'prod') arg1 = 'production';
-        await build(arg1 as any, arg2);
-    },
-};
+generateTypesCommand.action(async () => {
+    await generateTypes(process.cwd());
+});
 
-commands[command]().catch(console.error);
+const esbuildCommand = program.command('start');
+esbuildCommand.description('Launch VSCode development with extension (no launch.json needed)');
+
+esbuildCommand.action(async () => {
+    await esbuildBuild('development');
+});
+
+// const buildCommand = program.command('build', 'Make a productive-ready production build');
+
+program.parse(process.argv);
+
+// const packageCommand = program.command('package', 'Launch VSCode development with extension (no launch.json needed)');
+
+// const migrateCommand = program.command('migrate [path to package.json]', 'Migrate from regular package.json in interactive way (cleans contribution points, adds config)');
+
+// const validate = program.command('validate')
