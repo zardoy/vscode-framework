@@ -1,62 +1,92 @@
 # VSCode Framework
 
-Framework for creating VSCode extensions.
+> :fire: The fastest way to develop extensions for VSCode
+
+💡 Not Boilerplated
+⚡️ Hot Reload
+🔑 Make Code Typed from `package.json`'s Contribution Points
+📦 Optimized Build
+🛠️ Configurable
 
 ## The Main Reason
 
-I personally think that it's just tedious to maintain an average VSCode extension and there should be an easier way to do things.
+I personally think that it's just tedious to maintain an average VSCode extension and there should be an easier way to do things. Also, I didn't like the boilerplated [generator-code](https://github.com/Microsoft/vscode-generator-code).
 
 <!-- The standard `vscode` module just slows me down. -->
 
 ## Usage
 
-Install it: `yarn add github:zardoy/vscode-tools#build`
+Install it: `yarn add github:zardoy/vscode-tools#build` (I'll rename repo soon)
 
-1. Set your `main` field of `package.json` to `out.js` (also don't forget to gitignore it)
-2. Set your `watch` NPM script to `vscode-tools esbuild dev` (also NPM script `watch` should be your default task)
-3. Create prepare script for generating commands like so: https://github.com/zardoy/github-manager/blob/main/scripts/prepare.ts
+This framework encourage you to store the minimal amount of information in `package.json` (Extension Manifest).
 
-## Features
+Even in development workflow this extension
 
-### Extension Commands
+### Manifest Migration
 
-Instead of keeping your commands in sync with
+Command: `vscode-framework migrate`
 
-1. Contribution points
-2. Activation events
+This is interactive command, so you can either just run it or read what it does below.
 
-You can
+But note, these steps are optional.
 
-1. Define your commands in a dedicated file (e.g. `src/commands.ts`):
+- `package.json` cleanup: remove `engines`, `main`, `repository` and other fields that can be generated at start/build time.
+- Removes `launch.json` and `tasks.json`
+- Adds scripts to `package.json`:
+  - `start`: `vscode-framework start` – just run this script to launch extension
+  - `build`: `vscode-framework build` – create optimized build (doesn't create `.vsix` for a moment)
+  - `postinstall` – Generate Types (not client for now) from Extension Manifest
+- Creates config overrides
 
-```ts
-// this is your source of truth. You edit manually any command metadata only here
-export const commands = [
-    {
-        // command ID (should be short and UNIQUE)
-        command: "fix-all",
-        // command title should be verbose and in title-case
-        title: "Fix all auto-fixable Problems",
-        // optional, see below
-        description: "Applies ESLint auto-fix resolutions to all fixable problems"
-    }
-]
-```
+But this command for now doesn't perform migration for your code, if you have big codebase you can wait until this feature is done.
 
-2. Create a script to programmatically place them in `package.json` (let's say `scripts/prepare.ts`):
+### Extension Code
 
 ```ts
-import { updatePackageJson } from "@zardoy/vscode-tools/cli"
-import { commands } from "../src/commands";
+//📁 src/extension.ts
+import vscode from 'vscode';
+import { VscodeFramework, showQuickPick } from 'vscode-framework';
 
-updatePackageJson({
-    commands: commands,
-    where: "original",
-})
+export const activate = (ctx: vscode.ExtensionContext) => {
+    const framework = new VscodeFramework(ctx);
+
+    framework.registerCommand('make-project-awesome', async () => {
+        const packageManager = showQuickPick([
+            {
+                label: 'Yarn (fast)',
+                value: 'yarn'
+            },
+            {
+                label: 'NPM (faster)',
+                value: 'npm'
+            },
+            {
+                label: 'PNPM (the fastest)',
+                value: 'pnpm'
+            }
+        ]);
+        // will be printed in output pane
+        console.log('Selected', packageManager);
+    });
+}
 ```
 
-1. After running the script, you'll get package.json updated.
-TODO: better docs extract fields
+### Config
+
+You can create `vscode-framework.json` in the root to override [default config](src/config.ts).
+
+### Development Workflow
+
+I think you have noticed that it encourages to use start script instead of *launch config*. Which is significantly faster because no debugger warmup needed.
+As a bonus this approach a IDE-agnostic and you can run extension even without opening IDE.
+
+There is a hot reload feature, but you can manually restart editor with pressing <kdb>R</kbd> in console.
+
+### The Big Tradeoff
+
+Because we use ESBuild for blazing-fast compilation there is no type checking in console (but this is only temporary limitation).
+
+For now you need to rely on your IDE.
 
 #### About Description
 
@@ -68,16 +98,10 @@ Don't confuse `description` from commands above with description from VSCode's `
 
 Note, that VSCode doesn't support keywords for the commands, so
 
-### CLI
-
-WIP
-
 ### Environment Variables
 
 See [Environment Variables](build/client.d.ts) that are injected.
 
-To get them in intellisense create `globals.d.ts` file in your source root with `///<reference lib="">` at the top.
-
-TODO: add `types` command
+<!-- To get them in intellisense create `globals.d.ts` file in your source root with `///<reference lib="">` at the top. -->
 
 And also, what about having IDE-agnostic API?
