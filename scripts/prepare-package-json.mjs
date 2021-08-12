@@ -10,7 +10,7 @@ await modifyPackageJsonFile(
         main: "./index.js",
         types: "./index.d.ts",
         bin: {
-            "vscode-tools": "bin.js"
+            "vscode-framework": "bin.js"
         }
     }
 );
