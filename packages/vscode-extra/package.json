@@ -12,6 +12,9 @@
         "development",
         "extras"
     ],
+    "files": [
+        "build"
+    ],
     "peerDependencies": {
         "@types/vscode": "^1.60.0"
     },
