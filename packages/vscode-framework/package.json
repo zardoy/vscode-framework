@@ -1,0 +1,70 @@
+{
+    "name": "vscode-framework",
+    "version": "0.0.1",
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
+    "repository": "https://github.com/zardoy/vscode-tools.git",
+    "author": "Vitaly Turovsky <vital2580@icloud.com>",
+    "license": "MIT",
+    "keywords": [
+        "vscode",
+        "Visual Studio Code",
+        "code",
+        "ide",
+        "framework",
+        "tools",
+        "utils",
+        "strictly typed",
+        "generator",
+        "webview"
+    ],
+    "bin": {
+        "vscode-framework": "build/cli/bin.js"
+    },
+    "files": [
+        "build"
+    ],
+    "scripts": {
+        "_postinstall": "node build/postinstall.js",
+        "prepublishOnly": "pinst --enable",
+        "postpublish": "pinst --disable"
+    },
+    "devDependencies": {
+        "@hediet/node-reload": "^0.7.3",
+        "@types/fs-extra": "^9.0.12",
+        "@types/jsonfile": "^6.0.1",
+        "@types/lodash": "^4.14.172",
+        "@types/node": "^16.4.13",
+        "@types/react": "^17.0.16",
+        "@types/vscode": "^1.59.0",
+        "@zardoy/tsconfig": "^1.2.1",
+        "kleur": "^4.1.4",
+        "modify-json-file": "^1.1.0",
+        "terser": "^5.7.2",
+        "ttypescript": "^1.5.12",
+        "pinst": "^2.1.6",
+        "type-fest": "^2.0.0",
+        "typescript": "^4.3.5"
+    },
+    "peerDependencies": {
+        "@types/vscode": "^1.58.1"
+    },
+    "dependencies": {
+        "@prisma/debug": "^3.1.1",
+        "@vscode-framework/extension-manifest": "workspace:*",
+        "vscode-extra": "workspace:*",
+        "commander": "^8.1.0",
+        "cosmiconfig": "^7.0.1",
+        "esbuild": "^0.12.19",
+        "execa": "^5.1.1",
+        "exit-hook": "^2",
+        "fs-extra": "^10.0.0",
+        "generated-module": "^0.0.2",
+        "github-remote-info": "^1.0.2",
+        "jsonfile": "^6.1.0",
+        "lodash": "^4.17.21",
+        "pkg-dir": "^4",
+        "react": "^17.0.2",
+        "ts-morph": "^12.0.0"
+    }
+}

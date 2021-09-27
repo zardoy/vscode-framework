@@ -1,0 +1,24 @@
+{
+    "name": "vscode-extra",
+    "version": "0.0.1",
+    "repository": "zardoy/vscode-framework",
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
+    "keywords": [
+        "vscode",
+        "extension",
+        "api",
+        "extensions",
+        "development",
+        "extras"
+    ],
+    "peerDependencies": {
+        "@types/vscode": "^1.60.0"
+    },
+    "devDependencies": {
+        "tsd": "^0.17.0"
+    },
+    "scripts": {
+        "prepublishOnly": "tsd"
+    }
+}

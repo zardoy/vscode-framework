@@ -1,0 +1,15 @@
+{
+    "extends": "@zardoy/tsconfig/node",
+    "references": [
+        {
+            "path": "packages/extension-manifest/tsconfig.dev.json"
+        },
+        {
+            "path": "packages/vscode-extra/tsconfig.dev.json"
+        },
+        {
+            "path": "packages/vscode-framework/tsconfig.dev.json"
+        }
+    ],
+    "files": []
+}
