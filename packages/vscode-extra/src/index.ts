@@ -9,7 +9,7 @@ export type VSCodeQuickPickItem<T> = vscode.QuickPickItem & {
 export const showQuickPick = async <T, M extends boolean = false>(
     items: Array<VSCodeQuickPickItem<T>>,
     options: vscode.QuickPickOptions & { canPickMany?: M } = {},
-): Promise<M extends true ? T[] : T> => {
+): Promise<(M extends true ? T[] : T) | undefined> => {
     const selectedItem = await vscode.window.showQuickPick(items, options)
 
     return Array.isArray(selectedItem) ? selectedItem?.map(item => item.value) : (selectedItem?.value as any)

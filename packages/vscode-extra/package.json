@@ -1,6 +1,7 @@
 {
     "name": "vscode-extra",
     "version": "0.0.1",
+    "description": "Contains additional useful methods extensions that aren't provided by vscode API",
     "repository": "zardoy/vscode-framework",
     "main": "build/index.js",
     "types": "build/index.d.ts",
@@ -23,5 +24,8 @@
     },
     "scripts": {
         "prepublishOnly": "tsd"
+    },
+    "tsd": {
+        "extends": "@zardoy/tsconfig/node"
     }
 }
