@@ -1,15 +1,21 @@
 {
-    "name": "@vscode-framework/extension-manifest",
+    "name": "vscode-manifest",
     "version": "0.0.1",
     "main": "build/index.js",
     "types": "build/index.d.ts",
+    "files": [
+        "build"
+    ],
+    "description": "Contains TypeScript types, JSON schema and compiled validator for VSCode Extension Manifest",
     "scripts": {
         "generate-validator": "ts-node scripts/generateSchemaValidator.ts"
     },
     "keywords": [
         "vscode",
         "extracted",
+        "package.json",
         "manifest",
+        "read",
         "parse",
         "validate",
         "validator"

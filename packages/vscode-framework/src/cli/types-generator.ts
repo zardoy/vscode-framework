@@ -1,4 +1,4 @@
-import { readDirectoryManifest } from '@vscode-framework/extension-manifest'
+import { readDirectoryManifest } from 'vscode-manifest'
 import { oneOf } from '../util'
 import { GracefulError } from './errors'
 import { createJsdoc } from 'generated-module/build/ts-morph-utils'

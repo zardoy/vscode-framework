@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { readDirectoryManifest } from '@vscode-framework/extension-manifest'
+import { readDirectoryManifest } from 'vscode-manifest'
 import { generateManifest } from '../../src/cli'
 import { mockManifestOnce, screenRecorderManifest } from './common'
 

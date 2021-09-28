@@ -1,0 +1,389 @@
+{
+    "properties": {
+        "engines": {
+            "type": "object",
+            "description": "Engine compatibility.",
+            "properties": {
+                "vscode": {
+                    "type": "string",
+                    "description": "For VS Code extensions, specifies the VS Code version that the extension is compatible with. Cannot be *. For example: ^0.10.5 indicates compatibility with a minimum VS Code version of 0.10.5.",
+                    "default": "^1.22.0"
+                }
+            }
+        },
+        "publisher": {
+            "description": "The publisher of the VS Code extension.",
+            "type": "string"
+        },
+        "displayName": {
+            "description": "The display name for the extension used in the VS Code gallery.",
+            "type": "string"
+        },
+        "categories": {
+            "description": "The categories used by the VS Code gallery to categorize the extension.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "Azure",
+                            "Data Science",
+                            "Debuggers",
+                            "Extension Packs",
+                            "Education",
+                            "Formatters",
+                            "Keymaps",
+                            "Language Packs",
+                            "Linters",
+                            "Machine Learning",
+                            "Notebooks",
+                            "Programming Languages",
+                            "SCM Providers",
+                            "Snippets",
+                            "Testing",
+                            "Themes",
+                            "Visualization",
+                            "Other"
+                        ]
+                    }
+                ]
+            }
+        },
+        "galleryBanner": {
+            "type": "object",
+            "description": "Banner used in the VS Code marketplace.",
+            "properties": {
+                "color": {
+                    "description": "The banner color on the VS Code marketplace page header.",
+                    "type": "string"
+                },
+                "theme": {
+                    "description": "The color theme for the font used in the banner.",
+                    "type": "string",
+                    "enum": ["dark", "light"]
+                }
+            }
+        },
+        "contributes": {
+            "description": "All contributions of the VS Code extension represented by this package.",
+            "type": "object",
+            "properties": {},
+            "default": {}
+        },
+        "preview": {
+            "type": "boolean",
+            "description": "Sets the extension to be flagged as a Preview in the Marketplace."
+        },
+        "activationEvents": {
+            "description": "Activation events for the VS Code extension.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "defaultSnippets": [
+                    {
+                        "label": "onLanguage",
+                        "description": "An activation event emitted whenever a file that resolves to the specified language gets opened.",
+                        "body": "onLanguage:${1:languageId}"
+                    },
+                    {
+                        "label": "onCommand",
+                        "description": "An activation event emitted whenever the specified command gets invoked.",
+                        "body": "onCommand:${2:commandId}"
+                    },
+                    {
+                        "label": "onDebug",
+                        "description": "An activation event emitted whenever a user is about to start debugging or about to setup debug configurations.",
+                        "body": "onDebug"
+                    },
+                    {
+                        "label": "onDebugInitialConfigurations",
+                        "description": "An activation event emitted whenever a \"launch.json\" needs to be created (and all provideDebugConfigurations methods need to be called).",
+                        "body": "onDebugInitialConfigurations"
+                    },
+                    {
+                        "label": "onDebugDynamicConfigurations",
+                        "description": "An activation event emitted whenever a list of all debug configurations needs to be created (and all provideDebugConfigurations methods for the \"dynamic\" scope need to be called).",
+                        "body": "onDebugDynamicConfigurations"
+                    },
+                    {
+                        "label": "onDebugResolve",
+                        "description": "An activation event emitted whenever a debug session with the specific type is about to be launched (and a corresponding resolveDebugConfiguration method needs to be called).",
+                        "body": "onDebugResolve:${6:type}"
+                    },
+                    {
+                        "label": "onDebugAdapterProtocolTracker",
+                        "description": "An activation event emitted whenever a debug session with the specific type is about to be launched and a debug protocol tracker might be needed.",
+                        "body": "onDebugAdapterProtocolTracker:${6:type}"
+                    },
+                    {
+                        "label": "workspaceContains",
+                        "description": "An activation event emitted whenever a folder is opened that contains at least a file matching the specified glob pattern.",
+                        "body": "workspaceContains:${4:filePattern}"
+                    },
+                    {
+                        "label": "onStartupFinished",
+                        "description": "An activation event emitted after the start-up finished (after all `*` activated extensions have finished activating).",
+                        "body": "onStartupFinished"
+                    },
+                    {
+                        "label": "onFileSystem",
+                        "description": "An activation event emitted whenever a file or folder is accessed with the given scheme.",
+                        "body": "onFileSystem:${1:scheme}"
+                    },
+                    {
+                        "label": "onSearch",
+                        "description": "An activation event emitted whenever a search is started in the folder with the given scheme.",
+                        "body": "onSearch:${7:scheme}"
+                    },
+                    {
+                        "label": "onView",
+                        "body": "onView:${5:viewId}",
+                        "description": "An activation event emitted whenever the specified view is expanded."
+                    },
+                    {
+                        "label": "onIdentity",
+                        "body": "onIdentity:${8:identity}",
+                        "description": "An activation event emitted whenever the specified user identity."
+                    },
+                    {
+                        "label": "onUri",
+                        "body": "onUri",
+                        "description": "An activation event emitted whenever a system-wide Uri directed towards this extension is open."
+                    },
+                    {
+                        "label": "onOpenExternalUri",
+                        "body": "onOpenExternalUri",
+                        "description": "An activation event emitted whenever a external uri (such as an http or https link) is being opened."
+                    },
+                    {
+                        "label": "onCustomEditor",
+                        "body": "onCustomEditor:${9:viewType}",
+                        "description": "An activation event emitted whenever the specified custom editor becomes visible."
+                    },
+                    {
+                        "label": "onNotebook",
+                        "body": "onNotebook:${1:type}",
+                        "description": "An activation event emitted whenever the specified notebook document is opened."
+                    },
+                    {
+                        "label": "onAuthenticationRequest",
+                        "body": "onAuthenticationRequest:${11:authenticationProviderId}",
+                        "description": "An activation event emitted whenever sessions are requested from the specified authentication provider."
+                    },
+                    {
+                        "label": "onRenderer",
+                        "description": "An activation event emitted whenever a notebook output renderer is used.",
+                        "body": "onRenderer:${11:rendererId}"
+                    },
+                    {
+                        "label": "onTerminalProfile",
+                        "body": "onTerminalProfile:${1:terminalId}",
+                        "description": "An activation event emitted when a specific terminal profile is launched."
+                    },
+                    {
+                        "label": "onWalkthrough",
+                        "body": "onWalkthrough:${1:walkthroughID}",
+                        "description": "An activation event emitted when a specified walkthrough is opened."
+                    },
+                    {
+                        "label": "*",
+                        "description": "An activation event emitted on VS Code startup. To ensure a great end user experience, please use this activation event in your extension only when no other activation events combination works in your use-case.",
+                        "body": "*"
+                    }
+                ]
+            }
+        },
+        "badges": {
+            "type": "array",
+            "description": "Array of badges to display in the sidebar of the Marketplace's extension page.",
+            "items": {
+                "type": "object",
+                "required": ["url", "href", "description"],
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "Badge image URL."
+                    },
+                    "href": {
+                        "type": "string",
+                        "description": "Badge link."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Badge description."
+                    }
+                }
+            }
+        },
+        "markdown": {
+            "type": "string",
+            "description": "Controls the Markdown rendering engine used in the Marketplace. Either github (default) or standard.",
+            "enum": ["github", "standard"],
+            "default": "github"
+        },
+        "qna": {
+            "default": "marketplace",
+            "description": "Controls the Q&A link in the Marketplace. Set to marketplace to enable the default Marketplace Q & A site. Set to a string to provide the URL of a custom Q & A site. Set to false to disable Q & A altogether.",
+            "anyOf": [
+                {
+                    "type": ["string", "boolean"],
+                    "enum": ["marketplace", false]
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "extensionDependencies": {
+            "description": "Dependencies to other extensions. The identifier of an extension is always ${publisher}.${name}. For example: vscode.csharp.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^([a-z0-9A-Z][a-z0-9-A-Z]*)\\.([a-z0-9A-Z][a-z0-9-A-Z]*)$"
+            }
+        },
+        "extensionPack": {
+            "description": "A set of extensions that can be installed together. The identifier of an extension is always ${publisher}.${name}. For example: vscode.csharp.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^([a-z0-9A-Z][a-z0-9-A-Z]*)\\.([a-z0-9A-Z][a-z0-9-A-Z]*)$"
+            }
+        },
+        "extensionKind": {
+            "description": "Define the kind of an extension. `ui` extensions are installed and run on the local machine while `workspace` extensions run on the remote.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": ["ui", "workspace", "web"],
+                "enumDescriptions": [
+                    "UI extension kind. In a remote window, such extensions are enabled only when available on the local machine.",
+                    "Workspace extension kind. In a remote window, such extensions are enabled only when available on the remote.",
+                    "Web worker extension kind. Such an extension can execute in a web worker extension host."
+                ]
+            },
+            "default": ["workspace"],
+            "defaultSnippets": [
+                {
+                    "body": ["ui"],
+                    "description": "Define an extension which can run only on the local machine when connected to remote window."
+                },
+                {
+                    "body": ["workspace"],
+                    "description": "Define an extension which can run only on the remote machine when connected remote window."
+                },
+                {
+                    "body": ["ui", "workspace"],
+                    "description": "Define an extension which can run on either side, with a preference towards running on the local machine."
+                },
+                {
+                    "body": ["workspace", "ui"],
+                    "description": "Define an extension which can run on either side, with a preference towards running on the remote machine."
+                },
+                {
+                    "body": [],
+                    "description": "Define an extension which cannot run in a remote context, neither on the local, nor on the remote machine."
+                }
+            ]
+        },
+        "capabilities": {
+            "description": "Declare the set of supported capabilities by the extension.",
+            "type": "object",
+            "properties": {
+                "virtualWorkspaces": {
+                    "description": "Declares whether the extension should be enabled in virtual workspaces. A virtual workspace is a workspace which is not backed by any on-disk resources. When false, this extension will be automatically disabled in virtual workspaces. Default is true.",
+                    "type": ["boolean", "object"],
+                    "defaultSnippets": [
+                        {
+                            "label": "limited",
+                            "body": {
+                                "supported": "${1:limited}",
+                                "description": "${2}"
+                            }
+                        },
+                        {
+                            "label": "false",
+                            "body": {
+                                "supported": false,
+                                "description": "${2}"
+                            }
+                        }
+                    ],
+                    "properties": {
+                        "supported": {
+                            "markdownDescription": "Declares the level of support for virtual workspaces by the extension.",
+                            "type": ["string", "boolean"],
+                            "enum": ["limited", true, false],
+                            "enumDescriptions": [
+                                "The extension will be enabled in virtual workspaces with some functionality disabled.",
+                                "The extension will be enabled in virtual workspaces with all functionality enabled.",
+                                "The extension will not be enabled in virtual workspaces."
+                            ]
+                        },
+                        "description": {
+                            "type": "string",
+                            "markdownDescription": "A description of how virtual workspaces affects the extensions behavior and why it is needed. This only applies when `supported` is not `true`."
+                        }
+                    }
+                },
+                "untrustedWorkspaces": {
+                    "description": "Declares how the extension should be handled in untrusted workspaces.",
+                    "type": "object",
+                    "required": ["supported"],
+                    "defaultSnippets": [
+                        {
+                            "body": {
+                                "supported": "${1:limited}",
+                                "description": "${2}"
+                            }
+                        }
+                    ],
+                    "properties": {
+                        "supported": {
+                            "markdownDescription": "Declares the level of support for untrusted workspaces by the extension.",
+                            "type": ["string", "boolean"],
+                            "enum": ["limited", true, false],
+                            "enumDescriptions": [
+                                "The extension will be enabled in untrusted workspaces with some functionality disabled.",
+                                "The extension will be enabled in untrusted workspaces with all functionality enabled.",
+                                "The extension will not be enabled in untrusted workspaces."
+                            ]
+                        },
+                        "restrictedConfigurations": {
+                            "description": "A list of configuration keys contributed by the extension that should not use workspace values in untrusted workspaces.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": {
+                            "type": "string",
+                            "markdownDescription": "A description of how workspace trust affects the extensions behavior and why it is needed. This only applies when `supported` is not `true`."
+                        }
+                    }
+                }
+            }
+        },
+        "scripts": {
+            "type": "object",
+            "properties": {
+                "vscode:prepublish": {
+                    "description": "Script executed before the package is published as a VS Code extension.",
+                    "type": "string"
+                },
+                "vscode:uninstall": {
+                    "description": "Uninstall hook for VS Code extension. Script that gets executed when the extension is completely uninstalled from VS Code which is when VS Code is restarted (shutdown and start) after the extension is uninstalled. Only Node scripts are supported.",
+                    "type": "string"
+                }
+            }
+        },
+        "icon": {
+            "type": "string",
+            "description": "The path to a 128x128 pixel icon."
+        }
+    }
+}

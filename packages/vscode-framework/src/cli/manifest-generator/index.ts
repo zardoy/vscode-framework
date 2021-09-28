@@ -1,6 +1,6 @@
 // TODO can properties contain " ?
 
-import { ManifestType, readManifest } from '@vscode-framework/extension-manifest'
+import { ManifestType, readManifest } from 'vscode-manifest'
 import fs from 'fs'
 import { writeFile } from 'jsonfile'
 import { defaultsDeep, omit } from 'lodash'

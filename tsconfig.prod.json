@@ -2,13 +2,13 @@
     "extends": "@zardoy/tsconfig/node",
     "references": [
         {
-            "path": "packages/extension-manifest/tsconfig.prod.json"
-        },
-        {
             "path": "packages/vscode-extra/tsconfig.prod.json"
         },
         {
             "path": "packages/vscode-framework/tsconfig.prod.json"
+        },
+        {
+            "path": "packages/vscode-manifest/tsconfig.prod.json"
         }
     ],
     "files": [],

@@ -1,6 +1,6 @@
 import { getGithubRemoteInfo } from 'github-remote-info'
 import { MaybePromise, readModulePackage } from '../../util'
-import { ManifestType } from '@vscode-framework/extension-manifest'
+import { ManifestType } from 'vscode-manifest'
 import { UnionToIntersection } from 'type-fest'
 
 // They're generating package.json properties

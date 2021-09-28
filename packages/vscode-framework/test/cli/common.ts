@@ -1,4 +1,4 @@
-import { ManifestType } from '@vscode-framework/extension-manifest/'
+import { ManifestType } from 'vscode-manifest/'
 import jsonfile from 'jsonfile'
 
 export const mockManifestOnce = (manifest: ManifestType) => {

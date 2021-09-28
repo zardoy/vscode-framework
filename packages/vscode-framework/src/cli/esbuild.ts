@@ -1,5 +1,5 @@
 import Debug from '@prisma/debug'
-import { ManifestType } from '@vscode-framework/extension-manifest'
+import { ManifestType } from 'vscode-manifest'
 import { build as esbuildBuild, BuildOptions } from 'esbuild'
 import execa from 'execa'
 import fsExtra from 'fs-extra'
