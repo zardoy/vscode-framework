@@ -80,12 +80,9 @@ Object {
       },
     },
   },
-  "dependencies": Object {
-    "@hediet/node-reload": "*",
-  },
   "displayName": "Screen Recorder",
   "engines": Object {
-    "vscode": "^1.59.0",
+    "vscode": "^1.60.0",
   },
   "main": "extension.js",
   "name": "screen-recorder",

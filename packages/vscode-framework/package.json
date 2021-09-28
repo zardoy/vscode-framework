@@ -6,16 +6,17 @@
     "repository": "https://github.com/zardoy/vscode-tools.git",
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
     "license": "MIT",
-    "keywords": [
+    "replaceKeywords": [
         "vscode",
         "Visual Studio Code",
         "code",
         "ide",
         "framework",
+        "extensions",
+        "helper",
         "tools",
         "utils",
-        "strictly typed",
-        "generator",
+        "typed",
         "webview"
     ],
     "bin": {

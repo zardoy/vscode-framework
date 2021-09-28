@@ -18,6 +18,7 @@ const makeGenerators = <T extends GeneralPropGeneratorsType>(generators: T) => g
 
 // HERE!
 export const propsGenerators = makeGenerators({
+    // TODO implement tests
     // every generator's return type should be deeply merged
     async repository() {
         // hard to test
@@ -79,36 +80,36 @@ export const propsGenerators = makeGenerators({
             }
         else return {}
     },
-    requiredRuntimeDependency({
-        dependencies = {},
-        devDependencies = {},
-    }: PickManifest<'dependencies' | 'devDependencies'>) {
-        // TODO extract from actual peerDeps of that package.json
-        // TODO uncomment when HR is available
-        // const requiredRuntimeDeps = ['@hediet/node-reload']
-        const requiredRuntimeDeps = []
-        const unmetDeps = [...requiredRuntimeDeps]
-        // I believe it could be slow
-        const allListedDeps = [dependencies, devDependencies]
-            .flatMap(deps => deps && Object.keys(deps))
-            .filter(a => a !== undefined)
-        for (const requiredDep of unmetDeps) {
-            if (allListedDeps.includes(requiredDep)) unmetDeps.splice(unmetDeps.indexOf(requiredDep), 1)
-        }
-        if (unmetDeps.length)
-            throw new TypeError(
-                `These required peerDependencies are not in your package.json: ${unmetDeps.join(
-                    ', ',
-                )} please install them`,
-            )
-        return {
-            // TODO use pick
-            dependencies: {
-                // TODO do we really need it?
-                [requiredRuntimeDeps[0]!]: '*',
-            },
-        }
-    },
+    // requiredRuntimeDependency({
+    //     dependencies = {},
+    //     devDependencies = {},
+    // }: PickManifest<'dependencies' | 'devDependencies'>) {
+    //     // TODO extract from actual peerDeps of that package.json
+    //     // TODO uncomment when HR is available
+    //     // const requiredRuntimeDeps = ['@hediet/node-reload']
+    //     const requiredRuntimeDeps = []
+    //     const unmetDeps = [...requiredRuntimeDeps]
+    //     // I believe it could be slow
+    //     const allListedDeps = [dependencies, devDependencies]
+    //         .flatMap(deps => deps && Object.keys(deps))
+    //         .filter(a => a !== undefined)
+    //     for (const requiredDep of unmetDeps) {
+    //         if (allListedDeps.includes(requiredDep)) unmetDeps.splice(unmetDeps.indexOf(requiredDep), 1)
+    //     }
+    //     if (unmetDeps.length)
+    //         throw new TypeError(
+    //             `These required peerDependencies are not in your package.json: ${unmetDeps.join(
+    //                 ', ',
+    //             )} please install them`,
+    //         )
+    //     return {
+    //         // TODO use pick
+    //         dependencies: {
+    //             // TODO do we really need it?
+    //             [requiredRuntimeDeps[0]!]: '*',
+    //         },
+    //     }
+    // },
 })
 
 // 100% safe but
