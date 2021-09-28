@@ -1,7 +1,6 @@
 // this is just a wrapper for better types support
 
 import { Command, CommandOptions } from 'commander'
-import { pick } from 'lodash'
 import { CamelCase } from 'type-fest'
 import { pickObject } from '../util'
 
@@ -29,8 +28,6 @@ namespace CommandArguments {
         }
     >
 }
-
-type D = CommandArguments.MakeArguments<'[path]'[]>
 
 export class SuperCommander<C extends Record<string, any> | undefined = undefined> {
     program: Command
