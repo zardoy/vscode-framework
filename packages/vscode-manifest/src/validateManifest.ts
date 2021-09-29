@@ -1,7 +1,7 @@
 import type { ValidateFunction } from 'ajv'
 import { bold, red } from 'chalk'
 import { ManifestType } from '.'
-import { displayError, UnprintableError } from './displayError'
+import { displayError } from './displayError'
 import ajvValidateImport from './generated/validate.js'
 import { intoTwoArrays, onlyProperties } from './util'
 
@@ -15,7 +15,7 @@ export const validateManifest = (manifest: ManifestType) => {
 
 /**
  * The same validation function, but returns nothing, prints errors in case of invalid manifest and throws
- * @throws UnprintableError in case if invalid
+ * @throws in case if invalid
  */
 export const validateOrThrow = (manifest: ManifestType) => {
     const errors = validateManifest(manifest)
@@ -45,6 +45,7 @@ export const validateOrThrow = (manifest: ManifestType) => {
                 )
             }
         }
-        throw new UnprintableError()
+        // TODO exclude from output
+        throw new Error('validation error')
     }
 }

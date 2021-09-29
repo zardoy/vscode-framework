@@ -7,7 +7,6 @@ import { readFile } from 'jsonfile'
 
 import { ManifestType } from './frameworkTypes'
 import { Except } from 'type-fest'
-import { UnprintableError } from './displayError'
 
 // package: generate package
 
@@ -78,7 +77,6 @@ export const readManifest = async ({
 
         return manifest
     } catch (err) {
-        if (err instanceof UnprintableError) process.exit(1)
         throw err
     }
 }
