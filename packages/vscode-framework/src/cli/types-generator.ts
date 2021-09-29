@@ -1,4 +1,4 @@
-import { readDirectoryManifest } from 'vscode-manifest'
+import { readDirectoryManifest, readManifest } from 'vscode-manifest'
 import { oneOf } from '../util'
 import { GracefulError } from './errors'
 import { createJsdoc } from 'generated-module/build/ts-morph-utils'
@@ -18,7 +18,8 @@ const sliceExtensionId = (name: string) => name.split('.').slice(1).join('.')
  * @param cwd Directory with package.json (manifest) and node_modules
  */
 export const generateTypes = async (cwd: string) => {
-    const manifest = await readDirectoryManifest()
+    // TODOgenerateskeleteonanyway
+    const manifest = await readManifest({ manifestPath: cwd })
     if (!manifest.contributes) throw new GracefulError("Contributes property doesn't exist. Nothing to generate from")
 
     const { commands, configuration } = manifest.contributes
