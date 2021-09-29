@@ -1,6 +1,5 @@
 import Debug from '@prisma/debug'
 import execa from 'execa'
-import exitHook from 'exit-hook'
 import { Config } from '../config'
 
 const debug = Debug('vscode-framework:launcher')
@@ -35,12 +34,12 @@ export const launchVscode = (targetDir: string, config: LaunchConfig) => {
         detached: true,
         stdio: 'ignore',
     })
-    exitHook(() => {
-        // TODO close vscode
-        // workbench.action.quit
-        // workbench.action.closeWindow
-        // search.action.focusActiveEditor
-    })
+    // exitHook(() => {
+    // TODO close vscode
+    // workbench.action.quit
+    // workbench.action.closeWindow
+    // search.action.focusActiveEditor
+    // })
 
     return {
         vscodeProcess,

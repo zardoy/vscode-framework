@@ -56,7 +56,6 @@
         "cosmiconfig": "^7.0.1",
         "esbuild": "^0.13.3",
         "execa": "^5.1.1",
-        "exit-hook": "^3.0.0",
         "fs-extra": "^10.0.0",
         "generated-module": "^0.0.2",
         "github-remote-info": "^1.0.3",
