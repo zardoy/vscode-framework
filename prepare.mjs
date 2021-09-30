@@ -4,7 +4,7 @@ import { run } from './packages/vscode-framework/scripts/esbuild.mjs'
 import execa from 'execa'
 import * as globby from 'globby'
 
-let buildDel = await globby.globby(['**/*.tsbuildinfo', '**/build/**'])
+let buildDel = await globby.globby(['packages/**/*.tsbuildinfo', 'packages/*/build/**'])
 
 buildDel = buildDel.filter(v => v !== 'packages/vscode-framework/build/client.d.ts')
 
