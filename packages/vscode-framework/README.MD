@@ -83,13 +83,6 @@ export const activate = (ctx: vscode.ExtensionContext) => {
 - [ ] Hot reload is coming soon, for now you can quickly reload window by pressing `CMD+R` in development window.
 Or you can enable option `reloadWindow: true` in config.
 
-### Repo Notes
-
-- [ ] add postinstall hook with check for the file
-
-For local development in this repo, generate schema validator. e.g. in `./packages/extension-manifest` run `generate-validator` NPM script.
-It wasn't added to `postinstall`, to not bother you every time you install a dep, because generating takes some time.
-
 ### Config
 
 To overwrite [default config](src/config.ts), you need to place config in of the [supported places](https://github.com/davidtheclark/cosmiconfig#cosmiconfig).

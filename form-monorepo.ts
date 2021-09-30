@@ -74,9 +74,10 @@ import { getGithubRemoteInfo } from 'github-remote-info'
         .map(pkg => {
             const packageJson: PackageJson = jsonfile.readFileSync(join('packages', pkg, 'package.json'))
             const { name, description } = packageJson
-            return `| [${name}](${githubBaseUrl}${pkg}) | ${description} | ![${name} version](https://img.shields.io/npm/v/${name}.svg?label=%20) |`
+            return `| [${name}](${githubBaseUrl}${pkg}) | ${description} | [![${name} version](https://img.shields.io/npm/v/${name}.svg?label=%20)](https://npmjs.com/${name}) |`
         })
         .join('\n')
+    // TODO!
 
     const generatedTable = `
 ## Ecosystem
