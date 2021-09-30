@@ -9,9 +9,9 @@
         "type-fest": "^2.3.4"
     },
     "scripts": {
-        "start": "node prepare.mjs && tsc -b tsconfig.dev.json ; tsc-watch -b tsconfig.dev.json --onSuccess \"node esbuild.mjs development\"",
+        "start": "node prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node esbuild.mjs development\"",
         "prepublishOnly": "pnpm build && jest",
-        "build": "tsc -b tsconfig.prod.json ; tsc -b tsconfig.prod.json && node esbuild.mjs production"
+        "build": "node prepare.mjs && tsc -b tsconfig.prod.json && node esbuild.mjs production"
     },
     "prettier": {
         "tabWidth": 4,
