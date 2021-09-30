@@ -11,8 +11,5 @@
             "path": "packages/vscode-manifest/tsconfig.prod.json"
         }
     ],
-    "files": [],
-    "exclude": [
-        "packages/example-extension/src"
-    ]
+    "files": []
 }
