@@ -19,7 +19,7 @@ const sliceExtensionId = (name: string) => name.split('.').slice(1).join('.')
  */
 export const generateTypes = async (cwd: string) => {
     // TODOgenerateskeleteonanyway
-    const manifest = await readManifest({ manifestPath: cwd })
+    const manifest = await readManifest({ manifestPath: join(cwd, 'package.json') })
     if (!manifest.contributes) throw new GracefulError("Contributes property doesn't exist. Nothing to generate from")
 
     const { commands, configuration } = manifest.contributes
