@@ -68,6 +68,7 @@ const devExtensionPath = resolve(process.cwd(), relativePath)
 const buildExtension = async (
     mode: Parameters<typeof runEsbuild>[0]['mode'],
     launchVscodeConfig: LaunchConfig | false,
+    { esbuildConfig }: Pick<Config, 'esbuildConfig'>,
     bulidPath = devExtensionPath,
 ) => {
     process.env.NODE_ENV = mode
@@ -76,11 +77,18 @@ const buildExtension = async (
         bulidPath,
     })
     fsExtra.ensureDir(bulidPath)
+    // TODO extension entrypoint and in esbuild
     const manifest = await generateAndWriteManifest({
         outputPath: join(bulidPath, 'package.json'),
         overwrite: true,
     })
-    await runEsbuild({ mode, outDir: bulidPath, manifest: manifest!, launchVscodeConfig })
+    await runEsbuild({
+        mode,
+        outDir: bulidPath,
+        manifest: manifest!,
+        launchVscodeConfig,
+        overrideBuildOptions: esbuildConfig,
+    })
 }
 
 commander.command(
@@ -101,7 +109,7 @@ commander.command(
         loadConfig: true,
     },
     async ({ skipLaunching, path }, { config }) => {
-        await buildExtension('development', skipLaunching ? false : config, join(process.cwd(), path))
+        await buildExtension('development', skipLaunching ? false : config, config, join(process.cwd(), path))
     },
 )
 
@@ -117,8 +125,8 @@ commander.command(
     },
 )
 
-commander.command('build', 'Make a production-ready build', {}, async () => {
-    await buildExtension('production', false)
+commander.command('build', 'Make a production-ready build', { loadConfig: true }, async ({}, { config }) => {
+    await buildExtension('production', false, config)
 })
 
 commander.process()

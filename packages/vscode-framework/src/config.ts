@@ -1,18 +1,24 @@
 import { PartialDeep } from 'type-fest'
+import { BuildOptions } from 'esbuild'
 
 export interface Config {
-    executable: 'code' | 'code-insiders'
     // TODO implies executable = insiders
     enableProposedApi: boolean
-    disableExtensions: boolean
-    openDevtools: boolean
-    hotReload: {
-        enabled: boolean
-        /** Mocks `vscode` import with auto disposing */
-        automaticDispose: {
+    /** Override (extend) esbuild config in both */
+    esbuildConfig: BuildOptions
+    /** Development-only settings. They don't affect production build */
+    development: {
+        executable: 'code' | 'code-insiders'
+        disableExtensions: boolean
+        openDevtools: boolean
+        hotReload: {
             enabled: boolean
-            // TODO
-            ignore: string[]
+            /** Mocks `vscode` import with auto disposing */
+            automaticDispose: {
+                enabled: boolean
+                // TODO
+                ignore: string[]
+            }
         }
     }
     /** If array - specify contribution properties where it's allowed */
@@ -24,15 +30,18 @@ export interface Config {
 export type UserConfig = PartialDeep<Config>
 
 export const defaultConfig: Config = {
-    executable: 'code',
+    esbuildConfig: {},
     enableProposedApi: false,
-    disableExtensions: true,
-    openDevtools: false,
-    hotReload: {
-        enabled: true,
-        automaticDispose: {
+    development: {
+        executable: 'code',
+        disableExtensions: true,
+        openDevtools: false,
+        hotReload: {
             enabled: true,
-            ignore: [],
+            automaticDispose: {
+                enabled: true,
+                ignore: [],
+            },
         },
     },
     allowId: false,

@@ -26,7 +26,6 @@ export const runEsbuild = async ({
     outfile?: string
     overrideBuildOptions?: BuildOptions
 }) => {
-    // TODO config
     await fsExtra.copy(require.resolve('../extensionBootstrap'), resolve(outDir, 'extensionBootstrap.js'))
 
     // TODO also detect other cases

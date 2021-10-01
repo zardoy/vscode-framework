@@ -4,9 +4,9 @@ import { Config } from '../config'
 
 const debug = Debug('vscode-framework:launcher')
 
-export type LaunchConfig = Pick<Config, 'disableExtensions' | 'openDevtools'>
+export type LaunchConfig = Pick<Config, 'development'>
 
-export const launchVscode = (targetDir: string, config: LaunchConfig) => {
+export const launchVscode = (targetDir: string, { development: developmentConfig }: LaunchConfig) => {
     // reference: NativeParsedArgs
     /** falsy values are trimmed. I don't think that we need to pass false explicitly here */
     const args = {
@@ -15,8 +15,8 @@ export const launchVscode = (targetDir: string, config: LaunchConfig) => {
         // ignored if already has windows opened
         // wait: true,
         extensionDevelopmentPath: targetDir,
-        'disable-extensions': config.disableExtensions,
-        'open-devtools': config.openDevtools,
+        'disable-extensions': developmentConfig.disableExtensions,
+        'open-devtools': developmentConfig.openDevtools,
     }
     debug(args)
 
@@ -29,7 +29,7 @@ export const launchVscode = (targetDir: string, config: LaunchConfig) => {
         })
         .filter(a => a !== undefined) as string[]
 
-    const vscodeProcess = execa('code', [...argsParsed], {
+    const vscodeProcess = execa(developmentConfig.executable, [...argsParsed], {
         preferLocal: false,
         detached: true,
         stdio: 'ignore',
