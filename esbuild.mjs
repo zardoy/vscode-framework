@@ -3,7 +3,7 @@
 import { build } from 'esbuild'
 import fs from 'fs'
 import jsonfile from 'jsonfile'
-import { dirname, join, extname } from 'path'
+import { dirname, join, extname } from 'path/posix'
 
 import { globby } from 'globby'
 import { fileURLToPath } from 'url'
@@ -37,13 +37,12 @@ import { fileURLToPath } from 'url'
             ),
         )
     }
-    // console.log(entryPoints)
     if (!mode) throw new TypeError('mode is not specified')
     build({
         define: {
             __DEV__: `${mode === 'development'}`,
         },
-        watch: mode === 'development',
+        // watch: mode === 'development',
         platform: 'node',
         format: 'cjs',
         // @ts-ignore
