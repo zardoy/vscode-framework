@@ -92,7 +92,6 @@ Example: `vscode-framework.config.js` in the root of your project:
 ```js
 /** @type {import('vscode-framework/build/config').UserConfig} */
 const config = {
-    enableProposedApi: true
     openDevtools: true
 }
 module.exports = config

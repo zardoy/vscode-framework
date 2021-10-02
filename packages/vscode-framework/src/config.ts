@@ -2,12 +2,12 @@ import { PartialDeep } from 'type-fest'
 import { BuildOptions } from 'esbuild'
 
 export interface Config {
-    // TODO implies executable = insiders
-    enableProposedApi: boolean
     /** Override (extend) esbuild config in both */
     esbuildConfig: BuildOptions
     /** Development-only settings. They don't affect production build */
     development: {
+        // TODO implies executable = insiders
+        /** code- */
         executable: 'code' | 'code-insiders'
         disableExtensions: boolean
         openDevtools: boolean
@@ -31,7 +31,6 @@ export type UserConfig = PartialDeep<Config>
 
 export const defaultConfig: Config = {
     esbuildConfig: {},
-    enableProposedApi: false,
     development: {
         executable: 'code',
         disableExtensions: true,
