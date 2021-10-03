@@ -1,16 +1,16 @@
 #!/usr/bin/env node
+import Debug from '@prisma/debug'
 import { Command } from 'commander'
 import { cosmiconfig } from 'cosmiconfig'
-import fsExtra, { writeFileSync } from 'fs-extra'
+import fsExtra from 'fs-extra'
 import { defaultsDeep } from 'lodash'
 import { join, resolve } from 'path'
-import { generateAndWriteManifest, runEsbuild } from '.'
-import { generateTypes } from './types-generator'
-import { SuperCommander } from './commander'
-import { Config, defaultConfig } from '../config'
 import pkdDir from 'pkg-dir'
-import Debug from '@prisma/debug'
+import { generateAndWriteManifest, runEsbuild } from '.'
+import { Config, defaultConfig } from '../config'
+import { SuperCommander } from './commander'
 import { LaunchConfig, launchVscode } from './launcher'
+import { generateTypes } from './types-generator'
 
 declare const __DEV__: boolean
 

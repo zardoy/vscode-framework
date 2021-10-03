@@ -1,7 +1,7 @@
-import { Config } from '@jest/types'
+import { defineJestConfig } from '@zardoy/jest-config'
 
-const config: Config.InitialOptions = {
-    preset: 'ts-jest',
-}
+const config = defineJestConfig({}, true)
+
+// console.log(config)
 
 export default config
