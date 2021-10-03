@@ -27,8 +27,11 @@ interface ReadManifestOptions {
 }
 
 /** `readManifest` wrapper to read it from <cwd>/package.json */
-export const readDirectoryManifest = (options: Except<ReadManifestOptions, 'manifestPath'> = {}) =>
-    readManifest({ manifestPath: path.join(process.cwd(), 'package.json'), ...options })
+export const readDirectoryManifest = ({
+    directory = process.cwd(),
+    ...options
+}: Except<ReadManifestOptions, 'manifestPath'> & { directory?: string } = {}) =>
+    readManifest({ manifestPath: path.join(directory, 'package.json'), ...options })
 
 /** Should be cached */
 /** Read extension manifest (package.json) from given path. Note that it will be validated by default */
