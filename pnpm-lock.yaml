@@ -65,6 +65,7 @@ importers:
       commander: ^8.2.0
       cosmiconfig: ^7.0.1
       esbuild: ^0.13.3
+      escape-string-regexp: ^5.0.0
       execa: ^5.1.1
       fs-extra: ^10.0.0
       generated-module: ^0.0.2
@@ -88,6 +89,7 @@ importers:
       commander: 8.2.0
       cosmiconfig: 7.0.1
       esbuild: 0.13.3
+      escape-string-regexp: 5.0.0
       execa: 5.1.1
       fs-extra: 10.0.0
       generated-module: 0.0.2_typescript@4.4.3
@@ -1842,6 +1844,11 @@ packages:
     resolution: {integrity: sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==}
     engines: {node: '>=8'}
     dev: true
+
+  /escape-string-regexp/5.0.0:
+    resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
+    engines: {node: '>=12'}
+    dev: false
 
   /escodegen/1.14.3:
     resolution: {integrity: sha512-qFcX0XJkdg+PB3xjZZG/wKSuT1PnQWx57+TVSjIMmILd2yC/6ByYElPwJnslDsuWuSAp4AwJGumarAAmJch5Kw==}

@@ -1,10 +1,12 @@
 import Debug from '@prisma/debug'
 import { ManifestType } from 'vscode-manifest'
-import { build as esbuildBuild, BuildOptions } from 'esbuild'
+import { build as esbuildBuild } from 'esbuild'
 import execa from 'execa'
 import fsExtra from 'fs-extra'
 import { resolve } from 'path'
 import { launchVscode } from './launcher'
+import { Config } from '../config'
+import escapeStringRegexp from 'escape-string-regexp'
 
 const debug = Debug('vscode-framework:esbuild')
 
@@ -14,7 +16,7 @@ export const runEsbuild = async ({
     manifest,
     entryPoint = 'src/extension.ts',
     outfile = resolve(outDir, 'extension.js'),
-    overrideBuildOptions = {},
+    overrideBuildConfig: overrideBuildOptions = {},
     launchVscodeConfig,
 }: {
     mode: 'development' | 'production'
@@ -24,7 +26,7 @@ export const runEsbuild = async ({
     launchVscodeConfig: Parameters<typeof launchVscode>[1] | false
     entryPoint?: string
     outfile?: string
-    overrideBuildOptions?: BuildOptions
+    overrideBuildConfig?: Config['esbuildConfig']
 }) => {
     await fsExtra.copy(require.resolve('../extensionBootstrap'), resolve(outDir, 'extensionBootstrap.js'))
 
@@ -37,10 +39,10 @@ export const runEsbuild = async ({
         watch: mode === 'development',
         minify: mode === 'production',
         entryPoints: [entryPoint],
-        external: ['vscode'],
         platform: 'node',
         outfile,
         ...overrideBuildOptions,
+        external: ['vscode', ...(overrideBuildOptions.external ?? [])],
         define: {
             'process.env.NODE_ENV': `"${mode}"`,
             // TODO remove them
@@ -62,6 +64,40 @@ export const runEsbuild = async ({
                             rebuildCount++
                             if (!vscodeProcess) vscodeProcess = launchVscode(outDir, launchVscodeConfig).vscodeProcess
                         })
+                    }
+                },
+            },
+            {
+                name: 'alias-module',
+                setup(build) {
+                    const aliasModule = (aliasName: string, target: string) => {
+                        const filter = new RegExp('^' + escapeStringRegexp(aliasName) + '(?:\\/.*)?$')
+
+                        type PluginData = { resolveDir: string; aliasName: string }
+                        const namespace = 'esbuild-alias'
+                        build.onResolve({ filter }, async ({ resolveDir, path }) => {
+                            if (resolveDir === '') return
+
+                            return {
+                                path,
+                                namespace: namespace,
+                                pluginData: {
+                                    aliasName,
+                                    resolveDir,
+                                } as PluginData,
+                            }
+                        })
+                        build.onLoad(
+                            { filter, namespace },
+                            async ({ namespace, path, pluginData: pluginDataUntyped }) => {
+                                const { aliasName, resolveDir }: PluginData = pluginDataUntyped
+                                const contents = /* ts */ `
+export * from '${path.replace(aliasName, target)}';
+export { default } from '${path.replace(aliasName, target)}';
+    `
+                                return { contents, resolveDir }
+                            },
+                        )
                     }
                 },
             },

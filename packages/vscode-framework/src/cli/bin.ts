@@ -22,6 +22,7 @@ const program = new Command()
 const commander = new SuperCommander<Config>(program, async () => {
     const explorer = cosmiconfig('vscode-framework')
     const userConfig = await explorer.search()
+    debug('load-config', userConfig)
     return defaultsDeep(userConfig?.config || {}, defaultConfig)
 })
 
@@ -87,7 +88,7 @@ const buildExtension = async (
         outDir: bulidPath,
         manifest: manifest!,
         launchVscodeConfig,
-        overrideBuildOptions: esbuildConfig,
+        overrideBuildConfig: esbuildConfig,
     })
 }
 
