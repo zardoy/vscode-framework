@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 
 import { PackageJson } from 'type-fest'
-import { propsGenerators } from '../propsGenerators'
+import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
 import fs from 'fs'
 
 type Tests = {
