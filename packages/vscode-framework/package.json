@@ -20,7 +20,7 @@
         "webview"
     ],
     "bin": {
-        "vscode-framework": "build/cli/bin.js"
+        "vscode-framework": "build/bin.js"
     },
     "files": [
         "build"

@@ -10,6 +10,7 @@ import { generateAndWriteManifest, runEsbuild } from '.'
 import { Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
 import { LaunchConfig, launchVscode } from './launcher'
+import { addStandaloneCommands } from './standalone-commands'
 import { generateTypes } from './types-generator'
 
 declare const __DEV__: boolean
@@ -114,21 +115,11 @@ commander.command(
     },
 )
 
-commander.command(
-    'launch',
-    'Launch VSCode on defined path without building',
-    {
-        loadConfig: true,
-        arguments: ['[dir]'] as ['[dir]'],
-    },
-    ({}, { config, arguments: { dir = process.cwd() } }) => {
-        launchVscode(dir, config)
-    },
-)
-
 commander.command('build', 'Make a production-ready build', { loadConfig: true }, async ({}, { config }) => {
     await buildExtension('production', false, config)
 })
+
+addStandaloneCommands(commander)
 
 commander.process()
 
