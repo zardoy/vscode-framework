@@ -3,10 +3,12 @@
 import { build } from 'esbuild'
 import fs from 'fs'
 import jsonfile from 'jsonfile'
-import { dirname, join, extname } from 'path/posix'
+import pathModule from 'path'
 
 import { globby } from 'globby'
 import { fileURLToPath } from 'url'
+
+const { dirname, join, extname } = pathModule
 ;(async () => {
     // @ts-ignore
     const __dirname = dirname(fileURLToPath(import.meta.url))
