@@ -1,17 +1,29 @@
 import { ManifestType } from 'vscode-manifest/'
 import jsonfile from 'jsonfile'
 
+// TODO mock config in all tests to ensure stability
+
 export const mockManifestOnce = (manifest: ManifestType) => {
     const spy = jest.spyOn(jsonfile, 'readFile')
     // TODO mock implementation with testing on path
-    spy.mockResolvedValueOnce(manifest)
+    spy.mockResolvedValueOnce(JSON.parse(JSON.stringify(manifest)))
 }
 
-export const screenRecorderManifest: ManifestType = {
+const deepFreeze = <T extends Record<string, any>>(obj: T) => {
+    for (let [, value] of Object.entries(obj)) {
+        if (typeof value == 'object') {
+            deepFreeze(value)
+        }
+    }
+    Object.freeze(obj)
+    return obj
+}
+
+export const screenRecorderManifest: ManifestType = deepFreeze({
     name: 'screen-recorder',
     displayName: 'Screen Recorder',
     publisher: 'yatki',
-    version: 'invalid-doesn-matter',
+    version: 'invalid-doesnt-matter',
     categories: ['Other'],
     devDependencies: {
         '@hediet/node-reload': '*',
@@ -45,4 +57,4 @@ export const screenRecorderManifest: ManifestType = {
             },
         },
     },
-}
+})
