@@ -37,14 +37,18 @@ interface ReadManifestOptions {
     manifestPath: string
 }
 
-/** `readManifest` wrapper to read it from <cwd>/package.json */
+/** `readManifest` wrapper to read it from <directory = cwd>/package.json */
 export const readDirectoryManifest = ({
     directory = process.cwd(),
     ...options
 }: Except<ReadManifestOptions, 'manifestPath'> & { directory?: string } = {}) =>
     readManifest({ manifestPath: path.join(directory, 'package.json'), ...options })
 
-/** Read extension manifest (package.json) from given path. Note that it will be validated by default and normalizes ids! */
+/**
+ * Read extension manifest (package.json) from given path. Note that it will be validated by default and normalizes ids!
+ *
+ * I recommend to use {@linkcode readDirectoryManifest} instead
+ */
 export const readManifest = async ({
     manifestPath,
     // TODO-high change to false
