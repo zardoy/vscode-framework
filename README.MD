@@ -20,7 +20,4 @@ Warning: still WIP, not all functionality are available.
 
 ## Development
 
-- [ ] add postinstall hook with check for the file
-
-For local development in this repo, generate schema validator. e.g. in `./packages/extension-manifest` run `generate-validator` NPM script.
-It wasn't added to `postinstall`, to not bother you every time you install a dep, because generating takes some time.
+When you clone this repo for the first time and run `pnpm i`, you need to wait before schema gets generated via postinstall script.
