@@ -3,13 +3,18 @@ import vscode from 'vscode'
 import { MaybePromise } from '../util'
 import { Commands, Settings } from './generated'
 
-export class VscodeFramework {
+type RegularCommands = Commands['regular']
+
+// TODO test args
+export type CommandHandler = (data: { command: RegularCommands }, ...args: any[]) => MaybePromise<void>
+
+export class VscodeFramework<T extends boolean = false> {
     // outputChannel: vscode.OutputChannel
     readonly extensionIDName: string
 
     constructor(public readonly ctx: vscode.ExtensionContext) {
         // this.outputChannel = vscode.window.createOutputChannel(process.env.EXTENSION_DISPLAY_NAME)
-        // TODO we can't globally reassign things because Extension Host is shared between extensions
+        // TODO: we can't globally reassign things because Extension Host is shared between extensions
         // console.log = (...args) => {
         //     this.outputChannel.appendLine(args.join(' '))
         // }
@@ -23,8 +28,22 @@ export class VscodeFramework {
         this.extensionIDName = ctx.extension.id.split('.')[1]!
     }
 
-    public registerCommand(command: Commands['regular'], callback: () => MaybePromise<void>) {
-        this.ctx.subscriptions.push(vscode.commands.registerCommand(`${this.extensionIDName}.${command}`, callback))
+    /** make sure to not call after class creation, to prevent accidental registerCommand call (but no runtime restriction) */
+    public registerAllCommands(
+        commands: T extends false ? { [C in RegularCommands]: CommandHandler } : never,
+    ): VscodeFramework<true> {
+        for (const [command, handler] of Object.entries(commands)) {
+            this.registerCommand(command as any, handler)
+        }
+        return this as any
+    }
+
+    public registerCommand(command: T extends false ? RegularCommands : never, handler: CommandHandler) {
+        this.ctx.subscriptions.push(
+            vscode.commands.registerCommand(`${this.extensionIDName}.${command}`, (...args) =>
+                handler({ command }, ...args),
+            ),
+        )
     }
 
     public getExtensionSetting<T extends keyof Settings>(key: T): Settings[T] {
