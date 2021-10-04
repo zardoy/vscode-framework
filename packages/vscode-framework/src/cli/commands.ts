@@ -70,7 +70,7 @@ const devExtensionPath = resolve(process.cwd(), relativePath)
 const buildExtension = async (
     mode: Parameters<typeof runEsbuild>[0]['mode'],
     launchVscodeConfig: LaunchConfig | false,
-    { esbuildConfig }: Pick<Config, 'esbuildConfig'>,
+    { esbuildConfig, module }: Pick<Config, 'esbuildConfig' | 'module'>,
     bulidPath = devExtensionPath,
 ) => {
     process.env.NODE_ENV = mode
@@ -89,7 +89,10 @@ const buildExtension = async (
         outDir: bulidPath,
         manifest: manifest!,
         launchVscodeConfig,
-        overrideBuildConfig: esbuildConfig,
+        overrideBuildConfig: {
+            format: module,
+            ...esbuildConfig,
+        },
     })
 }
 

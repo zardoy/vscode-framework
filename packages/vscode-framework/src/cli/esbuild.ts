@@ -43,6 +43,8 @@ export const runEsbuild = async ({
         outfile,
         ...overrideBuildOptions,
         external: ['vscode', ...(overrideBuildOptions.external ?? [])],
+        logLevel: 'info',
+        // sourcemap: true,
         define: {
             'process.env.NODE_ENV': `"${mode}"`,
             // TODO remove them

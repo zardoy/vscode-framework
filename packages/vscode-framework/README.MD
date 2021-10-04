@@ -7,7 +7,8 @@ Warning: still WIP, not all functionality are available.
 - 💡 Not Boilerplated
 - ⚡️ Hot Reload (WIP)
 - 🔑 TypeScript Types from `package.json` Contribution Points
-- 📦 Optimized Single File Build with zero config
+- 📦 Publish Production-ready Build with zero config
+<!-- - use console.log in production to pipe them into extension output -->
 - 🛠️ Configurable
 
 And even more: painless <!-- pnpm support, CI, --> [API wrappers](packages/vscode-extra/).

@@ -2,13 +2,20 @@ import { PartialDeep } from 'type-fest'
 import { BuildOptions } from 'esbuild'
 
 export interface Config {
-    /** Override (extend) esbuild config in both */
+    /** alias for `esbuildConfig.format` (will be esm in future) */
+    module: 'esm' | 'cjs'
+    /** Override (extend) esbuild config for development and production */
     esbuildConfig: BuildOptions
     /** Development-only settings. They don't affect production build */
     development: {
         // TODO implies executable = insiders
         /** code- */
         executable: 'code' | 'code-insiders'
+        /**
+         *  effects `start` and `launch` commands. whether launch extension with other extensions disabled
+         * - it's not possible to get rid of *extensions disabled* notification on every reload
+         * - opening other folder/workspace will clear effect and enable extensions back
+         */
         disableExtensions: boolean
         openDevtools: boolean
         hotReload: {
@@ -21,9 +28,10 @@ export interface Config {
             }
         }
     }
-    /** If array - specify contribution properties where it's allowed */
-    allowId: boolean | string[]
-    /** Category that will be used in commands by default */
+    /** Try to restore IDs in contributions. disable or add contributions keys (implies blacklist) only if have issues with that */
+    // Will enable in case of any issues
+    // restoreId: boolean | string[]
+    /** Category that will be used in `contibutes.commands` by default */
     defaultCategory: 'extensionName' | { custom: string }
 }
 
@@ -31,6 +39,7 @@ export type UserConfig = PartialDeep<Config>
 
 export const defaultConfig: Config = {
     esbuildConfig: {},
+    module: 'cjs',
     development: {
         executable: 'code',
         disableExtensions: true,
@@ -43,6 +52,6 @@ export const defaultConfig: Config = {
             },
         },
     },
-    allowId: false,
+    // restoreId: true,
     defaultCategory: 'extensionName',
 }
