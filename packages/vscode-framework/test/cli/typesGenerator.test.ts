@@ -28,5 +28,5 @@ export interface Settings {
 `)
         callback(null)
     })
-    await generateTypes(process.cwd())
+    await generateTypes()
 })
