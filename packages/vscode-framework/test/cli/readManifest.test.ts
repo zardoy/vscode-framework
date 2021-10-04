@@ -45,7 +45,7 @@ test('Generates schema properly', async () => {
     expect(generatedManifest).toMatchInlineSnapshot(`
 Object {
   "activationEvents": Array [
-    "onCommand:screen-recorder.startRecording",
+    "onCommand:startRecording",
   ],
   "categories": Array [
     "Other",
@@ -54,13 +54,13 @@ Object {
     "commands": Array [
       Object {
         "category": "Screen Recorder",
-        "command": "screen-recorder.startRecording",
+        "command": "startRecording",
         "title": "Start Screen Recording",
       },
     ],
     "configuration": Object {
       "properties": Object {
-        "screen-recorder.record-quality": Object {
+        "record-quality": Object {
           "description": "Record quality",
           "enum": Array [
             "4K",
@@ -69,11 +69,11 @@ Object {
           ],
           "type": "string",
         },
-        "screen-recorder.record-sound": Object {
+        "record-sound": Object {
           "description": "Record sound",
           "type": "boolean",
         },
-        "screen-recorder.save-dir": Object {
+        "save-dir": Object {
           "description": "",
           "type": "string",
         },
@@ -89,7 +89,7 @@ Object {
   "publisher": "yatki",
   "qna": false,
   "repository": "https://github.com/zardoy/vscode-framework",
-  "version": "invalid-doesn-matter",
+  "version": "invalid-doesnt-matter",
 }
 `)
 })
