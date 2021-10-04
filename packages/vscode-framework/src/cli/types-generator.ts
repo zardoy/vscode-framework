@@ -17,7 +17,8 @@ const sliceExtensionId = (name: string) => name.split('.').slice(1).join('.')
  * Should be used directly in cli
  * @param cwd Directory with package.json (manifest) and node_modules
  */
-export const generateTypes = async ({ nodeModulesDir }: { nodeModulesDir: string }) => {
+export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeModulesDir?: string } = {}) => {
+    // TODO!
     // TODOgenerateskeleteonanyway
     const manifest = await readDirectoryManifest()
     if (!manifest.contributes) throw new GracefulError("Contributes property doesn't exist. Nothing to generate from")
@@ -72,14 +73,12 @@ export const generateTypes = async ({ nodeModulesDir }: { nodeModulesDir: string
               })
             : [],
     })
-    if (debug.enabled) {
-        debug(
-            `Generating types from manifest ${join(process.cwd(), 'package.json')} into ${join(
-                nodeModulesDir,
-                'node_modules/index.d.ts',
-            )}`,
-        )
-    }
+    debug(
+        `Generating types from manifest ${join(process.cwd(), 'package.json')} into ${join(
+            nodeModulesDir,
+            'node_modules/index.d.ts',
+        )}`,
+    )
     await generateTypesModule({
         moduleName: '.vscode-framework',
         targetDirectory: nodeModulesDir,

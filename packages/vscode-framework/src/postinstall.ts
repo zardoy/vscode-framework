@@ -1,4 +1,4 @@
 import { generateTypes } from './cli/types-generator'
 ;(async () => {
-    await generateTypes(process.env.INIT_CWD!)
+    await generateTypes({ nodeModulesDir: process.env.INIT_CWD! })
 })().catch(e => {})

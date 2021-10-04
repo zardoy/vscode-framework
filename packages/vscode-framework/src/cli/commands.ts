@@ -59,7 +59,7 @@ commander.command(
     'Generate TypeScript typings (from contribution points) and place them to nearest node_modules for working with framework',
     {},
     async ({}) => {
-        await generateTypes(__DEV__ ? (await pkdDir(__dirname))! : process.cwd())
+        await generateTypes({ nodeModulesDir: __DEV__ ? (await pkdDir(__dirname))! : process.cwd() })
     },
 )
 
