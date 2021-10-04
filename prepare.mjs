@@ -13,6 +13,6 @@ await del(buildDel, {
     // gitignore: true,
 })
 
-await execa('tsc -b tsconfig.prod.json', { preferLocal: true }).catch(e => {})
+await execa('tsc', '-b tsconfig.prod.json'.split(' '), { preferLocal: true }).catch(e => {})
 
 await run()
