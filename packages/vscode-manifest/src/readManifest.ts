@@ -12,11 +12,22 @@ import { Except } from 'type-fest'
 
 interface ReadManifestOptions {
     /**
-     * Contribution fields where full ids (with extension name) are allowed
-     * Will be probably removed
+     * Try to restore extension ID where they are missing. e.g.
+     * ```json
+     * "contributes": {
+     *     "commands": [ { "command": "say-hello", ... } ] -> "commands": [ { "command": "extension.say-hello", ... } ]
+     *     // But, be aware of that!
+     *     "commands": [ { "command": "ext.say-hello", ... } ] -> "commands": [ { "command": "extension.ext.say-hello", ... } ]
+     *     // but will skip this
+     *     "commands": [ { "command": "extension.say-hello", ... } ] -> "commands": [ { "command": "extension.say-hello", ... } ]
+     * }
+     * ```
+     * Works only on contribution fields where full ids (with extension name) are needed
+     * The setting will probably be removed
+     * Set to false to disable this behavious
      * @default true
      */
-    allowIds?: boolean | string[]
+    restoreIds?: boolean | string[]
     /**
      * set to `false` to skip validation but in this case you need to handle it manually.
      * see exports of validateManifest.ts for more
@@ -33,12 +44,11 @@ export const readDirectoryManifest = ({
 }: Except<ReadManifestOptions, 'manifestPath'> & { directory?: string } = {}) =>
     readManifest({ manifestPath: path.join(directory, 'package.json'), ...options })
 
-/** Should be cached */
-/** Read extension manifest (package.json) from given path. Note that it will be validated by default */
+/** Read extension manifest (package.json) from given path. Note that it will be validated by default and normalizes ids! */
 export const readManifest = async ({
     manifestPath,
     // TODO-high change to false
-    allowIds = true,
+    restoreIds = true,
     throwIfInvalid = true,
 }: ReadManifestOptions): Promise<ManifestType> => {
     try {
@@ -56,26 +66,29 @@ export const readManifest = async ({
             id: string,
         ) => {
             const parts = id.split('.')
-            // TODO produce warning
+            // TODO! produce warning
             if (parts.length >= 2 && parts[0] === manifest.name) return id
-            const generateId = allowIds === true || (Array.isArray(allowIds) && allowIds.includes(where))
+            const generateId = restoreIds === true || (Array.isArray(restoreIds) && restoreIds.includes(where))
             return generateId ? `${manifest.name}.${id}` : id
         }
 
-        if (manifest.contributes?.commands)
-            manifest.contributes.commands = manifest.contributes.commands.map(c => ({
-                ...c,
-                // TODO ensure that command is required in schema
-                command: ensureHasId('commands', c.command!),
-            }))
+        if (restoreIds) {
+            if (manifest.contributes?.commands)
+                manifest.contributes.commands = manifest.contributes.commands.map(c => ({
+                    ...c,
+                    // TODO ensure that command is required in schema
+                    command: ensureHasId('commands', c.command!),
+                }))
 
-        if (manifest.contributes?.configuration) {
-            if (Array.isArray(manifest.contributes.configuration))
-                throw new TypeError("contributes.configuration can't be array")
-            manifest.contributes.configuration.properties = mapKeys(
-                manifest.contributes.configuration.properties,
-                (_value, key) => ensureHasId('configuration', key),
-            )
+            if (manifest.contributes?.configuration) {
+                // TODO remove this limitation and warning
+                if (Array.isArray(manifest.contributes.configuration))
+                    throw new TypeError("contributes.configuration can't be array")
+                manifest.contributes.configuration.properties = mapKeys(
+                    manifest.contributes.configuration.properties,
+                    (_value, key) => ensureHasId('configuration', key),
+                )
+            }
         }
 
         return manifest

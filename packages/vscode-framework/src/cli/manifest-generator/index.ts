@@ -1,11 +1,11 @@
 // TODO can properties contain " ?
 
-import { ManifestType, readManifest } from 'vscode-manifest'
 import fs from 'fs'
 import { writeFile } from 'jsonfile'
-import { defaultsDeep, omit } from 'lodash'
-import { getManifestPathFromRoot, pickObject } from '../../util'
-import { propsGenerators } from './propsGenerators'
+import { omit } from 'lodash'
+import { ManifestType, readManifest } from 'vscode-manifest'
+import { getManifestPathFromRoot } from '../../util'
+import { propsGenerators, runGeneratorsOnManifest } from './propsGenerators'
 
 interface Options {
     /**
@@ -21,7 +21,9 @@ interface Options {
 /** Reads and validates manifest on <cwd>/package.json and writes manifest with generated props */
 export const generateAndWriteManifest = async ({ outputPath, overwrite = true, propsToGenerate = true }: Options) => {
     if (fs.existsSync(outputPath))
-        if (overwrite) await fs.promises.unlink(outputPath)
+        if (overwrite)
+            // TODO jsonfile already overwrites
+            await fs.promises.unlink(outputPath)
         else return
 
     const generatedManifest = await generateManifest({
@@ -33,8 +35,7 @@ export const generateAndWriteManifest = async ({ outputPath, overwrite = true, p
 }
 
 /**
- * Mutates sourceManifest !
- * @returns mutated sourceManifest with generatedProps
+ * @return like {@linkcode propsToGenerate}, but can also clean manifest
  */
 export const generateManifest = async ({
     propsToGenerate = true,
@@ -47,24 +48,16 @@ export const generateManifest = async ({
     /** Preserves only required props in generated package.json and removes other. Disable to preserve all source props + generated. */
     cleanupManifest?: boolean
 }): Promise<ManifestType> => {
-    // TODO clone manifest, don't mutate
     // TODO warn about overwritted props and to run vscode-framework migrate
-    if (propsToGenerate === true) propsToGenerate = Object.keys(propsGenerators)
-
-    let generatedManifest = cleanupManifest
-        ? // TODO use actual pick with ttypescript.
-          omit(sourceManifest, [
+    sourceManifest = cleanupManifest
+        ? // TODO-low use actual pick with ttypescript.
+          (omit(sourceManifest, [
               'dependencies',
               'devDependencies',
               'peerDependencies',
               'bin',
               'scripts',
-          ] as (keyof typeof sourceManifest)[])
+          ] as (keyof typeof sourceManifest)[]) as any)
         : sourceManifest
-    // eslint-disable-next-line no-await-in-loop
-    for (const prop of propsToGenerate)
-        generatedManifest = defaultsDeep(await propsGenerators[prop](sourceManifest), generatedManifest)
-
-    // TODO check type
-    return generatedManifest as any
+    return await runGeneratorsOnManifest(sourceManifest, propsToGenerate as any, true)
 }
