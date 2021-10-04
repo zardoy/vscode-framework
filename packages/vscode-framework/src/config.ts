@@ -2,8 +2,6 @@ import { PartialDeep } from 'type-fest'
 import { BuildOptions } from 'esbuild'
 
 export interface Config {
-    /** alias for `esbuildConfig.format` (will be esm in future) */
-    module: 'esm' | 'cjs'
     /** Override (extend) esbuild config for development and production */
     esbuildConfig: BuildOptions
     /** Development-only settings. They don't affect production build */
@@ -39,7 +37,6 @@ export type UserConfig = PartialDeep<Config>
 
 export const defaultConfig: Config = {
     esbuildConfig: {},
-    module: 'cjs',
     development: {
         executable: 'code',
         disableExtensions: true,
