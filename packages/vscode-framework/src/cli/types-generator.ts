@@ -1,11 +1,11 @@
-import { readDirectoryManifest, readManifest } from 'vscode-manifest'
+import Debug from '@prisma/debug'
+import { generateTypes as generateTypesModule, StringWriters } from 'generated-module'
+import { createJsdoc } from 'generated-module/build/ts-morph-utils'
+import { join } from 'path'
+import { StatementStructures, StructureKind } from 'ts-morph'
+import { readDirectoryManifest } from 'vscode-manifest'
 import { oneOf } from '../util'
 import { GracefulError } from './errors'
-import { createJsdoc } from 'generated-module/build/ts-morph-utils'
-import { StatementStructures, StructureKind } from 'ts-morph'
-import { generateTypes as generateTypesModule, StringWriters } from 'generated-module'
-import Debug from '@prisma/debug'
-import { join } from 'path'
 
 const debug = Debug('vscode-framework:types-generator')
 
@@ -17,9 +17,9 @@ const sliceExtensionId = (name: string) => name.split('.').slice(1).join('.')
  * Should be used directly in cli
  * @param cwd Directory with package.json (manifest) and node_modules
  */
-export const generateTypes = async (cwd: string) => {
+export const generateTypes = async ({ nodeModulesDir }: { nodeModulesDir: string }) => {
     // TODOgenerateskeleteonanyway
-    const manifest = await readManifest({ manifestPath: join(cwd, 'package.json') })
+    const manifest = await readDirectoryManifest()
     if (!manifest.contributes) throw new GracefulError("Contributes property doesn't exist. Nothing to generate from")
 
     const { commands, configuration } = manifest.contributes
@@ -75,14 +75,14 @@ export const generateTypes = async (cwd: string) => {
     if (debug.enabled) {
         debug(
             `Generating types from manifest ${join(process.cwd(), 'package.json')} into ${join(
-                cwd,
+                nodeModulesDir,
                 'node_modules/index.d.ts',
             )}`,
         )
     }
     await generateTypesModule({
         moduleName: '.vscode-framework',
-        targetDirectory: cwd,
+        targetDirectory: nodeModulesDir,
         generator: {
             tsMorph: generatedStatements,
         },
