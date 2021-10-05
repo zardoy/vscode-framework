@@ -21,3 +21,7 @@ Warning: still WIP, not all functionality are available.
 ## Development
 
 When you clone this repo for the first time and run `pnpm i`, you need to wait before schema gets generated via postinstall script.
+
+## TODO
+
+- [ ] ensure extension work correctly in portable mode, use right TMP

@@ -137,4 +137,6 @@ See [Environment Variables](build/client.d.ts) that are injected.
 
 <!-- To get them in intellisense create `globals.d.ts` file in your source root with `///<reference lib="">` at the top. -->
 
-And also, what about having IDE-agnostic extension API?
+## Compatibility
+
+VSCode works on node14, which means [it doesn't support](https://github.com/evanw/esbuild/issues/1466#issuecomment-886347363) `node:` imports. keep in mind that vscode-framework just removes `node:` prefix in such cases.

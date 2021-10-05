@@ -35,6 +35,7 @@ export const runEsbuild = async ({
         console.warn("Warning: extensionKind in manifest is set to [] which means your extension won't be launched")
 
     const { metafile } = await esbuildBuild({
+        target: 'node14',
         bundle: true,
         watch: mode === 'development',
         minify: mode === 'production',
@@ -70,37 +71,61 @@ export const runEsbuild = async ({
                 },
             },
             {
-                name: 'alias-module',
+                // there must be cleaner solution
+                name: 'esbuild-import-alias',
                 setup(build) {
-                    const aliasModule = (aliasName: string, target: string) => {
-                        const filter = new RegExp('^' + escapeStringRegexp(aliasName) + '(?:\\/.*)?$')
-
+                    // not used for now, config option will be available
+                    const aliasModule = (aliasName: string | RegExp, target: string) => {
+                        const filter =
+                            aliasModule instanceof RegExp
+                                ? aliasModule
+                                : new RegExp('^' + escapeStringRegexp(aliasName as string) + '(\\/.*)?$')
                         type PluginData = { resolveDir: string; aliasName: string }
-                        const namespace = 'esbuild-alias'
+                        const namespace = 'esbuild-import-alias'
+
                         build.onResolve({ filter }, async ({ resolveDir, path }) => {
                             if (resolveDir === '') return
-
                             return {
                                 path,
-                                namespace: namespace,
+                                namespace,
                                 pluginData: {
                                     aliasName,
                                     resolveDir,
                                 } as PluginData,
                             }
                         })
-                        build.onLoad(
-                            { filter, namespace },
-                            async ({ namespace, path, pluginData: pluginDataUntyped }) => {
-                                const { aliasName, resolveDir }: PluginData = pluginDataUntyped
-                                const contents = /* ts */ `
-export * from '${path.replace(aliasName, target)}';
-export { default } from '${path.replace(aliasName, target)}';
-    `
-                                return { contents, resolveDir }
-                            },
-                        )
+                        build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: pluginDataUntyped }) => {
+                            const { aliasName, resolveDir }: PluginData = pluginDataUntyped
+                            const contents = [
+                                `export * from '${path.replace(aliasName, target)}'`,
+                                `export { default } from '${path.replace(aliasName, target)}';`,
+                            ].join('\n')
+                            return { contents, resolveDir }
+                        })
                     }
+                },
+            },
+            {
+                name: 'esbuild-node-alias',
+                setup(build) {
+                    const namespace = 'esbuild-node-alias'
+                    const filter = /^node:(.*)/
+                    build.onResolve({ filter }, async ({ path, resolveDir }) => {
+                        return {
+                            path,
+                            namespace,
+                            pluginData: {
+                                resolveDir,
+                            },
+                        }
+                    })
+                    build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: { resolveDir } }) => {
+                        const target = path.replace(filter, '$1')
+                        const contents = [`export * from '${target}'`, `export { default } from '${target}';`].join(
+                            '\n',
+                        )
+                        return { resolveDir, contents }
+                    })
                 },
             },
         ],
