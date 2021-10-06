@@ -46,8 +46,10 @@ export const propsGenerators = makeGenerators({
         return { qna: false }
     },
     extensionEntryPoint() {
+        // TODO pass config
         // TODO browser entry point
-        return { main: `${process.env.NODE_ENV === 'development' ? 'extensionBootstrap.js' : 'extension.js'}` }
+        // return { main: `${process.env.NODE_ENV === 'development' ? 'extensionBootstrap.js' : 'extension.js'}` }
+        return { main: 'extension.js' }
     },
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {
         const { contributes } = manifest

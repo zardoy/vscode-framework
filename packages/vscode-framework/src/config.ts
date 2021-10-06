@@ -42,7 +42,7 @@ export const defaultConfig: Config = {
         disableExtensions: true,
         openDevtools: false,
         hotReload: {
-            enabled: true,
+            enabled: false,
             automaticDispose: {
                 enabled: true,
                 ignore: [],
