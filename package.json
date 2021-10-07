@@ -24,11 +24,11 @@
         "trailingComma": "all"
     },
     "devDependencies": {
-        "@types/node": "^16.10.2",
+        "@types/node": "^16.10.3",
         "@zardoy/jest-config": "^0.0.1",
         "@zardoy/tsconfig": "^1.2.2",
         "del": "^6.0.0",
-        "esbuild": "^0.13.3",
+        "esbuild": "^0.13.4",
         "execa": "^5.1.1",
         "github-remote-info": "^1.0.3",
         "globby": "^12.0.2",

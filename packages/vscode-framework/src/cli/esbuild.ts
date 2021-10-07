@@ -52,6 +52,7 @@ export const runEsbuild = async ({
             'process.env.EXTENSION_ID_NAME': `"${manifest.name}"`,
             'process.env.EXTENSION_DISPLAY_NAME': `"${manifest.displayName}"`,
             'process.env.REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT': 'true',
+            'process.env.EXTENSION_BOOTSTRAP_CONFIG': `"${JSON.stringify(launchVscodeConfig)}"`,
             ...(overrideBuildOptions.define ? overrideBuildOptions.define : {}),
         },
         plugins: [
@@ -62,10 +63,12 @@ export const runEsbuild = async ({
                     let rebuildCount = 0
                     if (launchVscodeConfig !== false) {
                         let vscodeProcess: execa.ExecaChildProcess | undefined
-                        build.onEnd(({ errors }) => {
+                        build.onEnd(async ({ errors }) => {
                             if (errors.length > 0) return
                             rebuildCount++
-                            if (!vscodeProcess) vscodeProcess = launchVscode(outDir, launchVscodeConfig).vscodeProcess
+                            if (!vscodeProcess)
+                                // TODO! assign immediately
+                                vscodeProcess = (await launchVscode(outDir, launchVscodeConfig)).vscodeProcess
                         })
                     }
                 },

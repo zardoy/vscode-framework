@@ -1,12 +1,14 @@
 import Debug from '@prisma/debug'
 import execa from 'execa'
 import { Config } from '../config'
+import nodeIpc from 'node-ipc'
+import exitHook from 'exit-hook'
 
 const debug = Debug('vscode-framework:launcher')
 
-export type LaunchConfig = Pick<Config, 'development'>
+export type LaunchParams = Pick<Config, 'development'>
 
-export const launchVscode = (targetDir: string, { development: developmentConfig }: LaunchConfig) => {
+export const launchVscode = async (targetDir: string, { development: developmentConfig }: LaunchParams) => {
     // reference: NativeParsedArgs
     /** falsy values are trimmed. I don't think that we need to pass false explicitly here */
     const args = {
@@ -29,17 +31,24 @@ export const launchVscode = (targetDir: string, { development: developmentConfig
         })
         .filter(a => a !== undefined) as string[]
 
+    // TODO don't use globals
+    nodeIpc.config.id = 'vscode-framework:server'
+    await new Promise<void>(r => {
+        nodeIpc.serve(r)
+        nodeIpc.server.start()
+    })
+
     const vscodeProcess = execa(developmentConfig.executable, [...argsParsed], {
         preferLocal: false,
         detached: true,
         stdio: 'ignore',
     })
-    // exitHook(() => {
-    // TODO close vscode
-    // workbench.action.quit
-    // workbench.action.closeWindow
-    // search.action.focusActiveEditor
-    // })
+    exitHook(() => {
+        // workbench.action.quit
+        // workbench.action.closeWindow
+        // search.action.focusActiveEditor
+        nodeIpc.server.emit('app:close')
+    })
 
     return {
         vscodeProcess,

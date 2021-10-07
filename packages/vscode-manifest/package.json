@@ -24,11 +24,11 @@
         "validator"
     ],
     "devDependencies": {
-        "@types/node": "^16.10.1",
+        "@types/node": "^16.10.3",
         "@zardoy/tsconfig": "^1.2.2",
         "ajv": "^8.6.3",
         "chalk": "^4.1.2",
-        "esbuild": "^0.13.3",
+        "esbuild": "^0.13.4",
         "fs-extra": "^10.0.0",
         "jsonfile": "^6.1.0",
         "path-exists-cli": "^2.0.0",

@@ -9,7 +9,7 @@ import pkdDir from 'pkg-dir'
 import { generateAndWriteManifest, runEsbuild } from '.'
 import { Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
-import { LaunchConfig, launchVscode } from './launcher'
+import { LaunchParams, launchVscode } from './launcher'
 import { addStandaloneCommands } from './standalone-commands'
 import { generateTypes } from './types-generator'
 
@@ -69,7 +69,7 @@ const devExtensionPath = resolve(process.cwd(), relativePath)
 
 const buildExtension = async (
     mode: Parameters<typeof runEsbuild>[0]['mode'],
-    launchVscodeConfig: LaunchConfig | false,
+    launchVscodeConfig: LaunchParams | false,
     { esbuildConfig }: Pick<Config, 'esbuildConfig'>,
     bulidPath = devExtensionPath,
 ) => {
