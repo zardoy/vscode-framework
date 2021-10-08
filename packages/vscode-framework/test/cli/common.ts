@@ -1,4 +1,4 @@
-import { ManifestType } from 'vscode-manifest/.js'
+import { ManifestType } from 'vscode-manifest'
 import jsonfile from 'jsonfile'
 
 // TODO mock config in all tests to ensure stability

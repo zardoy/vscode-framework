@@ -4,6 +4,7 @@ import { Command, CommandOptions } from 'commander'
 import { CamelCase } from 'type-fest'
 import { pickObject } from '../util'
 
+// eslint-disable-next-line zardoy-config/@typescript-eslint/no-namespace
 namespace CommandArguments {
     type IsRequired<T extends string> = T extends `<${string}>` ? true : T extends `[${string}]` ? false : never
     type ExtractString<T extends string> = T extends `<${infer U}>` ? U : T extends `[${infer U}]` ? U : never
@@ -35,6 +36,7 @@ export class SuperCommander<C extends Record<string, any> | undefined = undefine
     private readonly loadConfig:
         | ((commandName: string) => Record<string, any> | Promise<Record<string, any>>)
         | undefined
+
     constructor(
         ...[program, loadConfig]: C extends undefined
             ? [program: Command]
@@ -51,6 +53,7 @@ export class SuperCommander<C extends Record<string, any> | undefined = undefine
     command<
         S extends string,
         A extends CommandArguments.ArgumentsArr,
+        // eslint-disable-next-line zardoy-config/@typescript-eslint/ban-types
         O extends Record<string, { description: string; short?: string; defaultValue: string | boolean }> = {},
         E extends boolean = false,
     >(
@@ -60,7 +63,7 @@ export class SuperCommander<C extends Record<string, any> | undefined = undefine
             arguments?: A
             options?: O
             loadConfig?: E
-        } = {},
+        },
         action: (
             options: { [K in keyof O as K extends `--${infer U}` ? CamelCase<U> : never]: O[K]['defaultValue'] },
             params: {

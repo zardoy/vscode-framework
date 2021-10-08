@@ -8,9 +8,9 @@ import { defaultsDeep } from 'lodash'
 import pkdDir from 'pkg-dir'
 import { Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
-import { LaunchParams, launchVscode } from './launcher'
-import { addStandaloneCommands } from './standalone-commands'
-import { generateTypes } from './types-generator'
+import { LaunchParams } from './launcher'
+import { addStandaloneCommands } from './standaloneCommands'
+import { generateTypes } from './typesGenerator'
 import { generateAndWriteManifest, runEsbuild } from '.'
 
 declare const __DEV__: boolean
@@ -46,7 +46,7 @@ commander.command(
     async ({ overwrite }) => {
         // TODO but should I?
         process.env.NODE_ENV = 'development'
-        fsExtra.ensureDir(devExtensionPath)
+        await fsExtra.ensureDir(devExtensionPath)
         await generateAndWriteManifest({
             outputPath: join(devExtensionPath, 'package.json'),
             overwrite,
@@ -58,7 +58,7 @@ commander.command(
     'generate-types',
     'Generate TypeScript typings (from contribution points) and place them to nearest node_modules for working with framework',
     {},
-    async ({}) => {
+    async () => {
         await generateTypes({ nodeModulesDir: __DEV__ ? (await pkdDir(__dirname))! : process.cwd() })
     },
 )
@@ -78,7 +78,7 @@ const buildExtension = async (
         mode,
         bulidPath,
     })
-    fsExtra.ensureDir(bulidPath)
+    await fsExtra.ensureDir(bulidPath)
     // TODO extension entrypoint and in esbuild
     const manifest = await generateAndWriteManifest({
         outputPath: join(bulidPath, 'package.json'),
@@ -115,7 +115,7 @@ commander.command(
     },
 )
 
-commander.command('build', 'Make a production-ready build', { loadConfig: true }, async ({}, { config }) => {
+commander.command('build', 'Make a production-ready build', { loadConfig: true }, async (_, { config }) => {
     await buildExtension('production', false, config)
 })
 

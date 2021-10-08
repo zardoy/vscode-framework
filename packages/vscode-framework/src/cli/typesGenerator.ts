@@ -1,7 +1,7 @@
 import { join } from 'path'
 import Debug from '@prisma/debug'
 import { generateTypes as generateTypesModule, StringWriters } from 'generated-module'
-import { createJsdoc } from 'generated-module/build/ts-morph-utils.js'
+import { createJsdoc } from 'generated-module/build/ts-morph-utils'
 import { StatementStructures, StructureKind } from 'ts-morph'
 import { readDirectoryManifest } from 'vscode-manifest'
 import { oneOf } from '../util'

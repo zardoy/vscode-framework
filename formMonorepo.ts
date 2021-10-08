@@ -1,9 +1,9 @@
 import fs from 'fs'
-import { join } from 'path'
-import jsonfile from 'jsonfile'
-import { modifyPackageJsonFile, modifyTsConfigJsonFile } from 'modify-json-file'
-import { PackageJson, TsConfigJson } from 'type-fest'
 import { getGithubRemoteInfo } from 'github-remote-info'
+import jsonfile from 'jsonfile'
+import { modifyTsConfigJsonFile } from 'modify-json-file'
+import { join } from 'path'
+import { PackageJson, TsConfigJson } from 'type-fest'
 ;(async () => {
     const fromMonorepo = (...p: string[]) => join(__dirname, 'packages', ...p)
     const packageTsconfigs = {
@@ -51,7 +51,7 @@ import { getGithubRemoteInfo } from 'github-remote-info'
             path: string
             tsconfig: TsConfigJson
         }>)
-            await Ojsonfile.writeFile(fromPackage(path), tsconfig, {
+            await jsonfile.writeFile(fromPackage(path), tsconfig, {
                 spaces: 4,
             })
     }

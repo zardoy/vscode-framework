@@ -33,8 +33,8 @@ export const launchVscode = async (targetDir: string, { development: development
 
     // TODO don't use globals
     nodeIpc.config.id = 'vscode-framework:server'
-    await new Promise<void>(r => {
-        nodeIpc.serve(r)
+    await new Promise<void>(resolve => {
+        nodeIpc.serve(resolve)
         nodeIpc.server.start()
     })
 

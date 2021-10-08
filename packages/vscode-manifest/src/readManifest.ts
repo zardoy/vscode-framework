@@ -55,48 +55,44 @@ export const readManifest = async ({
     restoreIds = true,
     throwIfInvalid = true,
 }: ReadManifestOptions): Promise<ManifestType> => {
-    try {
-        const manifest: ManifestType = await readFile(manifestPath)
+    const manifest: ManifestType = await readFile(manifestPath)
 
-        if (throwIfInvalid) validateOrThrow(manifest)
+    if (throwIfInvalid) validateOrThrow(manifest)
 
-        /**
-         * configurationDefaults, keybindings must have extension name prefix for settings
-         * TODO customEditors, submenus, viewsWelcome, walkthroughs, menus and so on
-         * @returns id.name - only one dot
-         */
-        const ensureHasId = (
-            where: keyof Pick<NonNullable<ManifestType['contributes']>, 'commands' | 'colors' | 'configuration'>,
-            id: string,
-        ) => {
-            const parts = id.split('.')
-            // TODO! produce warning
-            if (parts.length >= 2 && parts[0] === manifest.name) return id
-            const generateId = restoreIds === true || (Array.isArray(restoreIds) && restoreIds.includes(where))
-            return generateId ? `${manifest.name}.${id}` : id
-        }
-
-        if (restoreIds) {
-            if (manifest.contributes?.commands)
-                manifest.contributes.commands = manifest.contributes.commands.map(c => ({
-                    ...c,
-                    // TODO ensure that command is required in schema
-                    command: ensureHasId('commands', c.command),
-                }))
-
-            if (manifest.contributes?.configuration) {
-                // TODO remove this limitation and warning
-                if (Array.isArray(manifest.contributes.configuration))
-                    throw new TypeError("contributes.configuration can't be array")
-                manifest.contributes.configuration.properties = mapKeys(
-                    manifest.contributes.configuration.properties,
-                    (_value, key) => ensureHasId('configuration', key),
-                )
-            }
-        }
-
-        return manifest
-    } catch (error) {
-        throw error
+    /**
+     * configurationDefaults, keybindings must have extension name prefix for settings
+     * TODO customEditors, submenus, viewsWelcome, walkthroughs, menus and so on
+     * @returns id.name - only one dot
+     */
+    const ensureHasId = (
+        where: keyof Pick<NonNullable<ManifestType['contributes']>, 'commands' | 'colors' | 'configuration'>,
+        id: string,
+    ) => {
+        const parts = id.split('.')
+        // TODO! produce warning
+        if (parts.length >= 2 && parts[0] === manifest.name) return id
+        const generateId = restoreIds === true || (Array.isArray(restoreIds) && restoreIds.includes(where))
+        return generateId ? `${manifest.name}.${id}` : id
     }
+
+    if (restoreIds) {
+        if (manifest.contributes?.commands)
+            manifest.contributes.commands = manifest.contributes.commands.map(c => ({
+                ...c,
+                // TODO ensure that command is required in schema
+                command: ensureHasId('commands', c.command),
+            }))
+
+        if (manifest.contributes?.configuration) {
+            // TODO remove this limitation and warning
+            if (Array.isArray(manifest.contributes.configuration))
+                throw new TypeError("contributes.configuration can't be array")
+            manifest.contributes.configuration.properties = mapKeys(
+                manifest.contributes.configuration.properties,
+                (_value, key) => ensureHasId('configuration', key),
+            )
+        }
+    }
+
+    return manifest
 }

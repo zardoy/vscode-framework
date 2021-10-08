@@ -40,7 +40,7 @@ export const validateOrThrow = (manifest: ManifestType) => {
                     `${red(
                         `- ${bold(
                             error.instancePath === '' ? 'root' : error.instancePath.slice(1).replace(/\//g, '.'),
-                        )} ${error.message}`,
+                        )} ${error.message!}`,
                     )}`,
                 )
         }

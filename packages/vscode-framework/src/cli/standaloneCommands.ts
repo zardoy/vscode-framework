@@ -14,8 +14,8 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
             loadConfig: true,
             arguments: ['[dir]'] as ['[dir]'],
         },
-        ({}, { config, arguments: { dir = process.cwd() } }) => {
-            launchVscode(dir, config)
+        async (_, { config, arguments: { dir = process.cwd() } }) => {
+            await launchVscode(dir, config)
         },
     )
 
@@ -31,7 +31,8 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
             // TODO
             if (!scripts) throw new Error('no scripts field')
             const entryPoints = await globby(join(process.cwd(), 'src/index.{js,mjs,cjs,ts,mts}'))
-            if (entryPoints.length !== 1) throw new Error(`no one entry point: ${entryPoints} `)
+            if (entryPoints.length !== 1)
+                throw new Error(`There is no entry point from the list: ${entryPoints.toString()} `)
             const entryPoint = entryPoints[0]!
             const esbuildBaseCommand = `esbuild ${entryPoint} --bundle --platform=node --outfile=dist/extension.js --external:vscode`
             if (!scripts['esbuild-start']) scripts['esbuild-start'] = `${esbuildBaseCommand} --watch --sourcemap`

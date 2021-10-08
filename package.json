@@ -11,6 +11,7 @@
     },
     "scripts": {
         "start": "node prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node esbuild.mjs development\"",
+        "eslint": "eslint packages/*/src/**/*.ts",
         "test": "jest",
         "prepublishOnly": "pnpm build && jest",
         "build": "node prepare.mjs && tsc -b tsconfig.prod.json && node esbuild.mjs production"

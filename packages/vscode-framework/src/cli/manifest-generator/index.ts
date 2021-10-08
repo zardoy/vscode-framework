@@ -57,6 +57,7 @@ export const generateManifest = async ({
               'peerDependencies',
               'bin',
               'scripts',
+              // eslint-disable-next-line zardoy-config/@typescript-eslint/array-type
           ] as (keyof typeof sourceManifest)[]) as any)
         : sourceManifest
     return runGeneratorsOnManifest(sourceManifest, propsToGenerate as any, true)

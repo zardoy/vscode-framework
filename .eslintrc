@@ -1,3 +1,16 @@
 {
-    "extends": ["plugin:zardoy-config/recommended"]
+    "extends": ["plugin:zardoy-config/recommended"],
+    "rules": {
+        // TODO disable import/* rules. this one is lagging
+        "zardoy-config/import/newline-after-import": "off",
+        "new-cap": [
+            "error",
+            {
+                "newIsCapExceptions": ["fdir"],
+                "capIsNewExceptions": ["Debug"] //@prisma/debug
+            }
+        ],
+        // investigate why it was created
+        "zardoy-config/node/file-extension-in-import": "off"
+    }
 }
