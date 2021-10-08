@@ -2,13 +2,15 @@ import { resolve } from 'path'
 import Debug from '@prisma/debug'
 import { ManifestType } from 'vscode-manifest'
 import { build as esbuildBuild } from 'esbuild'
-import execa from 'execa'
+import { nanoid } from 'nanoid'
 import fsExtra from 'fs-extra'
 import escapeStringRegexp from 'escape-string-regexp'
 import { Config } from '../config'
 import { launchVscode } from './launcher'
 
 const debug = Debug('vscode-framework:esbuild')
+
+export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false> & { serverIpcChannel: string }
 
 export const runEsbuild = async ({
     mode,
@@ -23,16 +25,21 @@ export const runEsbuild = async ({
     outDir: string
     manifest: Pick<ManifestType, 'name' | 'displayName' | 'extensionKind'>
     /** Config for handling vscode launch, pass `false` skip launching */
-    launchVscodeConfig: Parameters<typeof launchVscode>[1] | false
+    launchVscodeConfig: Pick<Config, 'development'> | false
     entryPoint?: string
     outfile?: string
     overrideBuildConfig?: Config['esbuildConfig']
 }) => {
-    await fsExtra.copy(require.resolve('../extensionBootstrap'), resolve(outDir, 'extensionBootstrap.js'))
+    const enableBootstrap = launchVscodeConfig !== false && launchVscodeConfig.development.extensionBootstrap
+    if (enableBootstrap)
+        await fsExtra.copy(require.resolve('../extensionBootstrap'), resolve(outDir, 'extensionBootstrap.js'))
 
     // TODO also detect other cases
     if (manifest.extensionKind?.length === 0)
         console.warn("Warning: extensionKind in manifest is set to [] which means your extension won't be launched")
+
+    let serverIpcChannel: undefined | string
+    if (enableBootstrap) serverIpcChannel = `vscode-framework:server_${nanoid(5)}`
 
     const { metafile } = await esbuildBuild({
         target: 'node14',
@@ -52,7 +59,14 @@ export const runEsbuild = async ({
             'process.env.EXTENSION_ID_NAME': `"${manifest.name}"`,
             'process.env.EXTENSION_DISPLAY_NAME': `"${manifest.displayName}"`,
             'process.env.REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT': 'true',
-            'process.env.EXTENSION_BOOTSTRAP_CONFIG': `"${JSON.stringify(launchVscodeConfig)}"`,
+            ...(serverIpcChannel
+                ? {
+                      'process.env.EXTENSION_BOOTSTRAP_CONFIG': `"${JSON.stringify({
+                          ...launchVscodeConfig,
+                          serverIpcChannel,
+                      } as BootstrapConfig)}"`,
+                  }
+                : {}),
             ...(overrideBuildOptions.define ? overrideBuildOptions.define : {}),
         },
         plugins: [
@@ -65,7 +79,10 @@ export const runEsbuild = async ({
                         build.onEnd(async ({ errors }) => {
                             if (errors.length > 0) return
                             if (rebuildCount++ > 0) return
-                            await launchVscode(outDir, launchVscodeConfig)
+                            await launchVscode(outDir, {
+                                ...launchVscodeConfig,
+                                serverIpcChannel: serverIpcChannel ?? false,
+                            })
                         })
                 },
             },

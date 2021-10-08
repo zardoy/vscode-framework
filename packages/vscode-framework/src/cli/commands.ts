@@ -8,7 +8,6 @@ import { defaultsDeep } from 'lodash'
 import pkdDir from 'pkg-dir'
 import { Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
-import { LaunchParams } from './launcher'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateTypes } from './typesGenerator'
 import { generateAndWriteManifest, runEsbuild } from '.'
@@ -69,7 +68,7 @@ const devExtensionPath = resolve(process.cwd(), relativePath)
 
 const buildExtension = async (
     mode: Parameters<typeof runEsbuild>[0]['mode'],
-    launchVscodeConfig: LaunchParams | false,
+    launchVscodeConfig: Pick<Config, 'development'> | false,
     { esbuildConfig }: Pick<Config, 'esbuildConfig'>,
     bulidPath = devExtensionPath,
 ) => {

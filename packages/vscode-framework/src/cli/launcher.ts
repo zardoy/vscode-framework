@@ -1,14 +1,30 @@
 import Debug from '@prisma/debug'
 import execa from 'execa'
-import nodeIpc from 'node-ipc'
 import exitHook from 'exit-hook'
+import nodeIpc from 'node-ipc'
 import { Config } from '../config'
 
 const debug = Debug('vscode-framework:launcher')
 
-export type LaunchParams = Pick<Config, 'development'>
+type LaunchParams = Pick<Config, 'development'> & {
+    /**
+     *  Passing a channel with an ID to launch IPC server only from `start` command, but not from `launch`.
+     *  An unique ID is required because multiple instances of extension can be launched
+     * */
+    serverIpcChannel: string | false
+}
 
-export const launchVscode = async (targetDir: string, { development: developmentConfig }: LaunchParams) => {
+export type IpcEvents = {
+    // app:reload not necessarily reloads window. it means changes happened and new file is on disk
+    extension: 'app:close' | 'app:reload'
+}
+
+let isServerIpcStarted = false
+
+export const launchVscode = async (
+    targetDir: string,
+    { development: developmentConfig, serverIpcChannel }: LaunchParams,
+) => {
     // reference: NativeParsedArgs
     /** falsy values are trimmed. I don't think that we need to pass false explicitly here */
     const args = {
@@ -32,23 +48,35 @@ export const launchVscode = async (targetDir: string, { development: development
         .filter(a => a !== undefined) as string[]
 
     // TODO don't use globals
-    nodeIpc.config.id = 'vscode-framework:server'
-    await new Promise<void>(resolve => {
-        nodeIpc.serve(resolve)
-        nodeIpc.server.start()
-    })
+    if (serverIpcChannel) {
+        if (isServerIpcStarted) throw new Error('IPC is already started. the first one must be closed')
+
+        nodeIpc.config.id = serverIpcChannel
+        nodeIpc.server.on('disconnect', () => {
+            isServerIpcStarted = false
+        })
+        nodeIpc.server.on('error', () => {
+            isServerIpcStarted = false
+        })
+        await new Promise<void>(resolve => {
+            nodeIpc.serve(resolve)
+            nodeIpc.server.start()
+        })
+        isServerIpcStarted = true
+    }
 
     const vscodeProcess = execa(developmentConfig.executable, [...argsParsed], {
         preferLocal: false,
         detached: true,
         stdio: 'ignore',
     })
-    exitHook(() => {
-        // workbench.action.quit
-        // workbench.action.closeWindow
-        // search.action.focusActiveEditor
-        nodeIpc.server.emit('app:close')
-    })
+    if (serverIpcChannel)
+        exitHook(() => {
+            // workbench.action.quit
+            // workbench.action.closeWindow
+            // search.action.focusActiveEditor
+            nodeIpc.server.emit('app:close')
+        })
 
     return {
         vscodeProcess,

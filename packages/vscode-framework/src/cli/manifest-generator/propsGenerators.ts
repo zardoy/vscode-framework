@@ -1,7 +1,8 @@
 import { getGithubRemoteInfo } from 'github-remote-info'
-import { ExtensionManifest, ManifestType } from 'vscode-manifest'
-import { UnionToIntersection } from 'type-fest'
 import { defaultsDeep } from 'lodash'
+import { UnionToIntersection } from 'type-fest'
+import { ManifestType } from 'vscode-manifest'
+import { Config } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
 
 // They're generating package.json properties
@@ -45,10 +46,12 @@ export const propsGenerators = makeGenerators({
     qnaFalse() {
         return { qna: false }
     },
-    extensionEntryPoint() {
+    // TODO config
+    extensionEntryPoint(_, { development: { extensionBootstrap } }: Pick<Config, 'development'>) {
         // TODO pass config
         // TODO browser entry point
-        // return { main: `${process.env.NODE_ENV === 'development' ? 'extensionBootstrap.js' : 'extension.js'}` }
+        const enableBootstrap = process.env.NODE_ENV === 'development' && !!extensionBootstrap
+        // return { main: `${enableBootstrap ? 'extensionBootstrap.js' : 'extension.js'}` }
         return { main: 'extension.js' }
     },
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {
