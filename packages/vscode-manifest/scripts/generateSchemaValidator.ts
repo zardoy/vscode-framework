@@ -2,22 +2,23 @@
 
 // import { InputData, JSONSchemaInput, quicktype, FetchingJSONSchemaStore } from 'quicktype-core'
 import { resolve } from 'path'
+import fs from 'fs'
 import fsExtra from 'fs-extra'
 import Ajv from 'ajv'
 import { build } from 'esbuild'
-import fs from 'fs'
 
 // ts-json-schema-generator doesn't set on-top required property (see issues)
 import * as TJS from 'typescript-json-schema'
 import { writeFileSync } from 'jsonfile'
-import standaloneCode from 'ajv/dist/standalone'
+import standaloneCode from 'ajv/dist/standalone.js'
 
 // make sure to keep the name
 import type { ExtensionManifestRequired } from '../src/frameworkTypes'
+
 const exportTypeName = 'ExtensionManifestRequired'
 
 const main = async () => {
-    //#region TYPESCRIPT-JSON-SCHEMA
+    // #region TYPESCRIPT-JSON-SCHEMA
     const settings: TJS.PartialArgs = {
         ref: false,
         required: true,
@@ -27,9 +28,9 @@ const main = async () => {
 
     const program = TJS.getProgramFromFiles([resolve(__dirname, '../src/frameworkTypes.ts')], {})
     const generatedSchema = TJS.generateSchema(program, exportTypeName, settings)
-    //#endregion
+    // #endregion
 
-    //#region TS-JSON-SCHEMA-GENERATOR (unused)
+    // #region TS-JSON-SCHEMA-GENERATOR (unused)
 
     // const generatedSchema = TJS.createGenerator({
     //     path: resolve(__dirname, '../src/frameworkTypes.ts'),
@@ -38,15 +39,15 @@ const main = async () => {
     //     tsconfig: resolve(__dirname, 'tsconfig.for-script.json'),
     // }).createSchema(exportTypeName)
 
-    //#endregion
+    // #endregion
 
     const fromGenerated = (path: string) => resolve(__dirname, '../src/generated', path)
     const generatedDir = fromGenerated('')
-    fsExtra.ensureDir(generatedDir)
+    await fsExtra.ensureDir(generatedDir)
     // for inspectations / debugging
     // writeFileSync(resolve(__dirname, generatedDir, 'schemaForValidation.json'), generatedSchema, { spaces: 4 })
 
-    //#region Generate validator using ajv and minify using esbuild (best)
+    // #region Generate validator using ajv and minify using esbuild (best)
     const ajv = new Ajv({
         code: { source: true },
         allErrors: true,
@@ -76,9 +77,9 @@ const main = async () => {
 
     // for now it's around 51
     if (outputSize > 55_000) throw new Error(`esbuild output size exceeded`)
-    //#endregion
+    // #endregion
 
-    //#region Generate validator using quicktype (works badly)
+    // #region Generate validator using quicktype (works badly)
 
     // const jsonInput = new JSONSchemaInput(new FetchingJSONSchemaStore())
     // await jsonInput.addSource({
@@ -96,10 +97,11 @@ const main = async () => {
 
     // await fsExtra.writeFile(resolve(generatedDir, 'extensionManifestValidator.ts'), lines.join('\n'))
 
-    //#endregion
+    // #endregion
 }
 
-main().catch(err => {
-    console.error(err)
+main().catch(error => {
+    console.error(error)
+    // eslint-disable-next-line zardoy-config/unicorn/no-process-exit
     process.exit(1)
 })

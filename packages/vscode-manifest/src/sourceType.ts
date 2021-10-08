@@ -1,4 +1,4 @@
-//manually
+// manually
 
 // Isn't precise TODO extract from schema too
 interface ICommand {
@@ -144,7 +144,7 @@ export interface ExtensionManifest {
     /**
      * The categories used by the VS Code gallery to categorize the extension.
      */
-    categories?: ExtensionCategory[number][]
+    categories?: Array<ExtensionCategory[number]>
     /**
      * All contributions of the VS Code extension represented by this package.
      */

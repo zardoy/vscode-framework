@@ -1,9 +1,9 @@
+import { join } from 'path'
 import { readDirectoryManifest } from 'vscode-manifest'
+import globby from 'globby'
 import { SuperCommander } from './commander'
 import { launchVscode } from './launcher'
 import { propsGenerators } from './manifest-generator/propsGenerators'
-import globby from 'globby'
-import { join } from 'path'
 
 export const addStandaloneCommands = (commander: SuperCommander<any>) => {
     commander.command(
@@ -27,20 +27,18 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
         async () => {
             // writes esbuild-scripts review and rename yourself
             const manifest = await readDirectoryManifest()
-            const scripts = manifest.scripts
+            const { scripts } = manifest
             // TODO
             if (!scripts) throw new Error('no scripts field')
             const entryPoints = await globby(join(process.cwd(), 'src/index.{js,mjs,cjs,ts,mts}'))
             if (entryPoints.length !== 1) throw new Error(`no one entry point: ${entryPoints} `)
             const entryPoint = entryPoints[0]!
             const esbuildBaseCommand = `esbuild ${entryPoint} --bundle --platform=node --outfile=dist/extension.js --external:vscode`
-            if (!scripts['esbuild-start']) {
-                scripts['esbuild-start'] = `${esbuildBaseCommand} --watch --sourcemap`
-            }
-            if (!scripts['esbuild-build']) {
+            if (!scripts['esbuild-start']) scripts['esbuild-start'] = `${esbuildBaseCommand} --watch --sourcemap`
+
+            if (!scripts['esbuild-build'])
                 // warning about tsc
                 scripts['esbuild-build'] = `${esbuildBaseCommand} --minify`
-            }
         },
     )
 

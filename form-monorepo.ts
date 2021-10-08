@@ -1,7 +1,7 @@
 import fs from 'fs'
+import { join } from 'path'
 import jsonfile from 'jsonfile'
 import { modifyPackageJsonFile, modifyTsConfigJsonFile } from 'modify-json-file'
-import { join } from 'path'
 import { PackageJson, TsConfigJson } from 'type-fest'
 import { getGithubRemoteInfo } from 'github-remote-info'
 ;(async () => {
@@ -24,40 +24,38 @@ import { getGithubRemoteInfo } from 'github-remote-info'
         // if (fs.existsSync(fromPackage(packageTsconfigName))) {
         //     console.warn(monorepoPackage, 'has tsconfig.json')
         // }
-        ;(
-            [
-                {
-                    path: packageTsconfigs.dev,
-                    tsconfig: {
-                        extends: `./${packageTsconfigs.prod}`,
-                        compilerOptions: {
-                            declarationMap: true,
-                        },
+        for (const { path, tsconfig } of [
+            {
+                path: packageTsconfigs.dev,
+                tsconfig: {
+                    extends: `./${packageTsconfigs.prod}`,
+                    compilerOptions: {
+                        declarationMap: true,
                     },
                 },
-                {
-                    path: packageTsconfigs.prod,
-                    tsconfig: {
-                        extends: '@zardoy/tsconfig/node-lib',
-                        compilerOptions: {
-                            composite: true,
-                            emitDeclarationOnly: true,
-                            rootDir: 'src',
-                            outDir: 'build',
-                        },
-                        include: ['src'],
+            },
+            {
+                path: packageTsconfigs.prod,
+                tsconfig: {
+                    extends: '@zardoy/tsconfig/node-lib',
+                    compilerOptions: {
+                        composite: true,
+                        emitDeclarationOnly: true,
+                        rootDir: 'src',
+                        outDir: 'build',
                     },
+                    include: ['src'],
                 },
-            ] as {
-                path: string
-                tsconfig: TsConfigJson
-            }[]
-        ).forEach(({ path, tsconfig }) => {
-            jsonfile.writeFile(fromPackage(path), tsconfig, {
+            },
+        ] as Array<{
+            path: string
+            tsconfig: TsConfigJson
+        }>)
+            await Ojsonfile.writeFile(fromPackage(path), tsconfig, {
                 spaces: 4,
             })
-        })
     }
+
     await modifyTsConfigJsonFile(join(__dirname, 'tsconfig.dev.json'), {
         references: packagesDirs.map(dir => ({ path: `packages/${dir}/${packageTsconfigs.dev}` })),
     })
@@ -74,6 +72,7 @@ import { getGithubRemoteInfo } from 'github-remote-info'
         .map(pkg => {
             const packageJson: PackageJson = jsonfile.readFileSync(join('packages', pkg, 'package.json'))
             const { name, description } = packageJson
+            // eslint-disable-next-line zardoy-config/@typescript-eslint/restrict-template-expressions
             return `| [${name}](${githubBaseUrl}${pkg}) | ${description} | [![${name} version](https://img.shields.io/npm/v/${name}.svg?label=%20)](https://npmjs.com/${name}) |`
         })
         .join('\n')

@@ -1,7 +1,7 @@
+import { join } from 'path'
 import Debug from '@prisma/debug'
 import { generateTypes as generateTypesModule, StringWriters } from 'generated-module'
-import { createJsdoc } from 'generated-module/build/ts-morph-utils'
-import { join } from 'path'
+import { createJsdoc } from 'generated-module/build/ts-morph-utils.js'
 import { StatementStructures, StructureKind } from 'ts-morph'
 import { readDirectoryManifest } from 'vscode-manifest'
 import { oneOf } from '../util'
@@ -34,7 +34,7 @@ export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeMo
                   {
                       name: 'regular',
                       type: writer =>
-                          commands.length
+                          commands.length > 0
                               ? StringWriters.union(commands.map(c => sliceExtensionId(c.command)))(writer)
                               : writer.quote('ERROR: There are no command contributions in manifest'),
                   },
@@ -50,27 +50,27 @@ export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeMo
         isExported: true,
         name: 'Settings',
         properties: configuration
-            ? Object.entries(configuration.properties).map(([name, setting]) => {
-                  return {
-                      // TODO use quote
-                      name: `"${sliceExtensionId(name)}"`,
-                      docs: createJsdoc({
-                          description: setting.description,
-                          default: setting.default,
-                      }),
-                      type: writer => {
-                          if (setting.enum) {
-                              StringWriters.union(setting.enum)(writer)
-                              return
-                          }
-                          if (oneOf(setting.type, ['boolean', 'number', 'string'])) {
-                              writer.write(setting.type as string)
-                              return
-                          }
-                          writer.write('unknown')
-                      },
-                  }
-              })
+            ? Object.entries(configuration.properties).map(([name, setting]) => ({
+                  // TODO use quote
+                  name: `"${sliceExtensionId(name)}"`,
+                  docs: createJsdoc({
+                      description: setting.description,
+                      default: setting.default,
+                  }),
+                  type: writer => {
+                      if (setting.enum) {
+                          StringWriters.union(setting.enum)(writer)
+                          return
+                      }
+
+                      if (oneOf(setting.type, ['boolean', 'number', 'string'])) {
+                          writer.write(setting.type as string)
+                          return
+                      }
+
+                      writer.write('unknown')
+                  },
+              }))
             : [],
     })
     debug(

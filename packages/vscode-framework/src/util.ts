@@ -1,9 +1,8 @@
-import path from 'path'
+import path, { resolve } from 'path'
 import { pick } from 'lodash'
 
 import { readFile } from 'jsonfile'
 import { PackageJson } from 'type-fest'
-import { resolve } from 'path'
 
 export const getManifestPathFromRoot = () => resolve(process.cwd(), 'package.json')
 

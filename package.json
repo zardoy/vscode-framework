@@ -1,4 +1,5 @@
 {
+    "name": "vscode-framework",
     "private": true,
     "dependencies": {
         "@types/jest": "^27.0.2",
@@ -41,5 +42,13 @@
         "tsc-watch": "^4.5.0",
         "typescript": "^4.4.3"
     },
-    "name": "vscode-framework"
+    "prttier": {
+        "semi": false,
+        "singleQuote": true,
+        "proseWrap": "never",
+        "tabWidth": 4,
+        "trailingComma": "all",
+        "arrowParens": "avoid",
+        "printWidth": 160
+    }
 }

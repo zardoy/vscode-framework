@@ -1,5 +1,5 @@
-import { showQuickPick } from '../build'
 import { expectType } from 'tsd'
+import { showQuickPick } from '../build.js'
 
 expectType<boolean | undefined>(
     await showQuickPick([

@@ -1,9 +1,9 @@
 import type { ValidateFunction } from 'ajv'
 import { bold, red } from 'chalk'
-import { ManifestType } from '.'
 import { displayError } from './displayError'
 import ajvValidateImport from './generated/validate.js'
 import { intoTwoArrays, onlyProperties } from './util'
+import { ManifestType } from '.'
 
 /** Returns null if valid */
 export const validateManifest = (manifest: ManifestType) => {
@@ -26,16 +26,16 @@ export const validateOrThrow = (manifest: ManifestType) => {
             errors,
             err => err.instancePath === '' && onlyProperties(err.params, ['missingProperty']),
         )
-        if (missingPackageJsonProps.length) {
+        if (missingPackageJsonProps.length > 0)
             console.error(
                 `${red('Missing root properties:')} ${missingPackageJsonProps
                     .map(err => red(`\n- ${bold(err.params.missingProperty)}`))
                     .join('')}`,
             )
-        }
-        if (otherErrors.length) {
-            if (missingPackageJsonProps.length) console.error(red(`Other errors:`))
-            for (const error of otherErrors) {
+
+        if (otherErrors.length > 0) {
+            if (missingPackageJsonProps.length > 0) console.error(red(`Other errors:`))
+            for (const error of otherErrors)
                 console.error(
                     `${red(
                         `- ${bold(
@@ -43,8 +43,8 @@ export const validateOrThrow = (manifest: ManifestType) => {
                         )} ${error.message}`,
                     )}`,
                 )
-            }
         }
+
         // TODO exclude from output
         throw new Error('validation error')
     }

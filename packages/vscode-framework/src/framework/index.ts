@@ -32,9 +32,8 @@ export class VscodeFramework<T extends boolean = false> {
     public registerAllCommands(
         commands: T extends false ? { [C in RegularCommands]: CommandHandler } : never,
     ): VscodeFramework<true> {
-        for (const [command, handler] of Object.entries(commands)) {
-            this.registerCommand(command as any, handler)
-        }
+        for (const [command, handler] of Object.entries(commands)) this.registerCommand(command as any, handler)
+
         return this as any
     }
 

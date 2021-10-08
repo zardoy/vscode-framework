@@ -59,5 +59,5 @@ export const generateManifest = async ({
               'scripts',
           ] as (keyof typeof sourceManifest)[]) as any)
         : sourceManifest
-    return await runGeneratorsOnManifest(sourceManifest, propsToGenerate as any, true)
+    return runGeneratorsOnManifest(sourceManifest, propsToGenerate as any, true)
 }

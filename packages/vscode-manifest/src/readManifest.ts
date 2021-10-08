@@ -1,12 +1,12 @@
 import path from 'path'
 import { mapKeys } from 'lodash'
-import { validateOrThrow } from './validateManifest'
 import { readFile } from 'jsonfile'
+import { Except } from 'type-fest'
+import { validateOrThrow } from './validateManifest'
 
 // TODO thank https://blog.hediet.de/post/hot_reload_for_vs_code_extension_development
 
 import { ManifestType } from './frameworkTypes'
-import { Except } from 'type-fest'
 
 // package: generate package
 
@@ -38,7 +38,7 @@ interface ReadManifestOptions {
 }
 
 /** `readManifest` wrapper to read it from <directory = cwd>/package.json */
-export const readDirectoryManifest = ({
+export const readDirectoryManifest = async ({
     directory = process.cwd(),
     ...options
 }: Except<ReadManifestOptions, 'manifestPath'> & { directory?: string } = {}) =>
@@ -81,7 +81,7 @@ export const readManifest = async ({
                 manifest.contributes.commands = manifest.contributes.commands.map(c => ({
                     ...c,
                     // TODO ensure that command is required in schema
-                    command: ensureHasId('commands', c.command!),
+                    command: ensureHasId('commands', c.command),
                 }))
 
             if (manifest.contributes?.configuration) {
@@ -96,7 +96,7 @@ export const readManifest = async ({
         }
 
         return manifest
-    } catch (err) {
-        throw err
+    } catch (error) {
+        throw error
     }
 }

@@ -1,8 +1,8 @@
 import { getGithubRemoteInfo } from 'github-remote-info'
-import { MaybePromise, readModulePackage } from '../../util'
 import { ExtensionManifest, ManifestType } from 'vscode-manifest'
 import { UnionToIntersection } from 'type-fest'
 import { defaultsDeep } from 'lodash'
+import { MaybePromise, readModulePackage } from '../../util'
 
 // They're generating package.json properties
 // If you with you can use them directly
@@ -54,7 +54,7 @@ export const propsGenerators = makeGenerators({
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {
         const { contributes } = manifest
         if (!contributes?.commands) return {}
-        const displayName = manifest.displayName
+        const { displayName } = manifest
         return {
             contributes: {
                 // TODO HIGH !!!!
@@ -81,7 +81,7 @@ export const propsGenerators = makeGenerators({
                 activationEvents:
                     process.env.NODE_ENV === 'development' ? ['*'] : allCommands.map(command => `onCommand:${command}`),
             }
-        else return {}
+        return {}
     },
     // requiredRuntimeDependency({
     //     dependencies = {},

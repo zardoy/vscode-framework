@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-useless-path-segments
+// eslint-disable-next-line zardoy-config/import/no-useless-path-segments
 export * from '.vscode-framework'
 
 // type _ModuleGenerated = typeof import('.vscode-framework') extends Record<any, any> ? true : false

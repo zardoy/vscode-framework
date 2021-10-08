@@ -1,10 +1,9 @@
 /// <reference types="jest" />
 
-import { generateTypes } from '../../src/cli/types-generator'
-import { mockManifestOnce, screenRecorderManifest } from './common'
-
 import fs from 'fs'
 import path from 'path'
+import { generateTypes } from '../../src/cli/types-generator'
+import { mockManifestOnce, screenRecorderManifest } from './common'
 
 test('Generates types propertly', async () => {
     mockManifestOnce(screenRecorderManifest)

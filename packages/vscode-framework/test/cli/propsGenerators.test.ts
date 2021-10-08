@@ -1,9 +1,9 @@
 /// <reference types="jest" />
 
-import { PackageJson } from 'type-fest'
-import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
 import fs from 'fs'
 import { join } from 'path'
+import { PackageJson } from 'type-fest'
+import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
 import { screenRecorderManifest } from './common'
 
 type HaveOwnTests = 'repository'

@@ -1,8 +1,8 @@
 import Debug from '@prisma/debug'
 import execa from 'execa'
-import { Config } from '../config'
 import nodeIpc from 'node-ipc'
 import exitHook from 'exit-hook'
+import { Config } from '../config'
 
 const debug = Debug('vscode-framework:launcher')
 

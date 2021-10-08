@@ -1,4 +1,4 @@
-import { ManifestType } from 'vscode-manifest/'
+import { ManifestType } from 'vscode-manifest/.js'
 import jsonfile from 'jsonfile'
 
 // TODO mock config in all tests to ensure stability
@@ -10,11 +10,8 @@ export const mockManifestOnce = (manifest: ManifestType) => {
 }
 
 const deepFreeze = <T extends Record<string, any>>(obj: T) => {
-    for (let [, value] of Object.entries(obj)) {
-        if (typeof value == 'object') {
-            deepFreeze(value)
-        }
-    }
+    for (const [, value] of Object.entries(obj)) if (typeof value === 'object') deepFreeze(value)
+
     Object.freeze(obj)
     return obj
 }

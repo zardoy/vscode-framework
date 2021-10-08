@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
+import nodeIpc from 'node-ipc'
 import { Config } from '../src/config'
 import type { MaybePromise } from '../src/util'
-import nodeIpc from 'node-ipc'
 
 type AsyncVoid = MaybePromise<void>
 
@@ -28,9 +28,8 @@ if (bootstrapConfig.hotReload) {
 
             return {
                 dispose: () => {
-                    ctx.subscriptions.forEach(({ dispose }) => {
-                        dispose()
-                    })
+                    for (const { dispose } of ctx.subscriptions) dispose()
+
                     console.log('deactivating')
                     const promise = deactivate?.()
                     if (deactivate) console.log('deactivate for disposing is called')
@@ -44,7 +43,5 @@ if (bootstrapConfig.hotReload) {
         })
     }
 } else {
-    activate = ctx => {
-        return activate(ctx)
-    }
+    activate = ctx => activate(ctx)
 }

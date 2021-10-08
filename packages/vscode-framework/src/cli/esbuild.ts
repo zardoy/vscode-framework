@@ -1,12 +1,12 @@
+import { resolve } from 'path'
 import Debug from '@prisma/debug'
 import { ManifestType } from 'vscode-manifest'
 import { build as esbuildBuild } from 'esbuild'
 import execa from 'execa'
 import fsExtra from 'fs-extra'
-import { resolve } from 'path'
-import { launchVscode } from './launcher'
-import { Config } from '../config'
 import escapeStringRegexp from 'escape-string-regexp'
+import { Config } from '../config'
+import { launchVscode } from './launcher'
 
 const debug = Debug('vscode-framework:esbuild')
 
@@ -61,13 +61,12 @@ export const runEsbuild = async ({
                 setup(build) {
                     if (mode !== 'development') return
                     let rebuildCount = 0
-                    if (launchVscodeConfig !== false) {
+                    if (launchVscodeConfig !== false)
                         build.onEnd(async ({ errors }) => {
                             if (errors.length > 0) return
                             if (rebuildCount++ > 0) return
                             await launchVscode(outDir, launchVscodeConfig)
                         })
-                    }
                 },
             },
             {
@@ -79,7 +78,7 @@ export const runEsbuild = async ({
                         const filter =
                             aliasModule instanceof RegExp
                                 ? aliasModule
-                                : new RegExp('^' + escapeStringRegexp(aliasName as string) + '(\\/.*)?$')
+                                : new RegExp(`^${escapeStringRegexp(aliasName as string)}(\\/.*)?$`)
                         type PluginData = { resolveDir: string; aliasName: string }
                         const namespace = 'esbuild-import-alias'
 
@@ -110,15 +109,13 @@ export const runEsbuild = async ({
                 setup(build) {
                     const namespace = 'esbuild-node-alias'
                     const filter = /^node:(.*)/
-                    build.onResolve({ filter }, async ({ path, resolveDir }) => {
-                        return {
-                            path,
-                            namespace,
-                            pluginData: {
-                                resolveDir,
-                            },
-                        }
-                    })
+                    build.onResolve({ filter }, async ({ path, resolveDir }) => ({
+                        path,
+                        namespace,
+                        pluginData: {
+                            resolveDir,
+                        },
+                    }))
                     build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: { resolveDir } }) => {
                         const target = path.replace(filter, '$1')
                         const contents = [`export * from '${target}'`, `export { default } from '${target}';`].join(

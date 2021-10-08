@@ -6,7 +6,8 @@ import execa from 'execa'
         stdio: 'inherit',
     })
     // WIP
-})().catch(err => {
-    console.error(err)
+})().catch(error => {
+    console.error(error)
+    // eslint-disable-next-line zardoy-config/unicorn/no-process-exit
     process.exit(1)
 })
