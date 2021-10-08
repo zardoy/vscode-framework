@@ -62,13 +62,10 @@ export const runEsbuild = async ({
                     if (mode !== 'development') return
                     let rebuildCount = 0
                     if (launchVscodeConfig !== false) {
-                        let vscodeProcess: execa.ExecaChildProcess | undefined
                         build.onEnd(async ({ errors }) => {
                             if (errors.length > 0) return
-                            rebuildCount++
-                            if (!vscodeProcess)
-                                // TODO! assign immediately
-                                vscodeProcess = (await launchVscode(outDir, launchVscodeConfig)).vscodeProcess
+                            if (rebuildCount++ > 0) return
+                            await launchVscode(outDir, launchVscodeConfig)
                         })
                     }
                 },
