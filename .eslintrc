@@ -1,3 +1,7 @@
 {
-    "extends": ["plugin:zardoy-config/recommended"]
+    "extends": ["plugin:zardoy-config/recommended"],
+    "rules": {
+        // doesn't work correctly for TypeScript types
+        "no-unused-vars": "off"
+    }
 }
