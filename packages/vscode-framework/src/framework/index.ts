@@ -8,7 +8,7 @@ type RegularCommands = Commands['regular']
 // TODO test args
 export type CommandHandler = (data: { command: RegularCommands }, ...args: any[]) => MaybePromise<void>
 
-export class VscodeFramework<T extends boolean = false> {
+export class VSCodeFramework<T extends boolean = false> {
     // outputChannel: vscode.OutputChannel
     readonly extensionIDName: string
 
@@ -31,7 +31,7 @@ export class VscodeFramework<T extends boolean = false> {
     /** make sure to not call after class creation, to prevent accidental registerCommand call (but no runtime restriction) */
     public registerAllCommands(
         commands: T extends false ? { [C in RegularCommands]: CommandHandler } : never,
-    ): VscodeFramework<true> {
+    ): VSCodeFramework<true> {
         for (const [command, handler] of Object.entries(commands)) this.registerCommand(command as any, handler)
 
         return this as any
