@@ -4,6 +4,7 @@ import fs from 'fs'
 import { writeFile } from 'jsonfile'
 import { omit } from 'lodash'
 import { ManifestType, readManifest } from 'vscode-manifest'
+import { Config } from '../../config'
 import { getManifestPathFromRoot } from '../../util'
 import { propsGenerators, runGeneratorsOnManifest } from './propsGenerators'
 
@@ -16,10 +17,16 @@ interface Options {
     /** @default true */
     overwrite?: boolean
     propsToGenerate?: true | Array<keyof typeof propsGenerators>
+    config: Config
 }
 
 /** Reads and validates manifest on <cwd>/package.json and writes manifest with generated props */
-export const generateAndWriteManifest = async ({ outputPath, overwrite = true, propsToGenerate = true }: Options) => {
+export const generateAndWriteManifest = async ({
+    outputPath,
+    overwrite = true,
+    propsToGenerate = true,
+    config,
+}: Options) => {
     if (fs.existsSync(outputPath))
         if (overwrite)
             // TODO jsonfile already overwrites
@@ -29,6 +36,7 @@ export const generateAndWriteManifest = async ({ outputPath, overwrite = true, p
     const generatedManifest = await generateManifest({
         propsToGenerate,
         sourceManifest: await readManifest({ manifestPath: getManifestPathFromRoot() }),
+        config,
     })
     await writeFile(outputPath, generatedManifest, { spaces: 4 })
     return generatedManifest
@@ -41,12 +49,14 @@ export const generateManifest = async ({
     propsToGenerate = true,
     sourceManifest,
     cleanupManifest = true,
+    config,
 }: {
     propsToGenerate?: Options['propsToGenerate']
     /** Manifest that will be used to generate props */
     sourceManifest: ManifestType
     /** Preserves only required props in generated package.json and removes other. Disable to preserve all source props + generated. */
     cleanupManifest?: boolean
+    config: Config
 }): Promise<ManifestType> => {
     // TODO warn about overwritted props and to run vscode-framework migrate
     sourceManifest = cleanupManifest
@@ -60,5 +70,5 @@ export const generateManifest = async ({
               // eslint-disable-next-line zardoy-config/@typescript-eslint/array-type
           ] as (keyof typeof sourceManifest)[]) as any)
         : sourceManifest
-    return runGeneratorsOnManifest(sourceManifest, propsToGenerate as any, true)
+    return runGeneratorsOnManifest(sourceManifest, propsToGenerate as any, true, config)
 }

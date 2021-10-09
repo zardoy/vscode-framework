@@ -127,12 +127,13 @@ export const runGeneratorsOnManifest = async (
     sourceManifest: ManifestType,
     runGenerators: true | keyof typeof propsGenerators,
     mergeSource: boolean,
+    config: Config,
 ) => {
     // TODO-low remove unknown conversion
     if (runGenerators === true) runGenerators = Object.keys(propsGenerators) as unknown as keyof typeof propsGenerators
     let generatedManifest = {} as ManifestType
     for (const prop of runGenerators)
-        generatedManifest = defaultsDeep(await propsGenerators[prop](sourceManifest), generatedManifest)
+        generatedManifest = defaultsDeep(await propsGenerators[prop](sourceManifest, config), generatedManifest)
     return mergeSource ? defaultsDeep(generatedManifest, sourceManifest) : generatedManifest
 }
 

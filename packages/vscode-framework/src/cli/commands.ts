@@ -41,12 +41,14 @@ commander.command(
                 defaultValue: false,
             },
         },
+        loadConfig: true,
     },
-    async ({ overwrite }) => {
+    async ({ overwrite }, { config }) => {
         // TODO but should I?
         process.env.NODE_ENV = 'development'
         await fsExtra.ensureDir(devExtensionPath)
         await generateAndWriteManifest({
+            config,
             outputPath: join(devExtensionPath, 'package.json'),
             overwrite,
         })
@@ -68,8 +70,8 @@ const devExtensionPath = resolve(process.cwd(), relativePath)
 
 const buildExtension = async (
     mode: Parameters<typeof runEsbuild>[0]['mode'],
-    launchVscodeConfig: Pick<Config, 'development'> | false,
-    { esbuildConfig }: Pick<Config, 'esbuildConfig'>,
+    config: Config,
+    launchVscode: boolean,
     bulidPath = devExtensionPath,
 ) => {
     process.env.NODE_ENV = mode
@@ -82,13 +84,14 @@ const buildExtension = async (
     const manifest = await generateAndWriteManifest({
         outputPath: join(bulidPath, 'package.json'),
         overwrite: true,
+        config,
     })
     await runEsbuild({
         mode,
         outDir: bulidPath,
         manifest: manifest!,
-        launchVscodeConfig,
-        overrideBuildConfig: esbuildConfig,
+        launchVscodeConfig: launchVscode ? config : false,
+        overrideBuildConfig: config.esbuildConfig,
     })
 }
 
@@ -110,12 +113,13 @@ commander.command(
         loadConfig: true,
     },
     async ({ skipLaunching, path }, { config }) => {
-        await buildExtension('development', skipLaunching ? false : config, config, join(process.cwd(), path))
+        await buildExtension('development', config, !skipLaunching, join(process.cwd(), path))
     },
 )
 
 commander.command('build', 'Make a production-ready build', { loadConfig: true }, async (_, { config }) => {
-    await buildExtension('production', false, config)
+    // TODO build path
+    await buildExtension('production', config, false)
 })
 
 addStandaloneCommands(commander)

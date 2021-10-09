@@ -4,6 +4,7 @@ import fs from 'fs'
 import { join } from 'path'
 import { PackageJson } from 'type-fest'
 import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
+import { defaultConfig } from '../../src/config'
 import { screenRecorderManifest } from './common'
 
 type HaveOwnTests = 'repository'
@@ -24,10 +25,10 @@ url=https://github.com/test-author/vscode-extension-name.git
         callback(null, testGitConfig as any)
     })
     expect(await propsGenerators.repository()).toMatchInlineSnapshot(`
-Object {
-  "repository": "https://github.com/test-author/vscode-extension-name",
-}
-`)
+        Object {
+          "repository": "https://github.com/test-author/vscode-extension-name",
+        }
+    `)
 })
 
 const tests: Tests = {
@@ -57,7 +58,7 @@ Object {
         expect(expected).toMatchInlineSnapshot(`
 Object {
   "engines": Object {
-    "vscode": "^1.60.0",
+    "vscode": "^1.61.0",
   },
 }
 `),
@@ -78,5 +79,5 @@ Object {
 test.each<{ name: keyof Tests; expect: (data) => void }>(
     Object.entries(tests).map(([name, expect]) => ({ name, expect })),
 )('Auto-generated field $name', async ({ name, expect }) => {
-    expect(await propsGenerators[name](screenRecorderManifest))
+    expect(await propsGenerators[name](screenRecorderManifest, defaultConfig))
 })
