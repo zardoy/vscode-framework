@@ -42,19 +42,18 @@ export const propsGenerators = makeGenerators({
             },
         }
     },
-    // disables useless Q&A tab in marketplace
+    // disables useless Q&A tab in marketplace on the web
     qnaFalse() {
         return { qna: false }
     },
-    // TODO config
     extensionEntryPoint(_, { target, development: { extensionBootstrap } }: Pick<Config, 'development' | 'target'>) {
         // TODO pass config
         const enableBootstrap = process.env.NODE_ENV === 'development' && !!extensionBootstrap
         // return { main: `${enableBootstrap ? 'extensionBootstrap.js' : 'extension-node.js'}` }
         // TODO move names to shared object
         return {
-            ...(target.desktop ? { main: 'extension-node.js' } : {}),
-            ...(target.web ? { browser: 'extension-browser.js' } : {}),
+            main: target.desktop ? 'extension-node.js' : undefined,
+            browser: target.web ? 'extension-web.js' : undefined,
         }
     },
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {

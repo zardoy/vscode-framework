@@ -67,6 +67,8 @@ export const generateManifest = async ({
               'peerDependencies',
               'bin',
               'scripts',
+              'main',
+              'browser',
               // eslint-disable-next-line zardoy-config/@typescript-eslint/array-type
           ] as (keyof typeof sourceManifest)[]) as any)
         : sourceManifest

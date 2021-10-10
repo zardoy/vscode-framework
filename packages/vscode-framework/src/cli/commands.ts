@@ -82,13 +82,13 @@ const buildExtension = async ({
     target: BuildTargetType
     bulidPath?: string
 }) => {
+    // TODO check for web absence of localizations, debuggers, terminal, typescriptServerPlugins in contributes
     process.env.NODE_ENV = mode
     debug('Building extension', {
         mode,
         bulidPath,
     })
     await fsExtra.ensureDir(bulidPath)
-    // TODO extension entrypoint and in esbuild
     const manifest = await generateAndWriteManifest({
         outputPath: join(bulidPath, 'package.json'),
         overwrite: true,
