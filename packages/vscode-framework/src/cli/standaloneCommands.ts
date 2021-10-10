@@ -34,7 +34,7 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
             if (entryPoints.length !== 1)
                 throw new Error(`There is no entry point from the list: ${entryPoints.toString()} `)
             const entryPoint = entryPoints[0]!
-            const esbuildBaseCommand = `esbuild ${entryPoint} --bundle --platform=node --outfile=dist/extension.js --external:vscode`
+            const esbuildBaseCommand = `esbuild ${entryPoint} --bundle --platform=node --outfile=dist/extension-node.js --external:vscode`
             if (!scripts['esbuild-start']) scripts['esbuild-start'] = `${esbuildBaseCommand} --watch --sourcemap`
 
             if (!scripts['esbuild-build'])

@@ -5,7 +5,7 @@ import { build as esbuildBuild } from 'esbuild'
 import { nanoid } from 'nanoid'
 import fsExtra from 'fs-extra'
 import escapeStringRegexp from 'escape-string-regexp'
-import { Config } from '../config'
+import { BuildTargetType, Config } from '../config'
 import { launchVscode } from './launcher'
 
 const debug = Debug('vscode-framework:esbuild')
@@ -14,20 +14,20 @@ export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'
 
 export const runEsbuild = async ({
     mode,
+    target,
     outDir,
     manifest,
     entryPoint = 'src/extension.ts',
-    outfile = resolve(outDir, 'extension.js'),
     overrideBuildConfig: overrideBuildOptions = {},
     launchVscodeConfig,
 }: {
     mode: 'development' | 'production'
-    outDir: string
+    target: BuildTargetType
     manifest: Pick<ManifestType, 'name' | 'displayName' | 'extensionKind'>
-    /** Config for handling vscode launch, pass `false` skip launching */
+    outDir: string
+    /** Config for handling vscode launch, pass `false` to skip launching */
     launchVscodeConfig: Pick<Config, 'development'> | false
     entryPoint?: string
-    outfile?: string
     overrideBuildConfig?: Config['esbuildConfig']
 }) => {
     const enableBootstrap = launchVscodeConfig !== false && launchVscodeConfig.development.extensionBootstrap
@@ -42,16 +42,17 @@ export const runEsbuild = async ({
     if (enableBootstrap) serverIpcChannel = `vscode-framework:server_${nanoid(5)}`
 
     const { metafile } = await esbuildBuild({
-        target: 'node14',
+        // latest is assumed if web
+        target: target === 'desktop' ? 'node14' : undefined,
         bundle: true,
         watch: mode === 'development',
         minify: mode === 'production',
         entryPoints: [entryPoint],
-        platform: 'node',
-        outfile,
+        platform: target === 'desktop' ? 'node' : 'browser',
+        outfile: resolve(outDir, target === 'desktop' ? 'extension-node.js' : 'extension-web.js'),
+        logLevel: 'info',
         ...overrideBuildOptions,
         external: ['vscode', ...(overrideBuildOptions.external ?? [])],
-        logLevel: 'info',
         // sourcemap: true,
         define: {
             'process.env.NODE_ENV': `"${mode}"`,
@@ -74,6 +75,7 @@ export const runEsbuild = async ({
                 name: 'build-wather',
                 setup(build) {
                     if (mode !== 'development') return
+                    // !web
                     let rebuildCount = 0
                     if (launchVscodeConfig !== false)
                         build.onEnd(async ({ errors }) => {

@@ -6,7 +6,7 @@ import { cosmiconfig } from 'cosmiconfig'
 import fsExtra from 'fs-extra'
 import { defaultsDeep } from 'lodash'
 import pkdDir from 'pkg-dir'
-import { Config, defaultConfig } from '../config'
+import { BuildTargetType, Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateTypes } from './typesGenerator'
@@ -68,12 +68,19 @@ const useOutForDebugging = true
 const relativePath = useOutForDebugging ? 'out' : 'node_modules/.vscode-extension'
 const devExtensionPath = resolve(process.cwd(), relativePath)
 
-const buildExtension = async (
-    mode: Parameters<typeof runEsbuild>[0]['mode'],
-    config: Config,
-    launchVscode: boolean,
+const buildExtension = async ({
+    mode,
+    config,
+    launchVscode,
+    target,
     bulidPath = devExtensionPath,
-) => {
+}: {
+    mode: Parameters<typeof runEsbuild>[0]['mode']
+    config: Config
+    launchVscode: boolean
+    target: BuildTargetType
+    bulidPath?: string
+}) => {
     process.env.NODE_ENV = mode
     debug('Building extension', {
         mode,
@@ -84,10 +91,18 @@ const buildExtension = async (
     const manifest = await generateAndWriteManifest({
         outputPath: join(bulidPath, 'package.json'),
         overwrite: true,
-        config,
+        config:
+            mode === 'development'
+                ? {
+                      ...config,
+                      // TS is literally killing the target type!
+                      target: { [target]: true } as any,
+                  }
+                : config,
     })
     await runEsbuild({
         mode,
+        target,
         outDir: bulidPath,
         manifest: manifest!,
         launchVscodeConfig: launchVscode ? config : false,
@@ -100,6 +115,13 @@ commander.command(
     'Launch VSCode extension development (no launch.json needed)',
     {
         options: {
+            '--target': {
+                // TODO use config's default
+                defaultValue: 'desktop' as BuildTargetType,
+                // reformat description
+                description:
+                    'Target for building and optionally launching, inherits config. Values: desktop (default if no config value), web',
+            },
             '--skip-launching': {
                 defaultValue: false,
                 description: 'Start esbuild watch, but do not launch VSCode',
@@ -112,14 +134,24 @@ commander.command(
         },
         loadConfig: true,
     },
-    async ({ skipLaunching, path }, { config }) => {
-        await buildExtension('development', config, !skipLaunching, join(process.cwd(), path))
+    async ({ skipLaunching, path, target }, { config }) => {
+        await buildExtension({
+            mode: 'development',
+            config,
+            launchVscode: !skipLaunching,
+            target,
+            bulidPath: join(process.cwd(), path),
+        })
     },
 )
 
 commander.command('build', 'Make a production-ready build', { loadConfig: true }, async (_, { config }) => {
     // TODO build path
-    await buildExtension('production', config, false)
+    // TODO move check to schema
+    if (!config.target.desktop && !config.target.web)
+        throw new Error('Both targets are disabled in config. Enable either desktop or wb')
+    // TODO! build web
+    await buildExtension({ mode: 'production', config, launchVscode: false, target: 'desktop' })
 })
 
 addStandaloneCommands(commander)

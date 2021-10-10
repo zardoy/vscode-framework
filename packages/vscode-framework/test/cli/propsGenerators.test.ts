@@ -65,7 +65,7 @@ Object {
     extensionEntryPoint: expected =>
         expect(expected).toMatchInlineSnapshot(`
 Object {
-  "main": "extension.js",
+  "main": "extension-node.js",
 }
 `),
     qnaFalse: expected =>

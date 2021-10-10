@@ -35,7 +35,7 @@ if (bootstrapConfig.hotReload) {
     enableHotReload({ entryModule: module })
     // TODO return type
     activateFunctions.push(ctx => {
-        hotRequire<Extension>(module, './extension.js', ({ activate, deactivate }) => {
+        hotRequire<Extension>(module, './extension-node.js', ({ activate, deactivate }) => {
             // console.log('activating')
             void activate(ctx)
 

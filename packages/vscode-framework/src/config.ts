@@ -4,6 +4,13 @@ import { BuildOptions } from 'esbuild'
 export interface Config {
     /** Override (extend) esbuild config for development and production */
     esbuildConfig: BuildOptions
+    /** Effects only `build` command */
+    target: Record<BuildTargetType, boolean>
+    /** Try to restore IDs in contributions. disable or add contributions keys (implies blacklist) only if have issues with that */
+    // Will enable in case of any issues
+    // restoreId: boolean | string[]
+    /** Category that will be used in `contibutes.commands` by default */
+    defaultCategory: 'extensionName' | { custom: string }
     /** Development-only settings. They don't affect production build */
     development: {
         // TODO implies executable = insiders
@@ -54,17 +61,16 @@ export interface Config {
                         }
               }
     }
-    /** Try to restore IDs in contributions. disable or add contributions keys (implies blacklist) only if have issues with that */
-    // Will enable in case of any issues
-    // restoreId: boolean | string[]
-    /** Category that will be used in `contibutes.commands` by default */
-    defaultCategory: 'extensionName' | { custom: string }
 }
 
 export type UserConfig = PartialDeep<Config>
 
+export type BuildTargetType = 'desktop' | 'web'
+
 export const defaultConfig: Config = {
     esbuildConfig: {},
+    defaultCategory: 'extensionName',
+    target: { desktop: true, web: false },
     development: {
         executable: 'code',
         disableExtensions: true,
@@ -78,6 +84,4 @@ export const defaultConfig: Config = {
         //     hotReload: false,
         // },
     },
-    // restoreId: true,
-    defaultCategory: 'extensionName',
 }

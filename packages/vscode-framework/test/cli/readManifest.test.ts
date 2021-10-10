@@ -85,7 +85,7 @@ test('Generates schema properly', async () => {
           "engines": Object {
             "vscode": "^1.61.0",
           },
-          "main": "extension.js",
+          "main": "extension-node.js",
           "name": "screen-recorder",
           "publisher": "yatki",
           "qna": false,

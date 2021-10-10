@@ -47,12 +47,15 @@ export const propsGenerators = makeGenerators({
         return { qna: false }
     },
     // TODO config
-    extensionEntryPoint(_, { development: { extensionBootstrap } }: Pick<Config, 'development'>) {
+    extensionEntryPoint(_, { target, development: { extensionBootstrap } }: Pick<Config, 'development' | 'target'>) {
         // TODO pass config
-        // TODO browser entry point
         const enableBootstrap = process.env.NODE_ENV === 'development' && !!extensionBootstrap
-        // return { main: `${enableBootstrap ? 'extensionBootstrap.js' : 'extension.js'}` }
-        return { main: 'extension.js' }
+        // return { main: `${enableBootstrap ? 'extensionBootstrap.js' : 'extension-node.js'}` }
+        // TODO move names to shared object
+        return {
+            ...(target.desktop ? { main: 'extension-node.js' } : {}),
+            ...(target.web ? { browser: 'extension-browser.js' } : {}),
+        }
     },
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {
         const { contributes } = manifest
