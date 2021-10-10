@@ -42,11 +42,10 @@ export const propsGenerators = makeGenerators({
             },
         }
     },
-    // disables useless Q&A tab in marketplace
+    // disables useless Q&A tab in marketplace on the web
     qnaFalse() {
         return { qna: false }
     },
-    // TODO config
     extensionEntryPoint(_, { target, development: { extensionBootstrap } }: Pick<Config, 'development' | 'target'>) {
         // TODO pass config
         const enableBootstrap = process.env.NODE_ENV === 'development' && !!extensionBootstrap
