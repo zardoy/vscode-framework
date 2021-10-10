@@ -1,10 +1,11 @@
 import { resolve } from 'path'
 import Debug from '@prisma/debug'
-import { ManifestType } from 'vscode-manifest'
 import { build as esbuildBuild } from 'esbuild'
-import { nanoid } from 'nanoid'
-import fsExtra from 'fs-extra'
 import escapeStringRegexp from 'escape-string-regexp'
+import fsExtra from 'fs-extra'
+import { nanoid } from 'nanoid'
+import { ManifestType } from 'vscode-manifest'
+import { Except } from 'type-fest'
 import { BuildTargetType, Config } from '../config'
 import { launchVscode } from './launcher'
 
@@ -26,7 +27,7 @@ export const runEsbuild = async ({
     manifest: Pick<ManifestType, 'name' | 'displayName' | 'extensionKind'>
     outDir: string
     /** Config for handling vscode launch, pass `false` to skip launching */
-    launchVscodeConfig: Pick<Config, 'development'> | false
+    launchVscodeConfig: Except<Parameters<typeof launchVscode>[1], 'serverIpcChannel'> | false
     entryPoint?: string
     overrideBuildConfig?: Config['esbuildConfig']
 }) => {

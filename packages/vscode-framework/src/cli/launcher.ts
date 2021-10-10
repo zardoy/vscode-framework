@@ -2,17 +2,27 @@ import Debug from '@prisma/debug'
 import execa from 'execa'
 import exitHook from 'exit-hook'
 import nodeIpc from 'node-ipc'
-import { Config } from '../config'
+import { Config, BuildTargetType } from '../config'
 
 const debug = Debug('vscode-framework:launcher')
 
-type LaunchParams = Pick<Config, 'development'> & {
-    /**
-     *  Passing a channel with an ID to launch IPC server only from `start` command, but not from `launch`.
-     *  An unique ID is required because multiple instances of extension can be launched
-     * */
-    serverIpcChannel: string | false
+export type LauncherCLIParams = {
+    /** What to launch */
+    target: BuildTargetType
+    webOpen: WebOpenType
 }
+
+// TODO turn into interface
+type LaunchParams = Pick<Config, 'development'> &
+    LauncherCLIParams & {
+        /**
+         *  Passing a channel with an ID to launch IPC server only from `start` command, but not from `launch`.
+         *  An unique ID is required because multiple instances of extension can be launched
+         * */
+        serverIpcChannel: string | false
+    }
+
+export type WebOpenType = 'desktop' | 'web'
 
 export type IpcEvents = {
     // app:reload not necessarily reloads window. it means changes happened and new file is on disk
@@ -22,8 +32,8 @@ export type IpcEvents = {
 let isServerIpcStarted = false
 
 export const launchVscode = async (
-    targetDir: string,
-    { development: developmentConfig, serverIpcChannel }: LaunchParams,
+    extensionDir: string,
+    { development: developmentConfig, serverIpcChannel, target, webOpen }: LaunchParams,
 ) => {
     // reference: NativeParsedArgs
     /** falsy values are trimmed. I don't think that we need to pass false explicitly here */
@@ -32,7 +42,7 @@ export const launchVscode = async (
         'new-window': true,
         // ignored if already has windows opened
         // wait: true,
-        extensionDevelopmentPath: targetDir,
+        extensionDevelopmentPath: extensionDir,
         'disable-extensions': developmentConfig.disableExtensions,
         'open-devtools': developmentConfig.openDevtools,
     }

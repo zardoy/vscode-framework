@@ -8,6 +8,7 @@ import { defaultsDeep } from 'lodash'
 import pkdDir from 'pkg-dir'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
+import { LauncherCLIParams, WebOpenType } from './launcher'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateTypes } from './typesGenerator'
 import { generateAndWriteManifest, runEsbuild } from '.'
@@ -71,13 +72,13 @@ const devExtensionPath = resolve(process.cwd(), relativePath)
 const buildExtension = async ({
     mode,
     config,
-    launchVscode,
+    launcherParams,
     target,
     bulidPath = devExtensionPath,
 }: {
     mode: Parameters<typeof runEsbuild>[0]['mode']
     config: Config
-    launchVscode: boolean
+    launcherParams: LauncherCLIParams | false
     target: BuildTargetType
     bulidPath?: string
 }) => {
@@ -105,7 +106,7 @@ const buildExtension = async ({
         target,
         outDir: bulidPath,
         manifest: manifest!,
-        launchVscodeConfig: launchVscode ? config : false,
+        launchVscodeConfig: launcherParams ? { ...config, ...launcherParams } : false,
         overrideBuildConfig: config.esbuildConfig,
     })
 }
@@ -119,8 +120,13 @@ commander.command(
                 // TODO use config's default
                 defaultValue: 'desktop' as BuildTargetType,
                 // reformat description
-                description:
-                    'Target for building and optionally launching, inherits config. Values: desktop (default if no config value), web',
+                description: 'Target for building and opt-out launching. Values: desktop (default), web',
+            },
+            '--web-open': {
+                // TODO use config's default
+                defaultValue: 'desktop' as WebOpenType,
+                // reformat description
+                description: 'If --target is web, specify where to launch vscode. Values: web (default), desktop',
             },
             '--skip-launching': {
                 defaultValue: false,
@@ -134,11 +140,16 @@ commander.command(
         },
         loadConfig: true,
     },
-    async ({ skipLaunching, path, target }, { config }) => {
+    async ({ skipLaunching, path, target, webOpen }, { config }) => {
         await buildExtension({
             mode: 'development',
             config,
-            launchVscode: !skipLaunching,
+            launcherParams: skipLaunching
+                ? false
+                : {
+                      target,
+                      webOpen,
+                  },
             target,
             bulidPath: join(process.cwd(), path),
         })
@@ -151,7 +162,7 @@ commander.command('build', 'Make a production-ready build', { loadConfig: true }
     if (!config.target.desktop && !config.target.web)
         throw new Error('Both targets are disabled in config. Enable either desktop or wb')
     // TODO! build web
-    await buildExtension({ mode: 'production', config, launchVscode: false, target: 'desktop' })
+    await buildExtension({ mode: 'production', config, launcherParams: false, target: 'desktop' })
 })
 
 addStandaloneCommands(commander)
