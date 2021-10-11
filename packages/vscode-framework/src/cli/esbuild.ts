@@ -51,6 +51,7 @@ export const runEsbuild = async ({
         entryPoints: [entryPoint],
         platform: target === 'desktop' ? 'node' : 'browser',
         outfile: resolve(outDir, target === 'desktop' ? 'extension-node.js' : 'extension-web.js'),
+        format: 'cjs',
         logLevel: 'info',
         ...overrideBuildOptions,
         external: ['vscode', ...(overrideBuildOptions.external ?? [])],
@@ -76,7 +77,6 @@ export const runEsbuild = async ({
                 name: 'build-wather',
                 setup(build) {
                     if (mode !== 'development') return
-                    // !web
                     let rebuildCount = 0
                     if (launchVscodeConfig !== false)
                         build.onEnd(async ({ errors }) => {

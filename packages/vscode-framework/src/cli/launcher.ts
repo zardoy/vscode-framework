@@ -2,6 +2,7 @@ import Debug from '@prisma/debug'
 import execa from 'execa'
 import exitHook from 'exit-hook'
 import nodeIpc from 'node-ipc'
+import { open as openVscodeBrowser } from '@vscode/test-web'
 import { Config, BuildTargetType } from '../config'
 
 const debug = Debug('vscode-framework:launcher')
@@ -35,6 +36,20 @@ export const launchVscode = async (
     extensionDir: string,
     { development: developmentConfig, serverIpcChannel, target, webOpen }: LaunchParams,
 ) => {
+    if (target === 'web' && webOpen === 'web') {
+        // TODO use mozilla's extension tool instead of this one
+        await openVscodeBrowser({
+            browserType: 'chromium',
+            headless: false,
+            devTools: developmentConfig.openDevtools,
+            extensionDevelopmentPath: extensionDir,
+            // version: 'stable'
+            // folderPath
+            // extensionPaths
+        })
+        return undefined
+    }
+
     // reference: NativeParsedArgs
     /** falsy values are trimmed. I don't think that we need to pass false explicitly here */
     const args = {
@@ -42,12 +57,15 @@ export const launchVscode = async (
         'new-window': true,
         // ignored if already has windows opened
         // wait: true,
+        extensionDevelopmentKind: target === 'web' ? 'web' : undefined,
         extensionDevelopmentPath: extensionDir,
         'disable-extensions': developmentConfig.disableExtensions,
         'open-devtools': developmentConfig.openDevtools,
     }
-    debug(args)
+    // TODO launch insiders
+    debug('vscode launch args', args)
 
+    // TODO investigate web option with extensionBootstrap
     const argsParsed = Object.entries(args)
         .flatMap(([name, value]) => {
             if (!value) return undefined
@@ -57,10 +75,10 @@ export const launchVscode = async (
         })
         .filter(a => a !== undefined) as string[]
 
-    // TODO don't use globals
-    if (serverIpcChannel) {
+    if (target !== 'web' && serverIpcChannel) {
         if (isServerIpcStarted) throw new Error('IPC is already started. the first one must be closed')
 
+        // TODO don't use global nodeIpc
         nodeIpc.config.id = serverIpcChannel
         nodeIpc.server.on('disconnect', () => {
             isServerIpcStarted = false
@@ -87,7 +105,6 @@ export const launchVscode = async (
             // search.action.focusActiveEditor
             nodeIpc.server.emit('app:close')
         })
-
     return {
         vscodeProcess,
     }

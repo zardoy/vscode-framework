@@ -53,6 +53,7 @@
     "dependencies": {
         "@prisma/debug": "^3.2.1",
         "@types/node-ipc": "^9.1.6",
+        "@vscode/test-web": "^0.0.15",
         "commander": "^8.2.0",
         "cosmiconfig": "^7.0.1",
         "esbuild": "^0.13.4",

@@ -107,6 +107,14 @@ But `launch` is a IDE-agnostic and you can even start extension without opening 
 
 <!-- There is a hot reload feature, but you can manually restart editor with pressing <kdb>R</kbd> in console. -->
 
+#### Web
+
+To test your extension on the web use `vscode-framework start --target web` command. ~~By default~~ (will be default in future) it uses `@vscode/test-web` to launch your extension in the browser (read how it works in [VSCode guide](https://code.visualstudio.com/api/extension-guides/web-extensions#test-your-web-extension)). It means that it will download VSCode insiders to the `.vscode-test-web` folder (don't forget to gitignore it) and launch your extension in the chromium. ~~VSCode version and browser are configurable.~~
+
+> Note: it also possible to launch web extension in desktop version: `vscode-framework start --target web --web-open desktop`
+
+<!-- TODO: -->
+
 ### Tradeoffs
 
 ### No type-checking

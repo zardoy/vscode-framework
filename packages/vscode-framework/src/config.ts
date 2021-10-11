@@ -1,6 +1,8 @@
 import { PartialDeep } from 'type-fest'
 import { BuildOptions } from 'esbuild'
 
+// TODO allow to export callback from mjs and ts to LfauncherCLIParams to return
+
 export interface Config {
     /** Override (extend) esbuild config for development and production */
     esbuildConfig: BuildOptions
