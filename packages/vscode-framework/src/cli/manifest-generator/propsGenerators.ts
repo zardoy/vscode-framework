@@ -52,8 +52,8 @@ export const propsGenerators = makeGenerators({
         // return { main: `${enableBootstrap ? 'extensionBootstrap.js' : 'extension-node.js'}` }
         // TODO move names to shared object
         return {
-            main: target.desktop ? 'extension-node.js' : undefined,
-            browser: target.web ? 'extension-web.js' : undefined,
+            ...(target.desktop ? { main: 'extension-node.js' } : {}),
+            ...(target.web ? { browser: 'extension-web.js' } : {}),
         }
     },
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {

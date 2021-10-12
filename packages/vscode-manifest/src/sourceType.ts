@@ -16,6 +16,8 @@ interface IConfigurationProperty {
 }
 
 interface IConfiguration {
+    title?: string
+    order?: number
     properties: Record<string, IConfigurationProperty>
 }
 

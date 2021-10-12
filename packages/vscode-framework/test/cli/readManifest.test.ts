@@ -12,7 +12,7 @@ test('Places IDs in contributes props', async () => {
         Object {
           "commands": Array [
             Object {
-              "command": "screen-recorder.startRecording",
+              "command": "screen-recorder.start-recording",
               "title": "Start Screen Recording",
             },
           ],
@@ -37,7 +37,72 @@ test('Places IDs in contributes props', async () => {
               },
             },
           },
+          "menus": Object {
+            "commandPalette": Array [
+              Object {
+                "command": "screen-recorder.start-recording",
+                "when": "!virtualWorkspace",
+              },
+            ],
+          },
         }
+    `)
+    mockManifestOnce({
+        ...screenRecorderManifest,
+        contributes: {
+            // TODO enhance
+            configuration: [
+                {
+                    title: 'Settings Section 1',
+                    order: 1,
+                    properties: {
+                        'enable-me': {
+                            type: 'boolean',
+                            description: 'whether is am i enabled',
+                            default: false,
+                        },
+                    },
+                },
+                {
+                    title: 'Settings Section 2',
+                    order: 2,
+                    properties: {
+                        'show-tips': {
+                            type: 'boolean',
+                            description: 'show tips',
+                            default: false,
+                        },
+                    },
+                },
+            ],
+        },
+    })
+    const generatedManifest2 = await readDirectoryManifest()
+    expect(generatedManifest2.contributes.configuration).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "order": 1,
+            "properties": Object {
+              "screen-recorder.enable-me": Object {
+                "default": false,
+                "description": "whether is am i enabled",
+                "type": "boolean",
+              },
+            },
+            "title": "Settings Section 1",
+          },
+          Object {
+            "order": 2,
+            "properties": Object {
+              "screen-recorder.show-tips": Object {
+                "default": false,
+                "description": "show tips",
+                "type": "boolean",
+              },
+            },
+            "title": "Settings Section 2",
+          },
+        ]
     `)
 })
 
@@ -46,7 +111,7 @@ test('Generates schema properly', async () => {
     expect(generatedManifest).toMatchInlineSnapshot(`
         Object {
           "activationEvents": Array [
-            "onCommand:startRecording",
+            "onCommand:start-recording",
           ],
           "categories": Array [
             "Other",
@@ -55,7 +120,7 @@ test('Generates schema properly', async () => {
             "commands": Array [
               Object {
                 "category": "Screen Recorder",
-                "command": "startRecording",
+                "command": "start-recording",
                 "title": "Start Screen Recording",
               },
             ],
@@ -79,6 +144,14 @@ test('Generates schema properly', async () => {
                   "type": "string",
                 },
               },
+            },
+            "menus": Object {
+              "commandPalette": Array [
+                Object {
+                  "command": "start-recording",
+                  "when": "!virtualWorkspace",
+                },
+              ],
             },
           },
           "displayName": "Screen Recorder",

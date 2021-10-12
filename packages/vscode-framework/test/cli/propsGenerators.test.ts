@@ -39,7 +39,7 @@ Object {
     "commands": Array [
       Object {
         "category": "Screen Recorder",
-        "command": "startRecording",
+        "command": "start-recording",
         "title": "Start Screen Recording",
       },
     ],
@@ -50,7 +50,7 @@ Object {
         expect(expected).toMatchInlineSnapshot(`
 Object {
   "activationEvents": Array [
-    "onCommand:startRecording",
+    "onCommand:start-recording",
   ],
 }
 `),

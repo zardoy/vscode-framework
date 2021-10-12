@@ -1,6 +1,6 @@
 import vscode from 'vscode'
 import nodeIpc from 'node-ipc'
-import type { BootstrapConfig } from '../src/cli/esbuild'
+import type { BootstrapConfig } from '../src/cli/buildExtension'
 import type { MaybePromise } from '../src/util'
 
 type AsyncVoid = MaybePromise<void>

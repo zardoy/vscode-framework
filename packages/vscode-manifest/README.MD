@@ -14,7 +14,7 @@ Schema is available (json is coming soon) via `require('vscode-manifest/build/vs
 
 > Obsolete, needs review
 
-The golden file is `vscode-manifest-schema.json`
+The extracted file from vscode sources is `vscode-manifest-schema.json` (raw). But most complete is `sourceType.ts`.
 
 See [script](scripts/generateSchemaValidator.ts), that used for extraction
 

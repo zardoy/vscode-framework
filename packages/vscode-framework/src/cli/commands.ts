@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 import { join, resolve } from 'path'
-import Debug from '@prisma/debug'
 import { Command } from 'commander'
 import { cosmiconfig } from 'cosmiconfig'
 import fsExtra from 'fs-extra'
 import { defaultsDeep } from 'lodash'
+import Debug from '@prisma/debug'
 import pkdDir from 'pkg-dir'
 import { BuildTargetType, Config, defaultConfig } from '../config'
+import { buildExtensionAndWatch } from './buildExtension'
 import { SuperCommander } from './commander'
-import { LauncherCLIParams, WebOpenType } from './launcher'
+import { WebOpenType } from './launcher'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateTypes } from './typesGenerator'
-import { generateAndWriteManifest, runEsbuild } from '.'
-
+import { generateAndWriteManifest } from '.'
 declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:cli')
@@ -69,46 +69,11 @@ const useOutForDebugging = true
 const relativePath = useOutForDebugging ? 'out' : 'node_modules/.vscode-extension'
 const devExtensionPath = resolve(process.cwd(), relativePath)
 
-const buildExtension = async ({
-    mode,
-    config,
-    launcherParams,
-    target,
-    bulidPath = devExtensionPath,
-}: {
-    mode: Parameters<typeof runEsbuild>[0]['mode']
-    config: Config
-    launcherParams: LauncherCLIParams | false
-    target: BuildTargetType
-    bulidPath?: string
-}) => {
-    // TODO check for web absence of localizations, debuggers, terminal, typescriptServerPlugins in contributes
-    process.env.NODE_ENV = mode
-    debug('Building extension', {
-        mode,
-        bulidPath,
-    })
-    await fsExtra.ensureDir(bulidPath)
-    const manifest = await generateAndWriteManifest({
-        outputPath: join(bulidPath, 'package.json'),
-        overwrite: true,
-        config:
-            mode === 'development'
-                ? {
-                      ...config,
-                      // TS is literally killing the target type!
-                      target: { [target]: true } as any,
-                  }
-                : config,
-    })
-    await runEsbuild({
-        mode,
-        target,
-        outDir: bulidPath,
-        manifest: manifest!,
-        launchVscodeConfig: launcherParams ? { ...config, ...launcherParams } : false,
-        overrideBuildConfig: config.esbuildConfig,
-    })
+const commonBuildStartOptions = {
+    '--path': {
+        defaultValue: relativePath,
+        description: 'Output path, in which package.json will be placed (or overrided!) for launching VSCode',
+    },
 }
 
 commander.command(
@@ -132,38 +97,54 @@ commander.command(
                 defaultValue: false,
                 description: 'Start esbuild watch, but do not launch VSCode',
             },
-            '--path': {
-                defaultValue: relativePath,
-                // defaultValue: './node_modules/.vscode-extension/',
-                description: 'Output path, in which package.json will be placed (or overrided!) for launching VSCode',
-            },
+            ...commonBuildStartOptions,
         },
         loadConfig: true,
     },
     async ({ skipLaunching, path, target, webOpen }, { config }) => {
-        await buildExtension({
+        await buildExtensionAndWatch({
             mode: 'development',
             config,
-            launcherParams: skipLaunching
+            launchVscodeParams: skipLaunching
                 ? false
                 : {
                       target,
                       webOpen,
                   },
             target,
-            bulidPath: join(process.cwd(), path),
+            outDir: join(process.cwd(), path),
         })
     },
 )
 
-commander.command('build', 'Make a production-ready build', { loadConfig: true }, async (_, { config }) => {
-    // TODO build path
-    // TODO move check to schema
-    if (!config.target.desktop && !config.target.web)
-        throw new Error('Both targets are disabled in config. Enable either desktop or wb')
-    // TODO! build web
-    await buildExtension({ mode: 'production', config, launcherParams: false, target: 'desktop' })
-})
+commander.command(
+    'build',
+    'Make a production-ready build',
+    {
+        options: {
+            ...commonBuildStartOptions,
+        },
+        loadConfig: true,
+    },
+    async ({ path }, { config }) => {
+        // TODO build path
+        // TODO move check to schema
+        if (!config.target.desktop && !config.target.web)
+            throw new Error('Both targets are disabled in config. Enable either desktop or wb')
+        for (const [platform, enablement] of Object.entries(config.target)) {
+            if (!enablement) continue
+            // TODO does read manifest twice
+            // eslint-disable-next-line no-await-in-loop
+            await buildExtensionAndWatch({
+                mode: 'production',
+                config,
+                launchVscodeParams: false,
+                target: platform,
+                outDir: join(process.cwd(), path),
+            })
+        }
+    },
+)
 
 addStandaloneCommands(commander)
 

@@ -29,7 +29,7 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
         commands: [
             {
                 // In this case both command and title would be prefixed
-                command: 'startRecording',
+                command: 'start-recording',
                 title: 'Start Screen Recording',
             },
         ],
@@ -52,6 +52,14 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
                     enum: ['4K', 'FullHD', 'HD'],
                 },
             },
+        },
+        menus: {
+            commandPalette: [
+                {
+                    command: 'start-recording',
+                    when: '!virtualWorkspace',
+                },
+            ],
         },
     },
 })

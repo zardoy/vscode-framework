@@ -17,7 +17,7 @@ And even more: painless <!-- pnpm support, CI, --> [API wrappers](packages/vscod
 
 I personally think that it's just tedious to maintain an average VSCode extension and there should be an easier way to do things. Also, I didn't like the boilerplated [generator-code](https://github.com/Microsoft/vscode-generator-code).
 
-Also, web extensions [must be bundled](https://docs.microsoft.com/en-us/answers/questions/368286/vc-2015-2019-install-check.html) into a single file, just let esbuild do all work.
+Also, web extensions [must be bundled](https://docs.microsoft.com/en-us/answers/questions/368286/vc-2015-2019-install-check.html) into a single file, just let the included esbuild do all the work.
 
 <!-- The standard `vscode` module just slows me down. -->
 
@@ -40,9 +40,19 @@ This is interactive command, you can either run it or read what it does below (a
   - Adds/proposes to change:
     - `start`: `vscode-framework start` – just run this script to launch extension
     - `build`: `vscode-framework build` – create optimized build (doesn't create `.vsix` for a moment)
-- Creates config overrides
+- [ ] Creates config overrides
 
 - [ ] But this command for now doesn't perform code migration, if you have big codebase you can wait until this feature is done.
+- removes IDs from contributes fields, where they can be generated automatically
+
+## Removed IDs
+
+Applies fields: TODO
+
+For example in `contributes.commands` field commands will be always prefixed with extension name, so we can handle it for you.
+
+But in some fields like `contributes.menus` it is possible to ..
+<!-- TODO write i've no power rn -->
 
 ### Extension Code
 
@@ -99,6 +109,16 @@ module.exports = config
 ```
 
 Unfortunately, cosmiconfig doesn't support `.mjs` extensions right now. ([issue](https://github.com/davidtheclark/cosmiconfig/issues/224))
+
+If you need to override entry point of the extension, use this config:
+
+```json
+{
+    "esbuildConfig": {
+        "entryPoints": ["src/extension.ts"]
+    }
+}
+```
 
 ### Development Workflow
 

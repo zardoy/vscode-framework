@@ -10,7 +10,7 @@ import { build } from 'esbuild'
 // ts-json-schema-generator doesn't set on-top required property (see issues)
 import * as TJS from 'typescript-json-schema'
 import { writeFileSync } from 'jsonfile'
-import standaloneCode from 'ajv/dist/standalone.js'
+import standaloneCode from 'ajv/dist/standalone'
 
 // make sure to keep the name
 import type { ExtensionManifestRequired } from '../src/frameworkTypes'

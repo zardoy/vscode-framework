@@ -22,9 +22,9 @@ interface ReadManifestOptions {
      *     "commands": [ { "command": "extension.say-hello", ... } ] -> "commands": [ { "command": "extension.say-hello", ... } ]
      * }
      * ```
-     * Works only on contribution fields where full ids (with extension name) are needed
-     * The setting will probably be removed
-     * Set to false to disable this behavious
+     * Works only on contribution fields where full ids (with extension name) are needed.
+     * Set to false to disable this behaviour.
+     * @note The setting will be probably removed.
      * @default true
      */
     restoreIds?: boolean | string[]
@@ -59,13 +59,14 @@ export const readManifest = async ({
 
     if (throwIfInvalid) validateOrThrow(manifest)
 
+    // TODO rewrite
     /**
      * configurationDefaults, keybindings must have extension name prefix for settings
      * TODO customEditors, submenus, viewsWelcome, walkthroughs, menus and so on
      * @returns id.name - only one dot
      */
     const ensureHasId = (
-        where: keyof Pick<NonNullable<ManifestType['contributes']>, 'commands' | 'colors' | 'configuration'>,
+        where: keyof Pick<NonNullable<ManifestType['contributes']>, 'commands' | 'colors' | 'configuration' | 'menus'>,
         id: string,
     ) => {
         const parts = id.split('.')
@@ -75,23 +76,47 @@ export const readManifest = async ({
         return generateId ? `${manifest.name}.${id}` : id
     }
 
-    if (restoreIds) {
-        if (manifest.contributes?.commands)
-            manifest.contributes.commands = manifest.contributes.commands.map(c => ({
+    if (restoreIds && manifest.contributes) {
+        const { configuration, commands, menus } = manifest.contributes
+        if (commands)
+            manifest.contributes.commands = commands.map(c => ({
                 ...c,
                 // TODO ensure that command is required in schema
                 command: ensureHasId('commands', c.command),
             }))
 
-        if (manifest.contributes?.configuration) {
-            // TODO remove this limitation and warning
-            if (Array.isArray(manifest.contributes.configuration))
-                throw new TypeError("contributes.configuration can't be array")
-            manifest.contributes.configuration.properties = mapKeys(
-                manifest.contributes.configuration.properties,
-                (_value, key) => ensureHasId('configuration', key),
-            )
+        if (configuration) {
+            type ConfigProperties = Extract<
+                typeof configuration,
+                {
+                    properties: any
+                }
+            >['properties']
+
+            const transformKeys = (properties: ConfigProperties): ConfigProperties =>
+                mapKeys(properties, (_, key) => ensureHasId('configuration', key))
+
+            manifest.contributes.configuration = Array.isArray(configuration)
+                ? configuration.map(({ properties, ...rest }) => ({
+                      ...rest,
+                      properties: transformKeys(properties),
+                  }))
+                : {
+                      ...configuration,
+                      properties: transformKeys(configuration.properties),
+                  }
         }
+
+        if (menus)
+            // however it is possible to disable commands of external extensions e.g. errorLens.copyProblemMessage, but not builtin
+            // TODO tests
+            // lodash-marker
+            manifest.contributes.menus = Object.fromEntries(
+                Object.entries(menus).map(([menuName, menuEntries]) => [
+                    menuName,
+                    menuEntries.map(({ command, ...rest }) => ({ ...rest, command: ensureHasId('menus', command) })),
+                ]),
+            )
     }
 
     return manifest
