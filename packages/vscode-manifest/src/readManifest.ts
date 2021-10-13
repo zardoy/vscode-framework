@@ -108,7 +108,6 @@ export const readManifest = async ({
         }
 
         if (menus)
-            // however it is possible to disable commands of external extensions e.g. errorLens.copyProblemMessage, but not builtin
             // TODO tests
             // lodash-marker
             manifest.contributes.menus = Object.fromEntries(
