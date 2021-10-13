@@ -16,7 +16,11 @@ import { clearConsole, logConsole } from './logger'
 const debug = Debug('vscode-framework:esbuild')
 
 /** for ipc. used in extensionBootstrap.ts */
-export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false> & { serverIpcChannel: string }
+export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false> & {
+    /** undefined to not enable IPC */
+    serverIpcChannel: string | undefined
+    console: Config['console']
+}
 
 type ModeType = 'development' | 'production'
 
@@ -173,6 +177,8 @@ export const runEsbuild = async ({
         platform: target === 'desktop' ? 'node' : 'browser',
         outfile: join(outDir, target === 'desktop' ? 'extension-node.js' : 'extension-web.js'),
         format: 'cjs',
+        // TODO!
+        // inject: [],
         ...overrideBuildConfig,
         // sourcemap: true,
         external: ['vscode', ...(overrideBuildConfig.external ?? [])],

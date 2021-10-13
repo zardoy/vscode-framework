@@ -13,6 +13,14 @@ export interface Config {
     // restoreId: boolean | string[]
     /** Category that will be used in `contibutes.commands` by default */
     defaultCategory: 'extensionName' | { custom: string }
+    /**
+     * What to do with `console` calls in your code?
+     * - outputChannel - pipe to outputChannel with the name of your extension
+     * TODO
+     * - strip - completely remove all `console` statements
+     * - leave - leave console statements as-is (not recommended)
+     */
+    console: 'outputChannel' | 'strip' | 'leave'
     /** Development-only settings. They don't affect production build */
     development: {
         // TODO implies executable = insiders
@@ -25,13 +33,6 @@ export interface Config {
          */
         disableExtensions: boolean
         openDevtools: boolean
-        /**
-         * What to do with `console` calls in your code?
-         * - outputChannel - pipe to outputChannel with the name of your extension
-         * TODO
-         * - strip - completely remove all `console` statements
-         */
-        console: 'outputChannel' | 'strip'
         /**
          * Whether to launch wrapper with ipc or extension bundle directly (if false)
          * Note that false disables all features of vscode-extension development workflow
@@ -73,11 +74,11 @@ export const defaultConfig: Config = {
     esbuildConfig: {},
     defaultCategory: 'extensionName',
     target: { desktop: true, web: false },
+    console: 'outputChannel',
     development: {
         executable: 'code',
         disableExtensions: true,
         openDevtools: false,
-        console: 'outputChannel',
         extensionBootstrap: false,
         // extensionBootstrap: {
         //     closeWindowOnExit: true,

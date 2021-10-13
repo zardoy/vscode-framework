@@ -6,6 +6,7 @@ Warning: still WIP, not all functionality are available.
 - ⚡️ Hot Reload (WIP)
 - 🔑 TypeScript Types from `package.json` Contribution Points
 - 📦 Optimized Single File Build with zero config
+- 🚀 Use `console` methods in production (creates extension output for you)
 - 🛠️ Configurable
 
 

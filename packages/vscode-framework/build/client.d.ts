@@ -10,3 +10,14 @@ declare namespace NodeJS {
         REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT: string
     }
 }
+
+interface Console {
+    /** Added by `vscode-framework`. Available only when `config.console` == 'outputChannel' (by default).
+     *
+     * Reveal outputChannel with logs */
+    show(focus?: boolean): void
+    /** Added by `vscode-framework`. Available only when `config.console` == 'outputChannel' (by default).
+     *
+     * Hide outputChannel with logs */
+    hide(): void
+}
