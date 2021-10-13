@@ -11,6 +11,7 @@ import { ManifestType } from 'vscode-manifest'
 import { BuildTargetType, Config } from '../config'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
+import { clearConsole, logConsole } from './logger'
 
 const debug = Debug('vscode-framework:esbuild')
 
@@ -172,7 +173,6 @@ export const runEsbuild = async ({
         platform: target === 'desktop' ? 'node' : 'browser',
         outfile: join(outDir, target === 'desktop' ? 'extension-node.js' : 'extension-web.js'),
         format: 'cjs',
-        logLevel: 'info',
         ...overrideBuildConfig,
         // sourcemap: true,
         external: ['vscode', ...(overrideBuildConfig.external ?? [])],
@@ -191,6 +191,26 @@ export const runEsbuild = async ({
                     build.onEnd(async ({ errors }) => {
                         if (errors.length > 0) return
                         await afterSuccessfulBuild(rebuildCount++)
+                    })
+
+                    let date: number
+                    build.onStart(() => {
+                        date = Date.now()
+                        clearConsole(true, false)
+                    })
+                    build.onEnd(result => {
+                        if (result.errors.length > 0) {
+                            console.log(kleur.bgRed().white(` BUILD ERRORS: ${result.errors.length} `))
+                            return
+                        }
+
+                        // TODO no=rebuild / hot-reload / reload
+                        const reloadType = ''
+                        logConsole(
+                            'log',
+                            kleur.green(rebuildCount === 1 ? 'build' : 'rebuild'),
+                            kleur.gray(`${Date.now() - date}ms`),
+                        )
                     })
                 },
             },

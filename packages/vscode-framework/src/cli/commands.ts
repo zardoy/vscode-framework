@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { join, resolve } from 'path'
 import { Command } from 'commander'
 import { cosmiconfig } from 'cosmiconfig'
@@ -6,6 +5,7 @@ import fsExtra from 'fs-extra'
 import { defaultsDeep } from 'lodash'
 import Debug from '@prisma/debug'
 import pkdDir from 'pkg-dir'
+import execa from 'execa'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { buildExtensionAndWatch } from './buildExtension'
 import { SuperCommander } from './commander'
@@ -102,18 +102,24 @@ commander.command(
         loadConfig: true,
     },
     async ({ skipLaunching, path, target, webOpen }, { config }) => {
-        await buildExtensionAndWatch({
-            mode: 'development',
-            config,
-            launchVscodeParams: skipLaunching
-                ? false
-                : {
-                      target,
-                      webOpen,
-                  },
-            target,
-            outDir: join(process.cwd(), path),
-        })
+        try {
+            await buildExtensionAndWatch({
+                mode: 'development',
+                config,
+                launchVscodeParams: skipLaunching
+                    ? false
+                    : {
+                          target,
+                          webOpen,
+                      },
+                target,
+                outDir: join(process.cwd(), path),
+            })
+        } catch (error) {
+            // eslint-disable-next-line zardoy-config/unicorn/no-process-exit
+            if (error.message?.startsWith('Build failed with')) process.exit(1)
+            throw error
+        }
     },
 )
 
@@ -122,15 +128,26 @@ commander.command(
     'Make a production-ready build',
     {
         options: {
+            '--skip-typechecking': {
+                defaultValue: false,
+                description: 'Will call tsc typecheck project if tsconfig.json is present',
+            },
             ...commonBuildStartOptions,
         },
         loadConfig: true,
     },
     async ({ path }, { config }) => {
+        // TODO apply same process.exit as above here
+
         // TODO build path
         // TODO move check to schema
         if (!config.target.desktop && !config.target.web)
             throw new Error('Both targets are disabled in config. Enable either desktop or wb')
+
+        if (fsExtra.existsSync('./tsconfig.json'))
+            // just to simplify, don't see a reason for programmatic usage
+            await execa('tsc', { stdio: 'inherit' })
+
         for (const [platform, enablement] of Object.entries(config.target)) {
             if (!enablement) continue
             // TODO does read manifest twice

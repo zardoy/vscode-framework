@@ -76,7 +76,7 @@ See [Environment Variables](build/client.d.ts) that are injected.
 
 <!-- > The fix is coming -->
 
-<!-- You might noticed the speed of bundling. This is because esbuild doesn't perform type-checking of your project. But don't worry this affects only development workflow, with `build` command it will perform typechecking by using `tsc` from your project, but only if you have typescript installed and `tsconfig.json` at root is present. -->
+You might noticed the speed of bundling. This is because esbuild doesn't perform type-checking of your project. But don't worry this affects only development workflow, with `build` command it will perform typechecking by using `tsc` from your project, but only if you have `tsconfig.json` (but not jsconfig) at the root. You can also pass `--skip-typechecking` to disable it.
 
 <!-- TODO build: perform typechecking flag -->
 
