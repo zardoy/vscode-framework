@@ -13,18 +13,6 @@ export class VSCodeFramework<T extends boolean = false> {
     readonly extensionIDName: string
 
     constructor(public readonly ctx: vscode.ExtensionContext) {
-        // this.outputChannel = vscode.window.createOutputChannel(process.env.EXTENSION_DISPLAY_NAME)
-        // TODO: we can't globally reassign things because Extension Host is shared between extensions
-        // console.log = (...args) => {
-        //     this.outputChannel.appendLine(args.join(' '))
-        // }
-
-        // if (process.env.NODE_ENV === 'development' && process.env.REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT !== 'false')
-        //     this.outputChannel.show(true)
-        // process.on("unhandledRejection", (err: Error) => {
-        //     // vscode.window.showErrorMessage(`Extension ${process.env.EXTENSION_DISPLAY_NAME} Crashed`, {
-        // process.on("uncaughtExceptionMonitor", (err: Error) => {
-
         this.extensionIDName = ctx.extension.id.split('.')[1]!
     }
 

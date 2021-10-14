@@ -45,11 +45,9 @@ commander.command(
         loadConfig: true,
     },
     async ({ overwrite }, { config }) => {
-        // TODO but should I?
-        process.env.NODE_ENV = 'development'
         await fsExtra.ensureDir(devExtensionPath)
         await generateAndWriteManifest({
-            config,
+            propsGeneratorsConfig: { useBootstrap: false, realisticActivationEvents: true, ...config },
             outputPath: join(devExtensionPath, 'package.json'),
             overwrite,
         })

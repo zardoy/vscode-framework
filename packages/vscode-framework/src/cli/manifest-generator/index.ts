@@ -4,9 +4,8 @@ import fs from 'fs'
 import { writeFile } from 'jsonfile'
 import { omit } from 'lodash'
 import { ManifestType, readManifest } from 'vscode-manifest'
-import { Config } from '../../config'
 import { getManifestPathFromRoot } from '../../util'
-import { propsGenerators, runGeneratorsOnManifest } from './propsGenerators'
+import { propsGenerators, PropsGeneratorsConfig, runGeneratorsOnManifest } from './propsGenerators'
 
 interface Options {
     /**
@@ -17,7 +16,7 @@ interface Options {
     /** @default true */
     overwrite?: boolean
     propsToGenerate?: true | Array<keyof typeof propsGenerators>
-    config: Config
+    propsGeneratorsConfig: PropsGeneratorsConfig
 }
 
 /** Reads and validates manifest on <cwd>/package.json and writes manifest with generated props */
@@ -25,7 +24,7 @@ export const generateAndWriteManifest = async ({
     outputPath,
     overwrite = true,
     propsToGenerate = true,
-    config,
+    propsGeneratorsConfig,
 }: Options) => {
     if (fs.existsSync(outputPath))
         if (overwrite)
@@ -36,7 +35,7 @@ export const generateAndWriteManifest = async ({
     const generatedManifest = await generateManifest({
         propsToGenerate,
         sourceManifest: await readManifest({ manifestPath: getManifestPathFromRoot() }),
-        config,
+        propsGeneratorsConfig,
     })
     await writeFile(outputPath, generatedManifest, { spaces: 4 })
     return generatedManifest
@@ -49,14 +48,14 @@ export const generateManifest = async ({
     propsToGenerate = true,
     sourceManifest,
     cleanupManifest = true,
-    config,
+    propsGeneratorsConfig: config,
 }: {
     propsToGenerate?: Options['propsToGenerate']
     /** Manifest that will be used to generate props */
     sourceManifest: ManifestType
     /** Preserves only required props in generated package.json and removes other. Disable to preserve all source props + generated. */
     cleanupManifest?: boolean
-    config: Config
+    propsGeneratorsConfig: PropsGeneratorsConfig
 }): Promise<ManifestType> => {
     // TODO warn about overwritted props and to run vscode-framework migrate
     sourceManifest = cleanupManifest

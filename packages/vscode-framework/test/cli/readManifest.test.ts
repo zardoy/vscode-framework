@@ -107,7 +107,10 @@ test('Places IDs in contributes props', async () => {
 })
 
 test('Generates schema properly', async () => {
-    const generatedManifest = await generateManifest({ sourceManifest: screenRecorderManifest, config: defaultConfig })
+    const generatedManifest = await generateManifest({
+        sourceManifest: screenRecorderManifest,
+        propsGeneratorsConfig: { useBootstrap: false, realisticActivationEvents: true, ...defaultConfig },
+    })
     expect(generatedManifest).toMatchInlineSnapshot(`
         Object {
           "activationEvents": Array [

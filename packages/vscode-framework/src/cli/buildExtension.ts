@@ -17,9 +17,8 @@ const debug = Debug('vscode-framework:esbuild')
 
 /** for ipc. used in extensionBootstrap.ts */
 export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false> & {
-    /** undefined to not enable IPC */
+    /** `undefined` means don't enable IPC */
     serverIpcChannel: string | undefined
-    console: Config['console']
 }
 
 type ModeType = 'development' | 'production'
@@ -69,6 +68,25 @@ export const buildExtensionAndWatch = async (params: Parameters<typeof buildExte
     }
 }
 
+const getEnableBootstrap = (config: Config): Record<'bootstrap' | 'ipc', boolean> => {
+    let bootstrap = false
+    let ipc = false
+    if (config.console === 'outputChannel') bootstrap = true
+    if (config.development.extensionBootstrap !== false) {
+        const values = Object.values(config.development.extensionBootstrap)
+        const allDisabled = values.every(value => value === false)
+        if (!allDisabled) {
+            bootstrap = true
+            ipc = true
+        }
+    }
+
+    return {
+        bootstrap,
+        ipc,
+    }
+}
+
 const buildExtension = async ({
     mode,
     target,
@@ -86,26 +104,33 @@ const buildExtension = async ({
     await fsExtra.ensureDir(outDir)
 
     // #region prepare bootstrap config
-    const enableBootstrap = launchVscodeParams !== false && config.development.extensionBootstrap
-    let serverIpcChannel: undefined | string
-    if (enableBootstrap) {
-        await fsExtra.copy(require.resolve('../extensionBootstrap'), resolve(outDir, 'extensionBootstrap.js'))
-        serverIpcChannel = `vscode-framework:server_${nanoid(5)}`
-    }
+    const bootstrapPartsEnablement = /* launchVscodeParams && */ getEnableBootstrap(config) as any
+    const enableBootstrap = bootstrapPartsEnablement !== false && bootstrapPartsEnablement.bootstrap
+    const enableIpc = bootstrapPartsEnablement !== false && bootstrapPartsEnablement.ipc
+    const serverIpcChannel = enableIpc ? `vscode-framework:server_${nanoid(5)}` : undefined
+    if (enableBootstrap)
+        await fsExtra.copy(require.resolve('../extensionBootstrap'), resolve(outDir, EXTENSION_ENTRYPOINTS.bootstrap))
+
     // #endregion
 
     // -> MANIFEST
     const generatedManifest = await generateAndWriteManifest({
         outputPath: join(outDir, 'package.json'),
         overwrite: true,
-        config:
+        propsGeneratorsConfig:
             mode === 'development'
                 ? {
+                      useBootstrap: enableBootstrap,
+                      realisticActivationEvents: false, // TODO!
                       ...config,
                       // TS is literally killing the target type!
                       target: { [target]: true } as any,
                   }
-                : config,
+                : {
+                      useBootstrap: false,
+                      realisticActivationEvents: true,
+                      ...config,
+                  },
     })
     if (!generatedManifest) throw new Error('Extension manifest (package.json) is missing.')
 
@@ -137,6 +162,7 @@ const buildExtension = async ({
             serverIpcChannel
                 ? {
                       define: {
+                          // TODO! doesn't consume!
                           'process.env.EXTENSION_BOOTSTRAP_CONFIG': `"${JSON.stringify({
                               ...launchVscodeParams,
                               serverIpcChannel,
@@ -175,7 +201,7 @@ export const runEsbuild = async ({
         minify: mode === 'production',
         entryPoints: ['src/extension.ts'],
         platform: target === 'desktop' ? 'node' : 'browser',
-        outfile: join(outDir, target === 'desktop' ? 'extension-node.js' : 'extension-web.js'),
+        outfile: join(outDir, target === 'desktop' ? EXTENSION_ENTRYPOINTS.node : EXTENSION_ENTRYPOINTS.web),
         format: 'cjs',
         // TODO!
         // inject: [],
@@ -188,6 +214,7 @@ export const runEsbuild = async ({
             'process.env.EXTENSION_ID_NAME': `"${resolvedManifest.name}"`,
             'process.env.EXTENSION_DISPLAY_NAME': `"${resolvedManifest.displayName}"`,
             'process.env.REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT': 'true',
+            'process.env.PLATFORM': `"${target === 'desktop' ? 'node' : 'web'}"`,
         },
         plugins: [
             {
@@ -282,4 +309,10 @@ export const runEsbuild = async ({
     // TODO output packed file and this file sizes at prod
     // const outputSize = Object.entries(metafile!.outputs)[0]![1]!.bytes
     return { stop }
+}
+
+export const EXTENSION_ENTRYPOINTS = {
+    bootstrap: 'extensionBootstrap.js',
+    node: 'extension-node.js',
+    web: 'extension-web.js',
 }

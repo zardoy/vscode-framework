@@ -1,5 +1,5 @@
 import vscode from 'vscode'
-import nodeIpc from 'node-ipc'
+// import nodeIpc from 'node-ipc'
 import type { BootstrapConfig } from '../src/cli/buildExtension'
 import type { MaybePromise } from '../src/util'
 import type { VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT_TYPE } from '../src/cli/consoleLogInject'
@@ -15,12 +15,9 @@ const activateFunctions: Array<Extension['activate']> = []
 
 const bootstrapConfig = JSON.parse(process.env.EXTENSION_BOOTSTRAP_CONFIG!) as BootstrapConfig
 
-declare const VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT: VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT_TYPE
-if (bootstrapConfig.console === 'outputChannel')
+declare const VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT: VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT_TYPE | undefined
+if (VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT)
     activateFunctions.push(() => {
-        // TODO require
-        // eslint-disable-next-line zardoy-config/@typescript-eslint/no-require-imports
-        const vscode = require('vscode') as typeof import('vscode')
         const outputChannel = vscode.window.createOutputChannel(process.env.EXTENSION_DISPLAY_NAME)
         // eslint-disable-next-line new-cap
         VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT(outputChannel)
@@ -32,15 +29,15 @@ if (bootstrapConfig.serverIpcChannel)
         // STATUS: connecting
         // maxRetries: 1, timeout: 1000
         const { serverIpcChannel } = bootstrapConfig
-        console.time('ipc-connect')
-        nodeIpc.connectTo(serverIpcChannel!, () => {
-            console.timeEnd('ipc-connect')
-            const ipc = nodeIpc.of[serverIpcChannel!]!
-            // STATUS: connected
-            ipc.on('data', buffer => {
-                console.log(buffer)
-            })
-        })
+        // console.time('ipc-connect')
+        // nodeIpc.connectTo(serverIpcChannel!, () => {
+        //     console.timeEnd('ipc-connect')
+        //     const ipc = nodeIpc.of[serverIpcChannel!]!
+        //     // STATUS: connected
+        //     ipc.on('data', buffer => {
+        //         console.log(buffer)
+        //     })
+        // })
     })
 
 if (bootstrapConfig?.hotReload) {

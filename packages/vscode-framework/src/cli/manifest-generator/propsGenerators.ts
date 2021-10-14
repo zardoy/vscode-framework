@@ -4,6 +4,7 @@ import { UnionToIntersection } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
 import { Config } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
+import { EXTENSION_ENTRYPOINTS } from '../buildExtension'
 
 // They're generating package.json properties
 // If you with you can use them directly
@@ -42,18 +43,15 @@ export const propsGenerators = makeGenerators({
             },
         }
     },
-    // disables useless Q&A tab in marketplace on the web
+    /** disables useless Q&A tab in marketplace on the web */
     qnaFalse() {
         return { qna: false }
     },
-    extensionEntryPoint(_, { target, development: { extensionBootstrap } }: Pick<Config, 'development' | 'target'>) {
-        // TODO pass config
-        const enableBootstrap = process.env.NODE_ENV === 'development' && !!extensionBootstrap
-        // return { main: `${enableBootstrap ? 'extensionBootstrap.js' : 'extension-node.js'}` }
-        // TODO move names to shared object
+    extensionEntryPoint(_, { target, useBootstrap }: { target: Config['target']; useBootstrap: boolean }) {
+        const bootstrapEntryPoint = useBootstrap && EXTENSION_ENTRYPOINTS.bootstrap
         return {
-            ...(target.desktop ? { main: 'extension-node.js' } : {}),
-            ...(target.web ? { browser: 'extension-web.js' } : {}),
+            ...(target.desktop ? { main: bootstrapEntryPoint || EXTENSION_ENTRYPOINTS.node } : {}),
+            ...(target.web ? { browser: bootstrapEntryPoint || EXTENSION_ENTRYPOINTS.web } : {}),
         }
     },
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {
@@ -72,7 +70,10 @@ export const propsGenerators = makeGenerators({
             },
         }
     },
-    activationEvents({ contributes, activationEvents }: PickManifest<'contributes' | 'activationEvents'>) {
+    activationEvents(
+        { contributes, activationEvents }: PickManifest<'contributes' | 'activationEvents'>,
+        { realisticActivationEvents }: { realisticActivationEvents: boolean },
+    ) {
         if (!contributes?.commands) return {}
         const allCommands = contributes.commands.map(({ command }) => command)
         // TODO! would override custom commands
@@ -83,8 +84,9 @@ export const propsGenerators = makeGenerators({
         )
             // TODO
             return {
-                activationEvents:
-                    process.env.NODE_ENV === 'development' ? ['*'] : allCommands.map(command => `onCommand:${command}`),
+                activationEvents: realisticActivationEvents
+                    ? allCommands.map(command => `onCommand:${command}`)
+                    : ['*'],
             }
         return {}
     },
@@ -120,6 +122,8 @@ export const propsGenerators = makeGenerators({
     // },
 })
 
+export type PropsGeneratorsConfig = Parameters<typeof propsGenerators[keyof typeof propsGenerators]>[1]
+
 /** Generate manifest with property generates from {@link propsGenerators}
  * @param sourceManifest Manifest, from which props will be generated
  * @param runGenerators property generators to run. true means all, otherwise pass array to run only them
@@ -129,13 +133,16 @@ export const runGeneratorsOnManifest = async (
     sourceManifest: ManifestType,
     runGenerators: true | keyof typeof propsGenerators,
     mergeSource: boolean,
-    config: Config,
+    propsGeneratorsConfig: PropsGeneratorsConfig,
 ) => {
     // TODO-low remove unknown conversion
     if (runGenerators === true) runGenerators = Object.keys(propsGenerators) as unknown as keyof typeof propsGenerators
     let generatedManifest = {} as ManifestType
     for (const prop of runGenerators)
-        generatedManifest = defaultsDeep(await propsGenerators[prop](sourceManifest, config), generatedManifest)
+        generatedManifest = defaultsDeep(
+            await propsGenerators[prop](sourceManifest, propsGeneratorsConfig),
+            generatedManifest,
+        )
     return mergeSource ? defaultsDeep(generatedManifest, sourceManifest) : generatedManifest
 }
 
