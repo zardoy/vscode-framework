@@ -47,7 +47,7 @@ commander.command(
     async ({ overwrite }, { config }) => {
         await fsExtra.ensureDir(devExtensionPath)
         await generateAndWriteManifest({
-            propsGeneratorsConfig: { useBootstrap: false, realisticActivationEvents: true, ...config },
+            propsGeneratorsConfig: { alwaysActivationEvent: false, ...config },
             outputPath: join(devExtensionPath, 'package.json'),
             overwrite,
         })
@@ -79,17 +79,18 @@ commander.command(
     'Launch VSCode extension development (no launch.json needed)',
     {
         options: {
-            '--target': {
+            '--web': {
                 // TODO use config's default
-                defaultValue: 'desktop' as BuildTargetType,
+                defaultValue: false,
                 // reformat description
-                description: 'Target for building and opt-out launching. Values: desktop (default), web',
+                description: 'Target web for building instead of desktop and opt-out launching.',
             },
-            '--web-open': {
+            '--web-desktop': {
                 // TODO use config's default
-                defaultValue: 'desktop' as WebOpenType,
+                defaultValue: false,
                 // reformat description
-                description: 'If --target is web, specify where to launch vscode. Values: web (default), desktop',
+                description:
+                    'If --web is present, you can launch web extension in desktop VSCode, instead of in browser',
             },
             '--skip-launching': {
                 defaultValue: false,
@@ -99,8 +100,9 @@ commander.command(
         },
         loadConfig: true,
     },
-    async ({ skipLaunching, path, target, webOpen }, { config }) => {
+    async ({ skipLaunching, path, web, webDesktop }, { config }) => {
         try {
+            const target: BuildTargetType = web ? 'web' : 'desktop'
             await buildExtensionAndWatch({
                 mode: 'development',
                 config,
@@ -108,7 +110,7 @@ commander.command(
                     ? false
                     : {
                           target,
-                          webOpen,
+                          webOpen: webDesktop ? 'desktop' : 'web',
                       },
                 target,
                 outDir: join(process.cwd(), path),

@@ -1,3 +1,4 @@
 build/**
 !build
 !build/client.d.ts
+!build/extensionBootstrap.ts

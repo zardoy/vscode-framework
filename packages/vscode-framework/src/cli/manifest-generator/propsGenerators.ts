@@ -47,11 +47,10 @@ export const propsGenerators = makeGenerators({
     qnaFalse() {
         return { qna: false }
     },
-    extensionEntryPoint(_, { target, useBootstrap }: { target: Config['target']; useBootstrap: boolean }) {
-        const bootstrapEntryPoint = useBootstrap && EXTENSION_ENTRYPOINTS.bootstrap
+    extensionEntryPoint(_, { target }: { target: Config['target'] }) {
         return {
-            ...(target.desktop ? { main: bootstrapEntryPoint || EXTENSION_ENTRYPOINTS.node } : {}),
-            ...(target.web ? { browser: bootstrapEntryPoint || EXTENSION_ENTRYPOINTS.web } : {}),
+            ...(target.desktop ? { main: EXTENSION_ENTRYPOINTS.node } : {}),
+            ...(target.web ? { browser: EXTENSION_ENTRYPOINTS.web } : {}),
         }
     },
     'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {
@@ -72,7 +71,7 @@ export const propsGenerators = makeGenerators({
     },
     activationEvents(
         { contributes, activationEvents }: PickManifest<'contributes' | 'activationEvents'>,
-        { realisticActivationEvents }: { realisticActivationEvents: boolean },
+        { alwaysActivationEvent }: { alwaysActivationEvent: boolean },
     ) {
         if (!contributes?.commands) return {}
         const allCommands = contributes.commands.map(({ command }) => command)
@@ -84,9 +83,7 @@ export const propsGenerators = makeGenerators({
         )
             // TODO
             return {
-                activationEvents: realisticActivationEvents
-                    ? allCommands.map(command => `onCommand:${command}`)
-                    : ['*'],
+                activationEvents: alwaysActivationEvent ? ['*'] : allCommands.map(command => `onCommand:${command}`),
             }
         return {}
     },

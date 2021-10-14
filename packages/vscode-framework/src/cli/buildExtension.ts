@@ -1,17 +1,14 @@
 import fs from 'fs'
 import { join, resolve } from 'path'
 import Debug from '@prisma/debug'
-import { build as esbuildBuild } from 'esbuild'
-import escapeStringRegexp from 'escape-string-regexp'
 import fsExtra from 'fs-extra'
 import kleur from 'kleur'
 import { defaultsDeep } from 'lodash'
 import { nanoid } from 'nanoid'
-import { ManifestType } from 'vscode-manifest'
 import { BuildTargetType, Config } from '../config'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
-import { clearConsole, logConsole } from './logger'
+import { runEsbuild } from './esbuild/esbuild'
 
 const debug = Debug('vscode-framework:esbuild')
 
@@ -21,12 +18,11 @@ export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'
     serverIpcChannel: string | undefined
 }
 
-type ModeType = 'development' | 'production'
+export type ModeType = 'development' | 'production'
 
 /** does watch only in `development` mode actually */
 export const buildExtensionAndWatch = async (params: Parameters<typeof buildExtension>[0]) => {
     const { mode, outDir } = params
-    // TODO export two?
     // if (params.mode !== 'development') throw new Error('Watch is allowed only in development mode')
     debug('Building extension', {
         mode,
@@ -104,12 +100,10 @@ const buildExtension = async ({
     await fsExtra.ensureDir(outDir)
 
     // #region prepare bootstrap config
-    const bootstrapPartsEnablement = /* launchVscodeParams && */ getEnableBootstrap(config) as any
+    const bootstrapPartsEnablement = launchVscodeParams && (getEnableBootstrap(config) as any)
     const enableBootstrap = bootstrapPartsEnablement !== false && bootstrapPartsEnablement.bootstrap
     const enableIpc = bootstrapPartsEnablement !== false && bootstrapPartsEnablement.ipc
     const serverIpcChannel = enableIpc ? `vscode-framework:server_${nanoid(5)}` : undefined
-    if (enableBootstrap)
-        await fsExtra.copy(require.resolve('../extensionBootstrap'), resolve(outDir, EXTENSION_ENTRYPOINTS.bootstrap))
 
     // #endregion
 
@@ -120,15 +114,13 @@ const buildExtension = async ({
         propsGeneratorsConfig:
             mode === 'development'
                 ? {
-                      useBootstrap: enableBootstrap,
-                      realisticActivationEvents: false, // TODO!
+                      alwaysActivationEvent: true, // TODO!
                       ...config,
                       // TS is literally killing the target type!
                       target: { [target]: true } as any,
                   }
                 : {
-                      useBootstrap: false,
-                      realisticActivationEvents: true,
+                      alwaysActivationEvent: false,
                       ...config,
                   },
     })
@@ -162,11 +154,10 @@ const buildExtension = async ({
             serverIpcChannel
                 ? {
                       define: {
-                          // TODO! doesn't consume!
-                          'process.env.EXTENSION_BOOTSTRAP_CONFIG': `"${JSON.stringify({
+                          EXTENSION_BOOTSTRAP_CONFIG: JSON.stringify({
                               ...launchVscodeParams,
                               serverIpcChannel,
-                          } as BootstrapConfig)}"`,
+                          } as BootstrapConfig),
                       },
                   }
                 : {},
@@ -175,144 +166,7 @@ const buildExtension = async ({
     })
 }
 
-type MaybePromise<T> = Promise<T> | T
-
-export const runEsbuild = async ({
-    target,
-    mode,
-    outDir,
-    afterSuccessfulBuild = () => {},
-    overrideBuildConfig = {},
-    resolvedManifest,
-}: {
-    target: BuildTargetType
-    mode: ModeType
-    outDir: string
-    afterSuccessfulBuild: (buildCount: number) => MaybePromise<void>
-    overrideBuildConfig: Config['esbuildConfig']
-    resolvedManifest: ManifestType
-}) => {
-    // lodash-marker
-    const { metafile, stop } = await esbuildBuild({
-        // latest is assumed if web
-        target: target === 'desktop' ? 'node14' : undefined,
-        bundle: true,
-        watch: mode === 'development',
-        minify: mode === 'production',
-        entryPoints: ['src/extension.ts'],
-        platform: target === 'desktop' ? 'node' : 'browser',
-        outfile: join(outDir, target === 'desktop' ? EXTENSION_ENTRYPOINTS.node : EXTENSION_ENTRYPOINTS.web),
-        format: 'cjs',
-        // TODO!
-        // inject: [],
-        ...overrideBuildConfig,
-        // sourcemap: true,
-        external: ['vscode', ...(overrideBuildConfig.external ?? [])],
-        define: {
-            'process.env.NODE_ENV': `"${mode}"`,
-            // TODO remove them
-            'process.env.EXTENSION_ID_NAME': `"${resolvedManifest.name}"`,
-            'process.env.EXTENSION_DISPLAY_NAME': `"${resolvedManifest.displayName}"`,
-            'process.env.REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT': 'true',
-            'process.env.PLATFORM': `"${target === 'desktop' ? 'node' : 'web'}"`,
-        },
-        plugins: [
-            {
-                name: 'build-watcher',
-                setup(build) {
-                    let rebuildCount = 0
-                    build.onEnd(async ({ errors }) => {
-                        if (errors.length > 0) return
-                        await afterSuccessfulBuild(rebuildCount++)
-                    })
-
-                    let date: number
-                    build.onStart(() => {
-                        date = Date.now()
-                        clearConsole(true, false)
-                    })
-                    build.onEnd(result => {
-                        if (result.errors.length > 0) {
-                            console.log(kleur.bgRed().white(` BUILD ERRORS: ${result.errors.length} `))
-                            return
-                        }
-
-                        // TODO no=rebuild / hot-reload / reload
-                        const reloadType = ''
-                        logConsole(
-                            'log',
-                            kleur.green(rebuildCount === 1 ? 'build' : 'rebuild'),
-                            kleur.gray(`${Date.now() - date}ms`),
-                        )
-                    })
-                },
-            },
-            {
-                // there must be cleaner solution
-                name: 'esbuild-import-alias',
-                setup(build) {
-                    // not used for now, config option will be available
-                    const aliasModule = (aliasName: string | RegExp, target: string) => {
-                        const filter =
-                            aliasModule instanceof RegExp
-                                ? aliasModule
-                                : new RegExp(`^${escapeStringRegexp(aliasName as string)}(\\/.*)?$`)
-                        type PluginData = { resolveDir: string; aliasName: string }
-                        const namespace = 'esbuild-import-alias'
-
-                        build.onResolve({ filter }, async ({ resolveDir, path }) => {
-                            if (resolveDir === '') return
-                            return {
-                                path,
-                                namespace,
-                                pluginData: {
-                                    aliasName,
-                                    resolveDir,
-                                } as PluginData,
-                            }
-                        })
-                        build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: pluginDataUntyped }) => {
-                            const { aliasName, resolveDir }: PluginData = pluginDataUntyped
-                            const contents = [
-                                `export * from '${path.replace(aliasName, target)}'`,
-                                `export { default } from '${path.replace(aliasName, target)}';`,
-                            ].join('\n')
-                            return { contents, resolveDir }
-                        })
-                    }
-                },
-            },
-            {
-                name: 'esbuild-node-alias',
-                setup(build) {
-                    const namespace = 'esbuild-node-alias'
-                    const filter = /^node:(.*)/
-                    build.onResolve({ filter }, async ({ path, resolveDir }) => ({
-                        path,
-                        namespace,
-                        pluginData: {
-                            resolveDir,
-                        },
-                    }))
-                    build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: { resolveDir } }) => {
-                        const target = path.replace(filter, '$1')
-                        const contents = [`export * from '${target}'`, `export { default } from '${target}';`].join(
-                            '\n',
-                        )
-                        return { resolveDir, contents }
-                    })
-                },
-            },
-        ],
-        ...(overrideBuildConfig.plugins ?? []),
-    })
-    // TODO output packed file and this file sizes at prod
-    // const outputSize = Object.entries(metafile!.outputs)[0]![1]!.bytes
-    return { stop }
-}
-
 export const EXTENSION_ENTRYPOINTS = {
-    bootstrap: 'extensionBootstrap.js',
     node: 'extension-node.js',
     web: 'extension-web.js',
 }

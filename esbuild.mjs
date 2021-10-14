@@ -40,13 +40,14 @@ const { dirname, join, extname } = pathPosix
         )
     }
     if (!mode) throw new TypeError('mode is not specified')
-    build({
+    await build({
         define: {
             __DEV__: `${mode === 'development'}`,
         },
         // watch: mode === 'development',
         platform: 'node',
         format: 'cjs',
+        logLevel: 'info',
         // @ts-ignore
         entryPoints,
         outdir: 'packages',

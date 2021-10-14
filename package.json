@@ -6,7 +6,7 @@
         "eslint": "eslint packages/*/src/**/*.ts",
         "test": "jest",
         "prepublishOnly": "pnpm build && jest",
-        "build": "node prepare.mjs && tsc -b tsconfig.prod.json && node esbuild.mjs production"
+        "build": "tsc -p tsconfig.only-typechecking.json && node prepare.mjs && tsc -b tsconfig.prod.json && node esbuild.mjs production"
     },
     "prettier": {
         "tabWidth": 4,

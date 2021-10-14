@@ -1,11 +1,11 @@
 import type internal from 'stream'
 
-const makeConsoleMethods = <T extends keyof Console>(t: T[]) => t
-
 // I am trying to store everything in the object, so esbuild does less renames (possible variable names collisions)
 const VSCODE_FRAMEWORK_OUTPUT = {
     oldConsole: globalThis.console,
-    channel: undefined as Pick<import('vscode').OutputChannel, 'appendLine' | 'clear' | 'hide' | 'show'> | undefined,
+    channel: undefined as
+        | Pick<import('vscode').OutputChannel, 'append' | 'appendLine' | 'clear' | 'hide' | 'show'>
+        | undefined,
     consoleTimeFormatter: new Intl.DateTimeFormat('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -13,35 +13,12 @@ const VSCODE_FRAMEWORK_OUTPUT = {
         fractionalSecondDigits: 3,
         hour12: false,
     }),
-    // from patch-Console
-    CONSOLE_METHODS: makeConsoleMethods([
-        'assert',
-        'count',
-        'countReset',
-        'debug',
-        'dir',
-        'dirxml',
-        'error',
-        'group',
-        'groupCollapsed',
-        'groupEnd',
-        'info',
-        'log',
-        'table',
-        'time',
-        'timeEnd',
-        'timeLog',
-        'trace',
-        'warn',
-        'clear',
-        'show',
-        'hide',
-    ]),
-    isDebugEnabled: process.env.NODE_ENV !== 'production',
+    isDebugEnabled: false,
+    // isDebugEnabled: process.env.NODE_ENV !== 'production',
     currentLevel: undefined as string | undefined,
     appendOutput(message: string) {
         const levelString = this.currentLevel ? ` [${this.currentLevel}]` : ''
-        this.channel!.appendLine(`[${this.consoleTimeFormatter.format(new Date())}]${levelString} ${message}`)
+        this.channel!.append(`[${this.consoleTimeFormatter.format(new Date())}]${levelString} ${message}`)
         this.currentLevel = undefined
     },
     newConsole: new globalThis.console.Console(
@@ -65,31 +42,37 @@ const VSCODE_FRAMEWORK_OUTPUT = {
 // TODO implement
 // if (process.env.REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT !== 'false')
 
-type HandledConsoleMethods = typeof VSCODE_FRAMEWORK_OUTPUT['CONSOLE_METHODS'][number]
+// initially from patch-console
+type HandledConsoleMethods =
+    | 'assert'
+    | 'count'
+    | 'countReset'
+    | 'debug'
+    | 'dir'
+    | 'dirxml'
+    | 'error'
+    | 'group'
+    | 'groupCollapsed'
+    | 'groupEnd'
+    | 'info'
+    | 'log'
+    | 'table'
+    | 'time'
+    | 'timeEnd'
+    | 'timeLog'
+    | 'trace'
+    | 'warn'
+    | 'clear'
+    | 'show'
+    | 'hide'
 // ctrl+space to see which methods are not touched in console
 // const methodsToLeaveAsIs: Exclude<keyof Console, HandledConsoleMethods> = ''
 
-/** @internal */
-export const VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT = (
-    NEW_OUTPUT_CHANNEL: NonNullable<typeof VSCODE_FRAMEWORK_OUTPUT['channel']>,
-) => {
-    VSCODE_FRAMEWORK_OUTPUT.channel = NEW_OUTPUT_CHANNEL
+const vscode_framework_set_debug_enabled = (isEnabled: boolean): void => {
+    VSCODE_FRAMEWORK_OUTPUT.isDebugEnabled = isEnabled
 }
 
-/** @internal */
-export type VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT_TYPE = typeof VSCODE_FRAMEWORK_ASSIGN_CONSOLE_OUTPUT
-
-/** @internal */
-export const VSCODE_FRAMEWORK_SET_DEBUG_ENABLED = (enabled: boolean): void => {
-    VSCODE_FRAMEWORK_OUTPUT.isDebugEnabled = enabled
-}
-
-export type VSCODE_FRAMEWORK_SET_DEBUG_ENABLED_TYPE = typeof VSCODE_FRAMEWORK_SET_DEBUG_ENABLED
-
-// const timeMarkers = {} as Record<string, number>
-
-/** @internal */
-export const console = {
+const console = {
     ...VSCODE_FRAMEWORK_OUTPUT.oldConsole,
     ...VSCODE_FRAMEWORK_OUTPUT.newConsole,
     ...({
@@ -132,4 +115,3 @@ export const console = {
 //         delete timeMarkers[marker]
 //         appendOutput('log', marker, Date.now() - timeMarkers[marker]!)
 //     },
-// }

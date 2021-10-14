@@ -82,8 +82,7 @@ test.each<{ name: keyof Tests; expect: (data) => void }>(
     expect(
         await propsGenerators[name](screenRecorderManifest, {
             target: { desktop: true, web: true },
-            useBootstrap: false,
-            realisticActivationEvents: true,
+            alwaysActivationEvent: false,
         }),
     )
 })
