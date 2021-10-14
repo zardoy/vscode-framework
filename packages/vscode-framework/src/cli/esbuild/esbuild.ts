@@ -93,7 +93,7 @@ export const runEsbuild = async ({
                         const reloadType = ''
                         logConsole(
                             'log',
-                            kleur.green(rebuildCount === 1 ? 'build' : 'rebuild'),
+                            kleur.green(rebuildCount === 0 ? 'build' : 'rebuild'),
                             kleur.gray(`${Date.now() - date}ms`),
                         )
                         await afterSuccessfulBuild(rebuildCount++)

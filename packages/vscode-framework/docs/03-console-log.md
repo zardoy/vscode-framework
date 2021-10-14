@@ -62,6 +62,7 @@ And using `console.log('%s there', 'hey')` simply won't work. However if don't u
 ## Debug
 
 TODO: this also where
+TODO: append with command executed
 
 ## Advanced
 
