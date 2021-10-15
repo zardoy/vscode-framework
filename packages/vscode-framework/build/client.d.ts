@@ -8,7 +8,10 @@ declare namespace NodeJS {
         EXTENSION_DISPLAY_NAME: string
         /** Set to "false" to not reveal output pannel (on development only) */
         REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT: string
-        /** similar to `process.type` but you should use this instead */
+        /**
+         * similar to `process.type`.
+         * @deprecated use `vscode.env.appHost` instead
+         *  */
         PLATFORM: 'node' | 'web'
     }
 }
