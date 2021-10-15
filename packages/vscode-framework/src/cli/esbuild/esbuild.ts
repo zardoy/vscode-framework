@@ -83,11 +83,11 @@ export const runEsbuild = async ({
                         const outputFile = outputFiles![0]!
                         // investigate performance
                         debug('Start writing')
-                        const lines = outputFile.text.split('\n')
-                        const lineNumber = lines.findIndex(line => line.startsWith('//'))
-                        if (lineNumber === -1) throw new Error("Can't find line with comment")
-                        lines.splice(lineNumber, 0, consoleInjectCode)
-                        await fs.promises.writeFile(outputFile.path, lines.join('\n'), 'utf-8')
+                        await fs.promises.writeFile(
+                            outputFile.path,
+                            `${consoleInjectCode}\n${outputFile.text}`,
+                            'utf-8',
+                        )
                         debug('End writing')
                         // TODO no=rebuild / hot-reload / reload
                         const reloadType = ''
