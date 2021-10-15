@@ -8,42 +8,38 @@ type RegularCommands = Commands['regular']
 // TODO test args
 export type CommandHandler = (data: { command: RegularCommands }, ...args: any[]) => MaybePromise<void>
 
-export class VSCodeFramework<T extends boolean = false> {
-    // outputChannel: vscode.OutputChannel
-    readonly extensionIDName: string
+declare let __VSCODE_FRAMEWORK_CONTEXT: vscode.ExtensionContext
 
-    constructor(public readonly ctx: vscode.ExtensionContext) {
-        this.extensionIDName = ctx.extension.id.split('.')[1]!
-    }
+/**
+ * Can be used only inside function
+ * and not used before extension activation!
+ * */
+export const extensionCtx = __VSCODE_FRAMEWORK_CONTEXT
 
-    /** make sure to not call after class creation, to prevent accidental registerCommand call (but no runtime restriction) */
-    public registerAllCommands(
-        commands: T extends false ? { [C in RegularCommands]: CommandHandler } : never,
-    ): VSCodeFramework<true> {
-        for (const [command, handler] of Object.entries(commands)) this.registerCommand(command as any, handler)
-
-        return this as any
-    }
-
-    public registerCommand(command: T extends false ? RegularCommands : never, handler: CommandHandler) {
-        this.ctx.subscriptions.push(
-            vscode.commands.registerCommand(`${this.extensionIDName}.${command}`, (...args) =>
-                handler({ command }, ...args),
-            ),
-        )
-    }
-
-    public getExtensionSetting<T extends keyof Settings>(key: T): Settings[T] {
-        vscode.workspace.getConfiguration(this.extensionIDName).get<Settings[T]>(key)
-    }
-
-    public async updateExtensionSetting<T extends keyof Settings>(key: T, value: Settings[T]): Promise<void> {
-        return vscode.workspace.getConfiguration(this.extensionIDName).update(key, value)
-    }
-
-    public async resetExtensionSetting<T extends keyof Settings>(key: T): Promise<void> {
-        return vscode.workspace.getConfiguration(this.extensionIDName).update(key, undefined)
-    }
+export const getExtensionId = (full = false) => {
+    const ctx = __VSCODE_FRAMEWORK_CONTEXT
+    return full ? ctx.extension.id : ctx.extension.id.split('.')[1]!
 }
+
+export const registerExtensionCommand = (command: RegularCommands, handler: CommandHandler) => {
+    const ctx = __VSCODE_FRAMEWORK_CONTEXT
+    const extensionIdName = extensionCtx.extension.id.split('.')[1]!
+    ctx.subscriptions.push(
+        vscode.commands.registerCommand(`${extensionIdName}.${command}`, (...args) => handler({ command }, ...args)),
+    )
+}
+
+export const registerAllExtensionCommands = (commands: { [C in RegularCommands]: CommandHandler }) => {
+    for (const [command, handler] of Object.entries(commands)) registerExtensionCommand(command, handler)
+}
+
+export const getExtensionSetting = <T extends keyof Settings>(key: T): Settings[T] =>
+    vscode.workspace.getConfiguration(getExtensionId()).get<Settings[T]>(key)
+
+/** Pass `undefined` as value to reset the setting */
+export const updateExtensionSetting = async <T extends keyof Settings>(
+    key: T,
+    value: Settings[T] | undefined,
+): Promise<void> => vscode.workspace.getConfiguration(getExtensionId()).update(key, value)
 
 export * from 'vscode-extra'
