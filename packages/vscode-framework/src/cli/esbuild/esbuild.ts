@@ -42,7 +42,7 @@ export const runEsbuild = async ({
         target: target === 'desktop' ? 'node14' : undefined,
         bundle: true,
         watch: mode === 'development',
-        minify: mode === 'production',
+        // minify: mode === 'production',
         platform: target === 'desktop' ? 'node' : 'browser',
         outfile: join(outDir, target === 'desktop' ? EXTENSION_ENTRYPOINTS.node : EXTENSION_ENTRYPOINTS.web),
         format: 'cjs',
