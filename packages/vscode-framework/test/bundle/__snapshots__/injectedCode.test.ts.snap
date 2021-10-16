@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Injected console code remains the same 1`] = `
+"/* vscode-framework dev */
+const VSCODE_FRAMEWORK_OUTPUT = {
+  oldConsole: globalThis.console,
+  channel: void 0,
+  consoleTimeFormatter: new Intl.DateTimeFormat(\\"en-US\\", {
+    hour: \\"2-digit\\",
+    minute: \\"2-digit\\",
+    second: \\"2-digit\\",
+    fractionalSecondDigits: 3,
+    hour12: false
+  }),
+  isDebugEnabled: false,
+  currentLevel: void 0,
+  appendOutput(message) {
+    const levelString = this.currentLevel ? \` [\${this.currentLevel}]\` : \\"\\";
+    this.channel.append(\`[\${this.consoleTimeFormatter.format(new Date())}]\${levelString} \${message}\`);
+    this.currentLevel = void 0;
+  },
+  newConsole: new globalThis.console.Console(...(() => {
+    const { PassThrough } = require(\\"stream\\");
+    const stdout = new PassThrough();
+    stdout.write = (message) => VSCODE_FRAMEWORK_OUTPUT.appendOutput(message);
+    const stderr = new PassThrough();
+    stderr.write = (message) => {
+      VSCODE_FRAMEWORK_OUTPUT.currentLevel = \\"error\\";
+      VSCODE_FRAMEWORK_OUTPUT.appendOutput(message);
+    };
+    return [stdout, stderr];
+  })())
+};
+const vscode_framework_set_debug_enabled = (isEnabled) => {
+  VSCODE_FRAMEWORK_OUTPUT.isDebugEnabled = isEnabled;
+};
+const console = {
+  ...VSCODE_FRAMEWORK_OUTPUT.oldConsole,
+  ...VSCODE_FRAMEWORK_OUTPUT.newConsole,
+  ...{
+    debug(...data) {
+      if (!VSCODE_FRAMEWORK_OUTPUT.isDebugEnabled)
+        return;
+      VSCODE_FRAMEWORK_OUTPUT.currentLevel = \\"debug\\";
+      VSCODE_FRAMEWORK_OUTPUT.newConsole.log(...data);
+    },
+    warn(...data) {
+      VSCODE_FRAMEWORK_OUTPUT.currentLevel = \\"warn\\";
+      VSCODE_FRAMEWORK_OUTPUT.newConsole.log(...data);
+    },
+    log(...data) {
+      VSCODE_FRAMEWORK_OUTPUT.currentLevel = \\"log\\";
+      VSCODE_FRAMEWORK_OUTPUT.newConsole.log(...data);
+    },
+    clear() {
+      VSCODE_FRAMEWORK_OUTPUT.channel.clear();
+    },
+    show() {
+      VSCODE_FRAMEWORK_OUTPUT.channel.show();
+    },
+    hide() {
+      VSCODE_FRAMEWORK_OUTPUT.channel.hide();
+    }
+  }
+};
+"
+`;
