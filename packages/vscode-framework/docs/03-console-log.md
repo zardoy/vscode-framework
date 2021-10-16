@@ -57,11 +57,25 @@ For browser environments, there is no `console.Console` method, so it's not easy
 ### Formatting
 
 <!-- Though, it's a temporary limitation keep in mind, that when targeting browser environments, using such methods as `console.assert(false, ...)` will just literally kill your extension!
-And using `console.log('%s there', 'hey')` simply won't work. However if don't use this feature and use only `log`, `debug`, `warn`, `error`, `debug`, `time`, `timeEnd` you are safe to go! -->
+Using `console.log('%s there', 'hey')` simply won't work. However if don't use this feature and use only `log`, `debug`, `warn`, `error`, `debug`, `time`, `timeEnd` you are safe to go! -->
 
 ## Debug
 
-TODO: this also where
+As said above, `console.debug` is enabled only in development by default, but it's possible to enable by manually calling `vscode_framework_set_debug_enabled` anywhere in your code.
+
+For example we can enable debug is appropriate setting is enabled:
+
+```ts
+import { getExtensionSetting } from 'vscode-framework'
+import { vscode_framework_set_debug_enabled } from 'vscode-framework/build/framework/injected'
+
+declare const vscode_framework_set_debug_enabled: vscode_framework_set_debug_enabled
+
+export const activate = () => {
+    vscode_framework_set_debug_enabled(getExtensionSetting('debug'))
+}
+```
+
 TODO: append with command executed
 
 ## Advanced
