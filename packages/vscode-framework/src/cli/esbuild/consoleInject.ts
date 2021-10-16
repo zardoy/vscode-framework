@@ -115,3 +115,10 @@ const console = {
 //         delete timeMarkers[marker]
 //         appendOutput('log', marker, Date.now() - timeMarkers[marker]!)
 //     },
+
+// TODO !!! implement
+// LOG_ICONS[.Alert] = '🚨'
+// LOG_ICONS[.Err] = '❌'
+// LOG_ICONS[.Warn] = '⚠️'
+// LOG_ICONS[.Debug] = '🐞'
+// LOG_ICONS[.Trace] = '🧾'
