@@ -79,12 +79,11 @@ export const defaultConfig: Config = {
         executable: 'code',
         disableExtensions: true,
         openDevtools: false,
-        extensionBootstrap: false,
-        // extensionBootstrap: {
-        //     closeWindowOnExit: true,
-        //     pipeConsole: false,
-        //     forceReload: 'display-hint',
-        //     hotReload: false,
-        // },
+        extensionBootstrap: {
+            closeWindowOnExit: true,
+            pipeConsole: false,
+            forceReload: 'display-hint',
+            hotReload: false,
+        },
     },
 }

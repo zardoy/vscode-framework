@@ -14,6 +14,9 @@ type MaybePromise<T> = Promise<T> | T
 
 const debug = Debug('vscode-framework:esbuild')
 
+/** Always injected for framework functionality */
+const injectedCode = `let __VSCODE_FRAMEWORK_CONTEXT\n`
+
 export const runEsbuild = async ({
     target,
     mode,
@@ -21,6 +24,7 @@ export const runEsbuild = async ({
     afterSuccessfulBuild = () => {},
     overrideBuildConfig = {},
     resolvedManifest,
+    injectConsole,
 }: {
     target: BuildTargetType
     mode: ModeType
@@ -28,14 +32,24 @@ export const runEsbuild = async ({
     afterSuccessfulBuild: (buildCount: number) => MaybePromise<void>
     overrideBuildConfig: Config['esbuildConfig']
     resolvedManifest: ManifestType
+    injectConsole: boolean
 }) => {
     const extensionEntryPoint = 'src/extension.ts'
     const realEntryPoint = join(__dirname, '../../extensionBootstrap.ts')
+    debug('Esbuild starting...')
     debug('Entry points', {
         real: realEntryPoint,
         extension: extensionEntryPoint,
     })
-    const consoleInjectCode = await fs.promises.readFile(join(__dirname, './consoleInject.js'), 'utf-8')
+    debug({
+        target,
+        injectConsole,
+        outDir,
+        overrideBuildConfig,
+    })
+    const consoleInjectCode = injectConsole
+        ? await fs.promises.readFile(join(__dirname, './consoleInject.js'), 'utf-8')
+        : undefined
     // lodash-marker
     const { metafile, stop } = await esbuildBuild({
         // latest is assumed if web
@@ -71,7 +85,7 @@ export const runEsbuild = async ({
                     let date: number
                     build.onStart(() => {
                         date = Date.now()
-                        clearConsole(true, false)
+                        if (!debug.enabled) clearConsole(true, false)
                     })
                     build.onEnd(async ({ errors, outputFiles }) => {
                         if (errors.length > 0) {
@@ -82,13 +96,14 @@ export const runEsbuild = async ({
                         // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
                         const outputFile = outputFiles![0]!
                         // investigate performance
-                        debug('Start writing')
+                        debug('Start writing with inject')
                         await fs.promises.writeFile(
                             outputFile.path,
-                            `${consoleInjectCode}\n${outputFile.text}`,
+                            `${injectedCode}${consoleInjectCode ?? ''}\n${outputFile.text}`,
                             'utf-8',
                         )
-                        debug('End writing')
+                        debug('End writing with inject')
+
                         // TODO no=rebuild / hot-reload / reload
                         const reloadType = ''
                         logConsole(

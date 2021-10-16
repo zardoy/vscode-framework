@@ -1,9 +1,9 @@
+/* eslint-disable zardoy-config/@typescript-eslint/no-require-imports */
 /// <reference path="client.d.ts" />
 
 // file that placed into output directory as-is
 
 import vscode from 'vscode'
-// import nodeIpc from 'node-ipc'
 import type { BootstrapConfig } from '../src/cli/buildExtension'
 import type { MaybePromise } from '../src/util'
 
@@ -17,25 +17,35 @@ interface Extension {
 const activateFunctions: Array<Extension['activate']> = []
 
 if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
-    const bootstrapConfig = JSON.parse(process.env.EXTENSION_BOOTSTRAP_CONFIG) as BootstrapConfig
-    if (bootstrapConfig.serverIpcChannel)
+    const bootstrapConfig = process.env.EXTENSION_BOOTSTRAP_CONFIG as unknown as BootstrapConfig
+    if (bootstrapConfig.serverIpcChannel) {
+        const nodeIpc = require('node-ipc') as typeof import('node-ipc')
+        nodeIpc.config.retry = 1000
+        nodeIpc.config.silent = true
         activateFunctions.push(() => {
             // STATUS: connecting
             // maxRetries: 1, timeout: 1000
             const { serverIpcChannel } = bootstrapConfig
-            // console.time('ipc-connect')
-            // nodeIpc.connectTo(serverIpcChannel!, () => {
-            //     console.timeEnd('ipc-connect')
-            //     const ipc = nodeIpc.of[serverIpcChannel!]!
-            //     // STATUS: connected
-            //     ipc.on('data', buffer => {
-            //         console.log(buffer)
-            //     })
-            // })
+            console.time('ipc-connect')
+            console.log('connecting')
+            nodeIpc.connectTo(serverIpcChannel!, () => {
+                console.log('created')
+                const ipc = nodeIpc.of[serverIpcChannel!]!
+                ipc.on('error', err => {
+                    if (err.code === 'ECONNREFUSED') return
+                    console.error('[ipc]', err)
+                })
+                ipc.on('connect', () => {
+                    console.timeEnd('ipc-connect')
+                    ipc.on('message', message => {
+                        console.log('ipc-recieve', message)
+                    })
+                })
+            })
         })
+    }
 
     if (bootstrapConfig?.hotReload) {
-        // eslint-disable-next-line zardoy-config/@typescript-eslint/no-require-imports
         // const { enableHotReload, hotRequire } = require('@hediet/node-reload') as typeof import('@hediet/node-reload')
         // enableHotReload({ entryModule: module })
         // // TODO return type
@@ -63,6 +73,7 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
 
 declare const VSCODE_FRAMEWORK_OUTPUT: any | undefined
 declare const vscode_framework_set_debug_enabled: any
+declare let __VSCODE_FRAMEWORK_CONTEXT: any
 if (VSCODE_FRAMEWORK_OUTPUT)
     activateFunctions.push(() => {
         const outputChannel = vscode.window.createOutputChannel(process.env.EXTENSION_DISPLAY_NAME)
@@ -72,7 +83,7 @@ if (VSCODE_FRAMEWORK_OUTPUT)
     })
 
 export const activate: Extension['activate'] = ctx => {
+    __VSCODE_FRAMEWORK_CONTEXT = ctx
     for (const activate of activateFunctions) void activate(ctx)
-    // eslint-disable-next-line zardoy-config/@typescript-eslint/no-require-imports
     require(process.env.EXTENSION_ENTRYPOINT!).activate(ctx)
 }

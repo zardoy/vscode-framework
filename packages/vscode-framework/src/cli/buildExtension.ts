@@ -5,6 +5,9 @@ import fsExtra from 'fs-extra'
 import kleur from 'kleur'
 import { defaultsDeep } from 'lodash'
 import { nanoid } from 'nanoid'
+import nodeIpc from 'node-ipc'
+import exitHook from 'exit-hook'
+import { Except } from 'type-fest'
 import { BuildTargetType, Config } from '../config'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
@@ -20,8 +23,49 @@ export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'
 
 export type ModeType = 'development' | 'production'
 
+export type IpcEvents = {
+    // app:reload not necessarily reloads window. it means changes happened and new file is on disk
+    extension: 'app:close' | 'app:reload'
+}
+
 /** does watch only in `development` mode actually */
-export const buildExtensionAndWatch = async (params: Parameters<typeof buildExtension>[0]) => {
+export const buildExtensionAndWatch = async (
+    params: Except<Parameters<typeof buildExtension>[0], 'ipcStartCb' | 'ipcEmitExtension'>,
+) => {
+    let isIpcServerStarted = false
+    let ipcSocket
+    const startIpcServer = async (serverIpcChannel: string) => {
+        // TODO web
+        if (isIpcServerStarted || params.target === 'web') return
+        debug('starting ipc', serverIpcChannel)
+        // if (isServerIpcStarted) throw new Error('IPC is already started. the first one must be closed')
+
+        // TODO don't use global nodeIpc
+        nodeIpc.config.id = serverIpcChannel
+        nodeIpc.config.silent = !debug.enabled
+        await new Promise<void>(resolve => {
+            nodeIpc.serve(resolve)
+            nodeIpc.server.start()
+        })
+        nodeIpc.server.on('connect', socket => {
+            ipcSocket = socket
+        })
+        nodeIpc.server.on('error', err => {
+            // investigate
+            throw err
+        })
+        console.log('ipc server started')
+        debug('ipc server started')
+        isIpcServerStarted = true
+
+        exitHook(() => {
+            // workbench.action.quit
+            // workbench.action.closeWindow
+            // search.action.focusActiveEditor
+            nodeIpc.server.emit('message', 'app:close')
+        })
+    }
+
     const { mode, outDir } = params
     // if (params.mode !== 'development') throw new Error('Watch is allowed only in development mode')
     debug('Building extension', {
@@ -36,7 +80,16 @@ export const buildExtensionAndWatch = async (params: Parameters<typeof buildExte
     let stopEsbuild: (() => void) | undefined
     const restartBuild = async () => {
         if (stopEsbuild) stopEsbuild()
-        stopEsbuild = (await buildExtension(params)).stop
+        stopEsbuild = (
+            await buildExtension({
+                ...params,
+                ipcStartCb: startIpcServer,
+                ipcEmitExtension: event => {
+                    if (!ipcSocket) return
+                    nodeIpc.server.emit(ipcSocket, 'message', event)
+                },
+            })
+        ).stop
     }
 
     await restartBuild()
@@ -64,23 +117,14 @@ export const buildExtensionAndWatch = async (params: Parameters<typeof buildExte
     }
 }
 
-const getEnableBootstrap = (config: Config): Record<'bootstrap' | 'ipc', boolean> => {
-    let bootstrap = false
-    let ipc = false
-    if (config.console === 'outputChannel') bootstrap = true
+const getEnableIpc = (config: Config): boolean => {
     if (config.development.extensionBootstrap !== false) {
         const values = Object.values(config.development.extensionBootstrap)
         const allDisabled = values.every(value => value === false)
-        if (!allDisabled) {
-            bootstrap = true
-            ipc = true
-        }
+        if (!allDisabled) return true
     }
 
-    return {
-        bootstrap,
-        ipc,
-    }
+    return false
 }
 
 const buildExtension = async ({
@@ -89,6 +133,8 @@ const buildExtension = async ({
     config,
     outDir,
     launchVscodeParams,
+    ipcStartCb,
+    ipcEmitExtension,
 }: {
     config: Config
     mode: ModeType
@@ -96,14 +142,15 @@ const buildExtension = async ({
     outDir: string
     /** Config for handling vscode launch, pass `false` to skip launching */
     launchVscodeParams: LauncherCLIParams | false
+    ipcStartCb?: (channel: string) => Promise<void>
+    ipcEmitExtension?: (event: 'app:reload') => void | Promise<void>
 }) => {
     await fsExtra.ensureDir(outDir)
 
     // #region prepare bootstrap config
-    const bootstrapPartsEnablement = launchVscodeParams && (getEnableBootstrap(config) as any)
-    const enableBootstrap = bootstrapPartsEnablement !== false && bootstrapPartsEnablement.bootstrap
-    const enableIpc = bootstrapPartsEnablement !== false && bootstrapPartsEnablement.ipc
-    const serverIpcChannel = enableIpc ? `vscode-framework:server_${nanoid(5)}` : undefined
+    /** An unique ID is required because multiple instances of extension can be launched */
+    const serverIpcChannel = ipcStartCb && getEnableIpc(config) ? `vscode-framework:server_${nanoid(5)}` : undefined
+    if (serverIpcChannel) await ipcStartCb!(serverIpcChannel)
 
     // #endregion
 
@@ -141,28 +188,31 @@ const buildExtension = async ({
         outDir,
         resolvedManifest: generatedManifest,
         async afterSuccessfulBuild(rebuildCount) {
-            if (mode !== 'development' || launchVscodeParams === false || rebuildCount > 0) return
+            if (mode !== 'development' || launchVscodeParams === false) return
+            ipcEmitExtension?.('app:reload')
+            if (rebuildCount > 0) return
             await launchVscode(outDir, {
                 ...launchVscodeParams,
                 // TS doesn't see target override ???
                 // ...config,
                 development: config.development,
-                serverIpcChannel: serverIpcChannel ?? false,
             })
         },
         overrideBuildConfig: defaultsDeep(
             serverIpcChannel
                 ? {
                       define: {
-                          EXTENSION_BOOTSTRAP_CONFIG: JSON.stringify({
-                              ...launchVscodeParams,
+                          EXTENSION_BOOTSTRAP_CONFIG: {
+                              ...config.development.extensionBootstrap,
                               serverIpcChannel,
-                          } as BootstrapConfig),
+                          } as BootstrapConfig,
                       },
                   }
                 : {},
             config.esbuildConfig,
         ),
+        // TODO handle other options
+        injectConsole: config.console === 'outputChannel',
     })
 }
 
