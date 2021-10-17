@@ -91,6 +91,11 @@ export const propsGenerators = makeGenerators({
         { contributes, activationEvents }: PickManifest<'contributes' | 'activationEvents'>,
         { alwaysActivationEvent }: { alwaysActivationEvent: boolean },
     ) {
+        if (alwaysActivationEvent)
+            return {
+                activationEvents: ['*'],
+            }
+        // Generate Activation Events From Commands
         if (!contributes?.commands) return {}
         const allCommands = contributes.commands.map(({ command }) => command)
         // TODO! would override custom commands
@@ -101,7 +106,7 @@ export const propsGenerators = makeGenerators({
         )
             // TODO
             return {
-                activationEvents: alwaysActivationEvent ? ['*'] : allCommands.map(command => `onCommand:${command}`),
+                activationEvents: allCommands.map(command => `onCommand:${command}`),
             }
         return {}
     },
