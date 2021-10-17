@@ -30,7 +30,9 @@ export const registerExtensionCommand = (command: RegularCommands, handler: Comm
 }
 
 // TODO! disallow production
-export const registerActiveDevelopmentCommand = (handler: CommandHandler) => {
+export const registerActiveDevelopmentCommand = (
+    handler: (data: { command: '' }, ...args: any[]) => MaybePromise<void>,
+) => {
     __VSCODE_FRAMEWORK_CONTEXT.subscriptions.push(
         vscode.commands.registerCommand('runActiveDevelopmentCommand', (...args) => handler({ command: '' }, ...args)),
     )
