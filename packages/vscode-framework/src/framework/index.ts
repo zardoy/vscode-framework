@@ -29,6 +29,16 @@ export const registerExtensionCommand = (command: RegularCommands, handler: Comm
     )
 }
 
+// TODO! disallow production
+export const registerActiveDevelopmentCommand = (handler: CommandHandler) => {
+    __VSCODE_FRAMEWORK_CONTEXT.subscriptions.push(
+        vscode.commands.registerCommand('runActiveDevelopmentCommand', (...args) => handler({ command: '' }, ...args)),
+    )
+}
+
+/** would never run. something like `test.skip` */
+export const registerNoop = (description: string, handler: CommandHandler) => {}
+
 export const registerAllExtensionCommands = (commands: { [C in RegularCommands]: CommandHandler }) => {
     for (const [command, handler] of Object.entries(commands)) registerExtensionCommand(command, handler)
 }

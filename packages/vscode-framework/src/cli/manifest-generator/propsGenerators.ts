@@ -53,19 +53,33 @@ export const propsGenerators = makeGenerators({
             ...(target.web ? { browser: EXTENSION_ENTRYPOINTS.web } : {}),
         }
     },
-    'contributes.commands': (manifest: PickManifest<'contributes' | 'name' | 'displayName'>) => {
+    'contributes.commands': (
+        manifest: PickManifest<'contributes' | 'name' | 'displayName'>,
+        { developmentCommands = true }: { developmentCommands?: boolean },
+    ) => {
         const { contributes } = manifest
         if (!contributes?.commands) return {}
         const { displayName } = manifest
         return {
             contributes: {
                 // TODO HIGH !!!!
-                commands: contributes.commands.map(({ command, title, category = displayName }) => ({
-                    // category: category ? displayName : category,
-                    category,
-                    command,
-                    title,
-                })),
+                commands: [
+                    ...(developmentCommands
+                        ? [
+                              {
+                                  title: 'Run Active Development Command',
+                                  category: 'VSCode Framework',
+                                  command: 'runActiveDevelopmentCommand',
+                              },
+                          ]
+                        : []),
+                    ...contributes.commands.map(({ command, title, category = displayName }) => ({
+                        // category: category ? displayName : category,
+                        category,
+                        command,
+                        title,
+                    })),
+                ],
             },
         }
     },
