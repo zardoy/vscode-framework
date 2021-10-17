@@ -1,3 +1,4 @@
+import Debug from '@prisma/debug'
 import { getGithubRemoteInfo } from 'github-remote-info'
 import { defaultsDeep } from 'lodash'
 import { UnionToIntersection } from 'type-fest'
@@ -8,6 +9,9 @@ import { EXTENSION_ENTRYPOINTS } from '../buildExtension'
 
 // They're generating package.json properties
 // If you with you can use them directly
+
+// TODO! package.json name - fileName
+const debug = Debug('vscode-framework:propsGenerators')
 
 type GeneralPropGeneratorsType = Record<
     string,
@@ -146,6 +150,11 @@ export const runGeneratorsOnManifest = async (
     mergeSource: boolean,
     propsGeneratorsConfig: PropsGeneratorsConfig,
 ) => {
+    debug('Running generators on manifest')
+    debug({
+        runGenerators,
+        propsGeneratorsConfig,
+    })
     // TODO-low remove unknown conversion
     if (runGenerators === true) runGenerators = Object.keys(propsGenerators) as unknown as keyof typeof propsGenerators
     let generatedManifest = {} as ManifestType
@@ -154,6 +163,7 @@ export const runGeneratorsOnManifest = async (
             await propsGenerators[prop](sourceManifest, propsGeneratorsConfig),
             generatedManifest,
         )
+    debug('Generated props %o', generatedManifest)
     return mergeSource ? defaultsDeep(generatedManifest, sourceManifest) : generatedManifest
 }
 

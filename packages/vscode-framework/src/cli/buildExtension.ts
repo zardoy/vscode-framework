@@ -34,7 +34,8 @@ export const buildExtensionAndWatch = async (
 ) => {
     const { mode, outDir } = params
     // if (params.mode !== 'development') throw new Error('Watch is allowed only in development mode')
-    debug('Building extension', {
+    debug('Building extension')
+    debug({
         mode,
         outDir,
     })

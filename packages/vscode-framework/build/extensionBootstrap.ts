@@ -16,6 +16,17 @@ interface Extension {
 }
 const activateFunctions: Array<Extension['activate']> = []
 
+declare const VSCODE_FRAMEWORK_OUTPUT: any | undefined
+declare const vscode_framework_set_debug_enabled: any
+declare let __VSCODE_FRAMEWORK_CONTEXT: any
+if (VSCODE_FRAMEWORK_OUTPUT)
+    activateFunctions.push(() => {
+        const outputChannel = vscode.window.createOutputChannel(process.env.EXTENSION_DISPLAY_NAME)
+        // eslint-disable-next-line new-cap
+        VSCODE_FRAMEWORK_OUTPUT.channel = outputChannel
+        if (process.env.NODE_ENV !== 'production') vscode_framework_set_debug_enabled(true)
+    })
+
 if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
     const bootstrapConfig = process.env.EXTENSION_BOOTSTRAP_CONFIG as unknown as BootstrapConfig
     if (bootstrapConfig.serverIpcChannel) {
@@ -70,17 +81,6 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
         // })
     }
 }
-
-declare const VSCODE_FRAMEWORK_OUTPUT: any | undefined
-declare const vscode_framework_set_debug_enabled: any
-declare let __VSCODE_FRAMEWORK_CONTEXT: any
-if (VSCODE_FRAMEWORK_OUTPUT)
-    activateFunctions.push(() => {
-        const outputChannel = vscode.window.createOutputChannel(process.env.EXTENSION_DISPLAY_NAME)
-        // eslint-disable-next-line new-cap
-        VSCODE_FRAMEWORK_OUTPUT.channel = outputChannel
-        if (process.env.NODE_ENV !== 'production') vscode_framework_set_debug_enabled(true)
-    })
 
 export const activate: Extension['activate'] = ctx => {
     __VSCODE_FRAMEWORK_CONTEXT = ctx
