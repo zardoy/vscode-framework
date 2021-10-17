@@ -30,42 +30,8 @@ export type IpcEvents = {
 
 /** does watch only in `development` mode actually */
 export const buildExtensionAndWatch = async (
-    params: Except<Parameters<typeof buildExtension>[0], 'ipcStartCb' | 'ipcEmitExtension'>,
+    params: Except<Parameters<typeof buildExtension>[0], 'ipcEmitExtension' | 'afterBuild'>,
 ) => {
-    let isIpcServerStarted = false
-    let ipcSocket
-    const startIpcServer = async (serverIpcChannel: string) => {
-        // TODO web
-        if (isIpcServerStarted || params.target === 'web') return
-        debug('starting ipc', serverIpcChannel)
-        // if (isServerIpcStarted) throw new Error('IPC is already started. the first one must be closed')
-
-        // TODO don't use global nodeIpc
-        nodeIpc.config.id = serverIpcChannel
-        nodeIpc.config.silent = !debug.enabled
-        await new Promise<void>(resolve => {
-            nodeIpc.serve(resolve)
-            nodeIpc.server.start()
-        })
-        nodeIpc.server.on('connect', socket => {
-            ipcSocket = socket
-        })
-        nodeIpc.server.on('error', err => {
-            // investigate
-            throw err
-        })
-        console.log('ipc server started')
-        debug('ipc server started')
-        isIpcServerStarted = true
-
-        exitHook(() => {
-            // workbench.action.quit
-            // workbench.action.closeWindow
-            // search.action.focusActiveEditor
-            nodeIpc.server.emit('message', 'app:close')
-        })
-    }
-
     const { mode, outDir } = params
     // if (params.mode !== 'development') throw new Error('Watch is allowed only in development mode')
     debug('Building extension', {
@@ -77,14 +43,56 @@ export const buildExtensionAndWatch = async (
         return
     }
 
+    // TODO! why do we need to stop esbuild?
     let stopEsbuild: (() => void) | undefined
+    let isLaunched = false
+    let ipcSocket
     const restartBuild = async () => {
         if (stopEsbuild) stopEsbuild()
         stopEsbuild = (
             await buildExtension({
                 ...params,
-                ipcStartCb: startIpcServer,
+                async afterBuild({ ipcChannel: serverIpcChannel }) {
+                    // TODO web
+                    if (isLaunched) return
+                    if (params.launchVscodeParams)
+                        await launchVscode(params.outDir, {
+                            ...params.launchVscodeParams,
+                            // TODO ...params.config
+                            development: params.config.development,
+                        })
+
+                    isLaunched = true
+                    if (!serverIpcChannel) return
+                    debug('starting ipc', serverIpcChannel)
+                    // if (isServerIpcStarted) throw new Error('IPC is already started. the first one must be closed')
+
+                    // TODO don't use global nodeIpc
+                    nodeIpc.config.id = serverIpcChannel
+                    nodeIpc.config.silent = !debug.enabled
+                    await new Promise<void>(resolve => {
+                        nodeIpc.serve(resolve)
+                        nodeIpc.server.start()
+                    })
+                    nodeIpc.server.on('connect', socket => {
+                        ipcSocket = socket
+                    })
+                    nodeIpc.server.on('error', err => {
+                        // investigate
+                        throw err
+                    })
+                    console.log('ipc server started')
+                    debug('ipc server started')
+
+                    exitHook(() => {
+                        // workbench.action.quit
+                        // workbench.action.closeWindow
+                        // search.action.focusActiveEditor
+                        nodeIpc.server.emit('message', 'app:close')
+                    })
+                },
                 ipcEmitExtension: event => {
+                    // TODO! emit on package.json update
                     if (!ipcSocket) return
                     nodeIpc.server.emit(ipcSocket, 'message', event)
                 },
@@ -132,25 +140,25 @@ const buildExtension = async ({
     target,
     config,
     outDir,
-    launchVscodeParams,
-    ipcStartCb,
     ipcEmitExtension,
+    afterBuild,
 }: {
     config: Config
     mode: ModeType
     target: BuildTargetType
     outDir: string
+    // TODO remove
     /** Config for handling vscode launch, pass `false` to skip launching */
     launchVscodeParams: LauncherCLIParams | false
-    ipcStartCb?: (channel: string) => Promise<void>
     ipcEmitExtension?: (event: 'app:reload') => void | Promise<void>
+    afterBuild?: (params: { ipcChannel?: string }) => void | Promise<void>
 }) => {
     await fsExtra.ensureDir(outDir)
 
     // #region prepare bootstrap config
     /** An unique ID is required because multiple instances of extension can be launched */
-    const serverIpcChannel = ipcStartCb && getEnableIpc(config) ? `vscode-framework:server_${nanoid(5)}` : undefined
-    if (serverIpcChannel) await ipcStartCb!(serverIpcChannel)
+    const serverIpcChannel = afterBuild && getEnableIpc(config) ? `vscode-framework:server_${nanoid(5)}` : undefined
+    if (serverIpcChannel) await afterBuild!({ ipcChannel: serverIpcChannel })
 
     // #endregion
 
@@ -161,7 +169,7 @@ const buildExtension = async ({
         propsGeneratorsConfig:
             mode === 'development'
                 ? {
-                      alwaysActivationEvent: true, // TODO!
+                      alwaysActivationEvent: true, // TODO! config
                       ...config,
                       // TS is literally killing the target type!
                       target: { [target]: true } as any,
@@ -188,15 +196,7 @@ const buildExtension = async ({
         outDir,
         resolvedManifest: generatedManifest,
         async afterSuccessfulBuild(rebuildCount) {
-            if (mode !== 'development' || launchVscodeParams === false) return
             ipcEmitExtension?.('app:reload')
-            if (rebuildCount > 0) return
-            await launchVscode(outDir, {
-                ...launchVscodeParams,
-                // TS doesn't see target override ???
-                // ...config,
-                development: config.development,
-            })
         },
         overrideBuildConfig: defaultsDeep(
             serverIpcChannel
