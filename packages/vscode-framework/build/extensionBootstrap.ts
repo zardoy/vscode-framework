@@ -29,6 +29,16 @@ if (VSCODE_FRAMEWORK_OUTPUT)
 
 if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
     const bootstrapConfig = process.env.EXTENSION_BOOTSTRAP_CONFIG as unknown as BootstrapConfig
+    // TODO! review avaialble
+    if (bootstrapConfig.developmentCommands && VSCODE_FRAMEWORK_OUTPUT)
+        activateFunctions.push(ctx => {
+            ctx.subscriptions.push(
+                vscode.commands.registerCommand('focusActiveDevelopmentExtensionOutput', () => {
+                    VSCODE_FRAMEWORK_OUTPUT.channel.show(true)
+                }),
+            )
+        })
+
     if (bootstrapConfig.serverIpcChannel) {
         const nodeIpc = require('node-ipc') as typeof import('node-ipc')
         nodeIpc.config.retry = 1000

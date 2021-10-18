@@ -204,6 +204,8 @@ const buildExtension = async ({
                 ? {
                       define: {
                           EXTENSION_BOOTSTRAP_CONFIG: {
+                              // TODO!
+                              developmentCommands: true,
                               ...config.development.extensionBootstrap,
                               serverIpcChannel,
                           } as BootstrapConfig,

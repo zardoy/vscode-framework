@@ -62,6 +62,7 @@ export const propsGenerators = makeGenerators({
         { developmentCommands = true }: { developmentCommands?: boolean },
     ) => {
         const { contributes } = manifest
+        // TODO! add development even if no commands
         if (!contributes?.commands) return {}
         const { displayName } = manifest
         return {
@@ -74,6 +75,11 @@ export const propsGenerators = makeGenerators({
                                   title: 'Run Active Development Command',
                                   category: 'VSCode Framework',
                                   command: 'runActiveDevelopmentCommand',
+                              },
+                              {
+                                  title: 'Focus on Active Development Extension Output',
+                                  category: 'VSCode Framework',
+                                  command: 'focusActiveDevelopmentExtensionOutput',
                               },
                           ]
                         : []),

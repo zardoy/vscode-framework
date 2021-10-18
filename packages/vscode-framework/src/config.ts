@@ -52,6 +52,8 @@ export interface Config {
                    * - false - do nothing, but remeber you always can reload extension window with CTRL+R shortcut
                    */
                   forceReload: 'forced' | 'display-hint' | false
+                  /** TODO! */
+                  developmentCommands: boolean
                   hotReload:
                       | false
                       | {
@@ -83,6 +85,7 @@ export const defaultConfig: Config = {
             closeWindowOnExit: true,
             pipeConsole: false,
             forceReload: 'display-hint',
+            developmentCommands: true,
             hotReload: false,
         },
     },
