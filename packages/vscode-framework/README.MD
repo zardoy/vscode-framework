@@ -24,19 +24,44 @@ This is a full-featured set of tools to develop [VSCode extensions](https://code
 - Install it in your project: `npm i -D vscode-framework`
 - Read the [DOCS](./docs/01-extension-manifest.md)
 
+## Brief Overview
+
+```ts
+import vscode from 'vscode'
+
+export const activate = (ctx: vscode.ExtensionContext) => {
+    ctx.subscriptions.push(
+        vscode.commands.registerCommand('extension.command', () =>
+            vscode.window.showInformationMessage(`Debug is ${vscode.workspace.getConfiguration(extension).get<true>('enableDebug') ? 'enabled' : 'disabled'}`),
+        ),
+    )
+}
+```
+
+```ts
+import vscode from 'vscode'
+import { getExtensionSetting, registerExtensionCommand } from 'vscode-framework'
+
+export const activate = () => {
+    registerExtensionCommand('command', () =>
+        vscode.window.showInformationMessage(`Debug is ${getExtensionSetting('enableDebug') ? 'enabled' : 'disabled'}`),
+    )
+}
+```
+
+## More Features
+
+- access extension context anywhere via `extensionCtx` export
+
 <!-- There is a hot reload feature, but you can manually restart editor with pressing <kdb>R</kbd> in console. -->
-
-<!-- #### About Description
-
-TODO: rewrite
-
+<!--
 Don't confuse `description` from commands above with description from VSCode's `Feature Contributes` tab:
 
 ![VSCode-Feature-Contributes](media/vscode-contribution-points.png)
 
 #### About Keywords
 
-Note, that VSCode doesn't support keywords for the commands, so -->
+Note, that VSCode doesn't support keywords for the commands, so --> -->
 
 ## Why it was Created?
 
