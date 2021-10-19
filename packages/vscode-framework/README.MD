@@ -11,7 +11,9 @@ Warning: still WIP, not all functionality are available.
 - 🚀 Use `console` methods in production (creates extension output for you)
 - 🛠️ Configurable
 
-And even more: painless <!-- pnpm support, CI, --> [API wrappers](packages/vscode-extra/).
+<!-- And even more: pnpm support, CI, [API wrappers](packages/vscode-extra/). -->
+
+Note: highly experimental, `start` works, but `build` wasn't battle-tested yet.
 
 ## What is this?
 
@@ -26,6 +28,8 @@ This is a full-featured set of tools to develop [VSCode extensions](https://code
 
 ## Brief Overview
 
+Let's take basic example:
+
 ```ts
 import vscode from 'vscode'
 
@@ -37,6 +41,8 @@ export const activate = (ctx: vscode.ExtensionContext) => {
     )
 }
 ```
+
+With this framework:
 
 ```ts
 import vscode from 'vscode'
