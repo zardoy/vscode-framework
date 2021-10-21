@@ -66,13 +66,10 @@ As said above, `console.debug` is enabled only in development by default, but it
 For example we can enable debug is appropriate setting is enabled:
 
 ```ts
-import { getExtensionSetting } from 'vscode-framework'
-import { vscode_framework_set_debug_enabled } from 'vscode-framework/build/framework/injected'
-
-declare const vscode_framework_set_debug_enabled: vscode_framework_set_debug_enabled
+import { getExtensionSetting, setDebugEnabled } from 'vscode-framework'
 
 export const activate = () => {
-    vscode_framework_set_debug_enabled(getExtensionSetting('debug'))
+    setDebugEnabled(getExtensionSetting('debug'))
 }
 ```
 
