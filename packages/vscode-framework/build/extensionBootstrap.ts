@@ -19,7 +19,7 @@ const activateFunctions: Array<Extension['activate']> = []
 declare const VSCODE_FRAMEWORK_OUTPUT: any | undefined
 declare const vscode_framework_set_debug_enabled: any
 declare let __VSCODE_FRAMEWORK_CONTEXT: any
-if (VSCODE_FRAMEWORK_OUTPUT)
+if (typeof VSCODE_FRAMEWORK_OUTPUT !== 'undefined')
     activateFunctions.push(() => {
         const outputChannel = vscode.window.createOutputChannel(process.env.EXTENSION_DISPLAY_NAME)
         // eslint-disable-next-line new-cap
@@ -30,7 +30,7 @@ if (VSCODE_FRAMEWORK_OUTPUT)
 if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
     const bootstrapConfig = process.env.EXTENSION_BOOTSTRAP_CONFIG as unknown as BootstrapConfig
     // TODO! review avaialble
-    if (bootstrapConfig.developmentCommands && VSCODE_FRAMEWORK_OUTPUT)
+    if (bootstrapConfig.developmentCommands && typeof VSCODE_FRAMEWORK_OUTPUT !== 'undefined')
         activateFunctions.push(ctx => {
             ctx.subscriptions.push(
                 vscode.commands.registerCommand('focusActiveDevelopmentExtensionOutput', () => {

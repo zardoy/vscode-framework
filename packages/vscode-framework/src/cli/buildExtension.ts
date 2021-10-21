@@ -200,22 +200,22 @@ const buildExtension = async ({
             ipcEmitExtension?.('app:reload')
         },
         overrideBuildConfig: defaultsDeep(
-            serverIpcChannel
-                ? {
-                      define: {
-                          EXTENSION_BOOTSTRAP_CONFIG: {
+            {
+                define: {
+                    EXTENSION_BOOTSTRAP_CONFIG: serverIpcChannel
+                        ? ({
                               // TODO!
                               developmentCommands: true,
                               ...config.development.extensionBootstrap,
                               serverIpcChannel,
-                          } as BootstrapConfig,
-                      },
-                  }
-                : {},
+                          } as BootstrapConfig)
+                        : false,
+                },
+            },
             config.esbuildConfig,
         ),
         // TODO handle other options
-        injectConsole: config.console === 'outputChannel',
+        injectConsole: config.consoleStatements === 'outputChannel',
     })
 }
 

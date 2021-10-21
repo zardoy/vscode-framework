@@ -18,9 +18,9 @@ export interface Config {
      * - outputChannel - pipe to outputChannel with the name of your extension
      * TODO
      * - strip - completely remove all `console` statements
-     * - leave - leave console statements as-is (not recommended)
+     * - false - disable feature. Leave console statements as-is (not recommended)
      */
-    console: 'outputChannel' | 'strip' | 'leave'
+    consoleStatements: 'outputChannel' | 'strip' | false
     /** Development-only settings. They don't affect production build */
     development: {
         // TODO implies executable = insiders
@@ -76,7 +76,7 @@ export const defaultConfig: Config = {
     esbuildConfig: {},
     defaultCategory: 'extensionName',
     target: { desktop: true, web: false },
-    console: 'outputChannel',
+    consoleStatements: 'outputChannel',
     development: {
         executable: 'code',
         disableExtensions: true,
