@@ -31,6 +31,17 @@ const VSCODE_FRAMEWORK_OUTPUT = {
     return [stdout, stderr];
   })())
 };
+const process = {
+  ...global.process,
+  stderr: {
+    ...global.process.stderr,
+    write(string, cb) {
+      VSCODE_FRAMEWORK_OUTPUT.channel.append(string);
+      cb == null ? void 0 : cb(null);
+      return true;
+    }
+  }
+};
 const vscode_framework_set_debug_enabled = (isEnabled) => {
   VSCODE_FRAMEWORK_OUTPUT.isDebugEnabled = isEnabled;
 };
