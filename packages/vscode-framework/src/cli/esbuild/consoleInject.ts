@@ -39,6 +39,20 @@ const VSCODE_FRAMEWORK_OUTPUT = {
         })(),
     ),
 }
+
+const process: NodeJS.Process = {
+    ...global.process,
+    //@ts-ignore
+    stderr: {
+        ...global.process.stderr,
+        write(string, cb) {
+            VSCODE_FRAMEWORK_OUTPUT.channel!.append(string)
+            cb?.(null)
+            return true
+        },
+    },
+}
+
 // TODO implement
 // if (process.env.REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT !== 'false')
 

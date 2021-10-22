@@ -13,7 +13,7 @@ import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
 import { runEsbuild } from './esbuild/esbuild'
 
-const debug = Debug('vscode-framework:esbuild')
+const debug = Debug('vscode-framework:bulid-extension')
 
 /** for ipc. used in extensionBootstrap.ts */
 export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false> & {
@@ -158,8 +158,8 @@ const buildExtension = async ({
 
     // #region prepare bootstrap config
     /** An unique ID is required because multiple instances of extension can be launched */
-    const serverIpcChannel = afterBuild && getEnableIpc(config) ? `vscode-framework:server_${nanoid(5)}` : undefined
-    if (serverIpcChannel) await afterBuild!({ ipcChannel: serverIpcChannel })
+    const serverIpcChannel =
+        mode !== 'production' && afterBuild && getEnableIpc(config) ? `vscode-framework:server_${nanoid(5)}` : undefined
 
     // #endregion
 
@@ -197,7 +197,8 @@ const buildExtension = async ({
         outDir,
         resolvedManifest: generatedManifest,
         async afterSuccessfulBuild(rebuildCount) {
-            ipcEmitExtension?.('app:reload')
+            if (rebuildCount === 0) await afterBuild!({ ipcChannel: serverIpcChannel })
+            else ipcEmitExtension?.('app:reload')
         },
         overrideBuildConfig: defaultsDeep(
             {
@@ -215,7 +216,7 @@ const buildExtension = async ({
             config.esbuildConfig,
         ),
         // TODO handle other options
-        injectConsole: config.consoleStatements === 'outputChannel',
+        injectConsole: config.consoleStatements !== false && config.consoleStatements.action === 'pipeToOutputChannel',
     })
 }
 

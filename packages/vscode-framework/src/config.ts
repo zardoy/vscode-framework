@@ -20,7 +20,15 @@ export interface Config {
      * - strip - completely remove all `console` statements
      * - false - disable feature. Leave console statements as-is (not recommended)
      */
-    consoleStatements: 'outputChannel' | 'strip' | false
+    consoleStatements:
+        | false
+        | {
+              action: 'strip'
+          }
+        | {
+              action: 'pipeToOutputChannel'
+              useEmoji: boolean
+          }
     /** Development-only settings. They don't affect production build */
     development: {
         // TODO implies executable = insiders
@@ -32,6 +40,7 @@ export interface Config {
          * - opening other folder/workspace will clear effect and enable extensions back
          */
         disableExtensions: boolean
+        /** Set true to open Chrome DevTools at launch */
         openDevtools: boolean
         /**
          * Whether to launch wrapper with ipc or extension bundle directly (if false)
@@ -40,6 +49,14 @@ export interface Config {
         extensionBootstrap:
             | false
             | {
+                  /**
+                   * Takes effect only when consoleStatements.action == pipeToOutputChannel (by default).
+                   *
+                   * Whether to reveal outputChannel with logs at start (it still won't take focus)
+                   */
+                  // TODO
+                  revealOutputChannel: boolean
+                  // IPC
                   /** Whether to display all console calls in console from you launched the extension */
                   pipeConsole: boolean
                   /** Whether to close extension development window on development process exit (e.g. when you stop `vscode-framework start`) */
@@ -76,12 +93,17 @@ export const defaultConfig: Config = {
     esbuildConfig: {},
     defaultCategory: 'extensionName',
     target: { desktop: true, web: false },
-    consoleStatements: 'outputChannel',
+    consoleStatements: {
+        action: 'pipeToOutputChannel',
+        // TODO
+        useEmoji: false,
+    },
     development: {
         executable: 'code',
         disableExtensions: true,
         openDevtools: false,
         extensionBootstrap: {
+            revealOutputChannel: false,
             closeWindowOnExit: true,
             pipeConsole: false,
             forceReload: 'display-hint',

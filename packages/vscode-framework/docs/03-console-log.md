@@ -1,9 +1,10 @@
 # Console
 
-Status: almost done, for not it getting stripped by esbuild in produciton.
-TODO: describe config variants
+With vscode-framework it's possible to use console methods and `debug`-like libraries as usual.
 
-All console methods in your code by default will be redirected to Output channel of your extension. You literally don't need to everything.
+> You can't just redefine global `console.log`, because it would affect other extension, running in the same node [Extension Host](https://code.visualstudio.com/api/advanced-topics/extension-host).
+
+All console methods in your code by default will be redirected to Output channel of your extension.
 
 ## Example
 
@@ -73,9 +74,15 @@ export const activate = () => {
 }
 ```
 
-TODO: append with command executed
+But `util.debuglog`-like libraries should work well, since we're also handling `process.stderr.write`.
+
+TODO: append with the command being executed (like debugs namespaces)
 
 ## Advanced
 
 This feature works by simply putting `console` variable to the top of your bundled script ([here is the code](../src/cli/esbuild/consoleInject.ts)). It means that other dependencies will use it too, but not other extensions.
 Also, if you really need to access to the `vscode.OutputChannel` instance, you can do it like so: `VSCODE_FRAMEWORK_OUTPUT.channel` anywhere in your extension.
+
+## Config
+
+<!-- TODO -->
