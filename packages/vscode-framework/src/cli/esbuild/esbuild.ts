@@ -5,6 +5,7 @@ import escapeStringRegexp from 'escape-string-regexp'
 import kleur from 'kleur'
 import { ManifestType } from 'vscode-manifest'
 import Debug from '@prisma/debug'
+import filesize from 'filesize'
 import { BuildTargetType, Config } from '../../config'
 import { clearConsole, logConsole } from '../logger'
 import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
@@ -52,15 +53,16 @@ export const runEsbuild = async ({
         : undefined
     // lodash-marker
     const { metafile, stop } = await esbuildBuild({
+        bundle: true,
         // latest is assumed if web
         target: target === 'desktop' ? 'node14' : undefined,
-        bundle: true,
         watch: mode === 'development',
-        // minify: mode === 'production',
+        minify: mode === 'production',
         platform: target === 'desktop' ? 'node' : 'browser',
         outfile: join(outDir, target === 'desktop' ? EXTENSION_ENTRYPOINTS.node : EXTENSION_ENTRYPOINTS.web),
         format: 'cjs',
         entryPoints: [realEntryPoint],
+        metafile: true,
         ...overrideBuildConfig,
         write: false,
         // sourcemap: true,
@@ -111,6 +113,7 @@ export const runEsbuild = async ({
                             kleur.green(rebuildCount === 0 ? 'build' : 'rebuild'),
                             kleur.gray(`${Date.now() - date}ms`),
                         )
+                        debug('afterSuccessfulBuild called')
                         await afterSuccessfulBuild(rebuildCount++)
                     })
                 },
@@ -175,6 +178,11 @@ export const runEsbuild = async ({
         ...(overrideBuildConfig.plugins ?? []),
     })
     // TODO output packed file and this file sizes at prod
-    // const outputSize = Object.entries(metafile!.outputs)[0]![1]!.bytes
+    if (mode === 'production') {
+        const outputSize = Object.entries(metafile!.outputs)[0]![1]!.bytes
+        // TODO output real size
+        console.log('Production build size:', kleur.bold().cyan(filesize(outputSize)))
+    }
+
     return { stop }
 }

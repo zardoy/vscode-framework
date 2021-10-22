@@ -13,6 +13,7 @@ import { WebOpenType } from './launcher'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateTypes } from './typesGenerator'
 import { generateAndWriteManifest } from '.'
+import kleur from 'kleur'
 declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:cli')
@@ -144,9 +145,13 @@ commander.command(
         if (!config.target.desktop && !config.target.web)
             throw new Error('Both targets are disabled in config. Enable either desktop or wb')
 
-        if (fsExtra.existsSync('./tsconfig.json'))
+        if (fsExtra.existsSync('./tsconfig.json')) {
+            const date = Date.now()
+            console.log(kleur.green('Executing tsc for type-checking...'))
             // just to simplify, don't see a reason for programmatic usage
             await execa('tsc', { stdio: 'inherit' })
+            console.log(kleur.green('Type-checking done in '), `${Date.now() - date}ms`)
+        }
 
         for (const [platform, enablement] of Object.entries(config.target)) {
             if (!enablement) continue

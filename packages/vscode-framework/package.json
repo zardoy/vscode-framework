@@ -57,6 +57,7 @@
         "escape-string-regexp": "^4.0.0",
         "execa": "^5.1.1",
         "exit-hook": "^2.2.1",
+        "filesize": "^8.0.3",
         "fs-extra": "^10.0.0",
         "generated-module": "^0.0.2",
         "github-remote-info": "^1.0.3",
