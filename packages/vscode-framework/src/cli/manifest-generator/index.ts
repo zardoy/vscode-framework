@@ -2,10 +2,13 @@
 
 import fs from 'fs'
 import { writeFile } from 'jsonfile'
-import { omit } from 'lodash'
+import { defaultsDeep, omit } from 'lodash'
 import { ManifestType, readManifest } from 'vscode-manifest'
+import { defaultConfig, Config } from '../../config'
 import { getManifestPathFromRoot } from '../../util'
-import { propsGenerators, PropsGeneratorsConfig, runGeneratorsOnManifest } from './propsGenerators'
+import { propsGenerators, PropsGeneratorsMeta, runGeneratorsOnManifest } from './propsGenerators'
+
+// TODO get off of config
 
 interface Options {
     /**
@@ -13,18 +16,18 @@ interface Options {
      * for now custom path to package.json
      */
     outputPath: string
+    config: Config
     /** @default true */
     overwrite?: boolean
-    propsToGenerate?: true | Array<keyof typeof propsGenerators>
-    propsGeneratorsConfig: PropsGeneratorsConfig
+    propsGeneratorsMeta: PropsGeneratorsMeta
 }
 
 /** Reads and validates manifest on <cwd>/package.json and writes manifest with generated props */
 export const generateAndWriteManifest = async ({
     outputPath,
     overwrite = true,
-    propsToGenerate = true,
-    propsGeneratorsConfig,
+    config,
+    propsGeneratorsMeta,
 }: Options) => {
     if (fs.existsSync(outputPath))
         if (overwrite)
@@ -32,30 +35,47 @@ export const generateAndWriteManifest = async ({
             await fs.promises.unlink(outputPath)
         else return
 
-    const generatedManifest = await generateManifest({
-        propsToGenerate,
-        sourceManifest: await readManifest({ manifestPath: getManifestPathFromRoot() }),
-        propsGeneratorsConfig,
-    })
+    const sourceManifest = await readManifest({ manifestPath: getManifestPathFromRoot() })
+    let generatedManifest =
+        config.disablePropsGenerators === true
+            ? sourceManifest
+            : await generateManifest({
+                  skipPropGenerators: config.disablePropsGenerators,
+                  sourceManifest,
+                  propsGeneratorsMeta,
+              })
+    for (const generator of config.extendPropsGenerators)
+        generatedManifest = defaultsDeep(
+            await generator({
+                generatedManifest,
+                meta: propsGeneratorsMeta,
+                resolvedConfig: config,
+                sourceManifest,
+            }),
+            generatedManifest,
+        )
+
     await writeFile(outputPath, generatedManifest, { spaces: 4 })
     return generatedManifest
 }
+
+// TODO rethink and rename export
 
 /**
  * @return like {@linkcode propsToGenerate}, but can also clean manifest
  */
 export const generateManifest = async ({
-    propsToGenerate = true,
+    skipPropGenerators = defaultConfig.disablePropsGenerators,
     sourceManifest,
     cleanupManifest = true,
-    propsGeneratorsConfig: config,
+    propsGeneratorsMeta: config,
 }: {
-    propsToGenerate?: Options['propsToGenerate']
+    skipPropGenerators?: Config['disablePropsGenerators']
     /** Manifest that will be used to generate props */
     sourceManifest: ManifestType
     /** Preserves only required props in generated package.json and removes other. Disable to preserve all source props + generated. */
     cleanupManifest?: boolean
-    propsGeneratorsConfig: PropsGeneratorsConfig
+    propsGeneratorsMeta: PropsGeneratorsMeta
 }): Promise<ManifestType> => {
     // TODO warn about overwritted props and to run vscode-framework migrate
     sourceManifest = cleanupManifest
@@ -71,5 +91,14 @@ export const generateManifest = async ({
               // eslint-disable-next-line zardoy-config/@typescript-eslint/array-type
           ] as (keyof typeof sourceManifest)[]) as any)
         : sourceManifest
-    return runGeneratorsOnManifest(sourceManifest, propsToGenerate as any, true, config)
+    return runGeneratorsOnManifest(
+        sourceManifest,
+        typeof skipPropGenerators === 'boolean'
+            ? (!skipPropGenerators as true)
+            : (removeItems(Object.keys(propsGenerators), skipPropGenerators) as any[]),
+        true,
+        config,
+    )
 }
+
+const removeItems = (arr: string[], toRemove: string[]) => arr.filter(item => !toRemove.includes(item))

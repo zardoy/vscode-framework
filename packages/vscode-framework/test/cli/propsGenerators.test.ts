@@ -4,6 +4,7 @@ import fs from 'fs'
 import { join } from 'path'
 import { PackageJson } from 'type-fest'
 import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
+import { defaultConfig } from '../../src/config'
 import { screenRecorderManifest } from './common'
 
 type HaveOwnTests = 'repository'
@@ -82,7 +83,8 @@ test.each<{ name: keyof Tests; expect: (data) => void }>(
     expect(
         await propsGenerators[name](screenRecorderManifest, {
             target: { desktop: true, web: true },
-            alwaysActivationEvent: false,
+            mode: 'production',
+            config: defaultConfig.development,
         }),
     )
 })

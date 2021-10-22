@@ -8,7 +8,7 @@ import { nanoid } from 'nanoid'
 import nodeIpc from 'node-ipc'
 import exitHook from 'exit-hook'
 import { Except } from 'type-fest'
-import { BuildTargetType, Config } from '../config'
+import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
 import { runEsbuild } from './esbuild/esbuild'
@@ -16,11 +16,15 @@ import { runEsbuild } from './esbuild/esbuild'
 const debug = Debug('vscode-framework:bulid-extension')
 
 /** for ipc. used in extensionBootstrap.ts */
-export type BootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false> & {
+export type BootstrapConfig = ExtensionBootstrapConfig & {
     /** `undefined` means don't enable IPC */
     serverIpcChannel: string | undefined
 }
 
+/** Build mode.
+ * - development - started with `start` command
+ * - production - started with `build` command
+ */
 export type ModeType = 'development' | 'production'
 
 export type IpcEvents = {
@@ -167,18 +171,13 @@ const buildExtension = async ({
     const generatedManifest = await generateAndWriteManifest({
         outputPath: join(outDir, 'package.json'),
         overwrite: true,
-        propsGeneratorsConfig:
-            mode === 'development'
-                ? {
-                      alwaysActivationEvent: true, // TODO! config
-                      ...config,
-                      // TS is literally killing the target type!
-                      target: { [target]: true } as any,
-                  }
-                : {
-                      alwaysActivationEvent: false,
-                      ...config,
-                  },
+        config,
+        propsGeneratorsMeta: {
+            mode,
+            // TS is literally killing the target type!
+            target: mode === 'development' ? ({ [target]: true } as any) : config.target,
+            config: config.development,
+        },
     })
     if (!generatedManifest) throw new Error('Extension manifest (package.json) is missing.')
 

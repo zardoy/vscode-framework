@@ -6,6 +6,7 @@ import { defaultsDeep } from 'lodash'
 import Debug from '@prisma/debug'
 import pkdDir from 'pkg-dir'
 import execa from 'execa'
+import kleur from 'kleur'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { buildExtensionAndWatch } from './buildExtension'
 import { SuperCommander } from './commander'
@@ -13,7 +14,6 @@ import { WebOpenType } from './launcher'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateTypes } from './typesGenerator'
 import { generateAndWriteManifest } from '.'
-import kleur from 'kleur'
 declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:cli')
@@ -35,7 +35,7 @@ const commander = new SuperCommander<Config>(program, async () => {
 // split into two commands
 commander.command(
     'generate-manifest',
-    'Generates package.json for extension. Use this command before consuming extension!',
+    'Generates package.json for extension in production mode. Use this command before consuming extension!',
     {
         options: {
             '--overwrite': {
@@ -48,7 +48,8 @@ commander.command(
     async ({ overwrite }, { config }) => {
         await fsExtra.ensureDir(devExtensionPath)
         await generateAndWriteManifest({
-            propsGeneratorsConfig: { alwaysActivationEvent: false, ...config },
+            config,
+            propsGeneratorsMeta: { mode: 'production', target: config.target, config: { ...config.development } },
             outputPath: join(devExtensionPath, 'package.json'),
             overwrite,
         })

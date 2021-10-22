@@ -106,10 +106,10 @@ test('Places IDs in contributes props', async () => {
     `)
 })
 
-test('Generates schema properly', async () => {
+test('Generates schema properly in production', async () => {
     const generatedManifest = await generateManifest({
         sourceManifest: screenRecorderManifest,
-        propsGeneratorsConfig: { alwaysActivationEvent: false, ...defaultConfig },
+        propsGeneratorsMeta: { target: defaultConfig.target, mode: 'production', config: defaultConfig.development },
     })
     expect(generatedManifest).toMatchInlineSnapshot(`
         Object {

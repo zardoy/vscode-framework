@@ -3,9 +3,9 @@ import { getGithubRemoteInfo } from 'github-remote-info'
 import { defaultsDeep } from 'lodash'
 import { UnionToIntersection } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
-import { Config } from '../../config'
+import { Config, ExtensionBootstrapConfig } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
-import { EXTENSION_ENTRYPOINTS } from '../buildExtension'
+import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 
 // They're generating package.json properties
 // If you with you can use them directly
@@ -13,19 +13,31 @@ import { EXTENSION_ENTRYPOINTS } from '../buildExtension'
 // TODO! package.json name - fileName
 const debug = Debug('vscode-framework:propsGenerators')
 
-type GeneralPropGeneratorsType = Record<
+export type PropsGeneratorsMeta = {
+    mode: ModeType
+    target: Config['target']
+    config: {
+        alwaysActivationEvent: Config['development']['alwaysActivationEvent']
+        extensionBootstrap:
+            | {
+                  developmentCommands: ExtensionBootstrapConfig['developmentCommands']
+              }
+            | false
+    }
+}
+
+type MakePropsGenerators = Record<
     string,
-    (manifestData: any, configData: any) => MaybePromise<Partial<ManifestType>>
+    (manifestData: any, meta: PropsGeneratorsMeta) => MaybePromise<Partial<ManifestType>>
 >
 
 type PickManifest<T extends keyof ManifestType> = Pick<ManifestType, T>
 
 // MAKE TECH!
-const makeGenerators = <T extends GeneralPropGeneratorsType>(generators: T) => generators
+const makeGenerators = <T extends MakePropsGenerators>(generators: T) => generators
 
 // HERE!
 export const propsGenerators = makeGenerators({
-    // TODO implement tests
     // every generator's return type should be deeply merged
     async repository() {
         // hard to test
@@ -51,7 +63,7 @@ export const propsGenerators = makeGenerators({
     qnaFalse() {
         return { qna: false }
     },
-    extensionEntryPoint(_, { target }: { target: Config['target'] }) {
+    extensionEntryPoint(_, { target }) {
         return {
             ...(target.desktop ? { main: EXTENSION_ENTRYPOINTS.node } : {}),
             ...(target.web ? { browser: EXTENSION_ENTRYPOINTS.web } : {}),
@@ -59,45 +71,46 @@ export const propsGenerators = makeGenerators({
     },
     'contributes.commands': (
         manifest: PickManifest<'contributes' | 'name' | 'displayName'>,
-        { developmentCommands = true }: { developmentCommands?: boolean },
+        { mode, config: { extensionBootstrap } },
     ) => {
-        const { contributes } = manifest
-        // TODO! add development even if no commands
-        if (!contributes?.commands) return {}
-        const { displayName } = manifest
-        return {
-            contributes: {
-                // TODO HIGH !!!!
-                commands: [
-                    ...(developmentCommands
-                        ? [
-                              {
-                                  title: 'Run Active Development Command',
-                                  category: 'VSCode Framework',
-                                  command: 'runActiveDevelopmentCommand',
-                              },
-                              {
-                                  title: 'Focus on Active Development Extension Output',
-                                  category: 'VSCode Framework',
-                                  command: 'focusActiveDevelopmentExtensionOutput',
-                              },
-                          ]
-                        : []),
-                    ...contributes.commands.map(({ command, title, category = displayName }) => ({
-                        // category: category ? displayName : category,
-                        category,
-                        command,
-                        title,
-                    })),
-                ],
-            },
-        }
+        const additionalCommands =
+            mode !== 'production' && extensionBootstrap && extensionBootstrap.developmentCommands
+                ? [
+                      {
+                          title: 'Run Active Development Command',
+                          category: 'VSCode Framework',
+                          command: 'runActiveDevelopmentCommand',
+                      },
+                      {
+                          title: 'Focus on Active Development Extension Output',
+                          category: 'VSCode Framework',
+                          command: 'focusActiveDevelopmentExtensionOutput',
+                      },
+                  ]
+                : []
+        const { contributes, displayName } = manifest
+        const commands = [
+            ...additionalCommands,
+            ...(contributes?.commands ?? []).map(({ command, title, category = displayName }) => ({
+                // category: category ? displayName : category,
+                category,
+                command,
+                title,
+            })),
+        ]
+        return commands.length > 0
+            ? {
+                  contributes: {
+                      commands,
+                  },
+              }
+            : {}
     },
     activationEvents(
         { contributes, activationEvents }: PickManifest<'contributes' | 'activationEvents'>,
-        { alwaysActivationEvent }: { alwaysActivationEvent: boolean },
+        { mode, config: { alwaysActivationEvent } },
     ) {
-        if (alwaysActivationEvent)
+        if (mode !== 'production' && alwaysActivationEvent)
             return {
                 activationEvents: ['*'],
             }
@@ -148,8 +161,6 @@ export const propsGenerators = makeGenerators({
     // },
 })
 
-export type PropsGeneratorsConfig = Parameters<typeof propsGenerators[keyof typeof propsGenerators]>[1]
-
 /** Generate manifest with property generates from {@link propsGenerators}
  * @param sourceManifest Manifest, from which props will be generated
  * @param runGenerators property generators to run. true means all, otherwise pass array to run only them
@@ -157,21 +168,20 @@ export type PropsGeneratorsConfig = Parameters<typeof propsGenerators[keyof type
  */
 export const runGeneratorsOnManifest = async (
     sourceManifest: ManifestType,
-    runGenerators: true | keyof typeof propsGenerators,
+    runGenerators: true | Array<keyof typeof propsGenerators>,
     mergeSource: boolean,
-    propsGeneratorsConfig: PropsGeneratorsConfig,
+    propsGeneratorsMeta: PropsGeneratorsMeta,
 ) => {
     debug('Running generators on manifest')
     debug({
         runGenerators,
-        propsGeneratorsConfig,
+        propsGeneratorsMeta,
     })
-    // TODO-low remove unknown conversion
-    if (runGenerators === true) runGenerators = Object.keys(propsGenerators) as unknown as keyof typeof propsGenerators
+    if (runGenerators === true) runGenerators = Object.keys(propsGenerators)
     let generatedManifest = {} as ManifestType
     for (const prop of runGenerators)
         generatedManifest = defaultsDeep(
-            await propsGenerators[prop](sourceManifest, propsGeneratorsConfig),
+            await propsGenerators[prop](sourceManifest, propsGeneratorsMeta),
             generatedManifest,
         )
     debug('Generated props %o', generatedManifest)

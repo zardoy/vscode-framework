@@ -1,5 +1,8 @@
-import { PartialDeep } from 'type-fest'
 import { BuildOptions } from 'esbuild'
+import { PartialDeep } from 'type-fest'
+import { ManifestType } from 'vscode-manifest'
+import type { propsGenerators, PropsGeneratorsMeta } from './cli/manifest-generator/propsGenerators'
+import { MaybePromise } from './util'
 
 // TODO allow to export callback from mjs and ts to LfauncherCLIParams to return
 
@@ -22,13 +25,21 @@ export interface Config {
      */
     consoleStatements:
         | false
-        | {
-              action: 'strip'
-          }
+        // TODO implement
+        // | {
+        //       action: 'strip'
+        //   }
         | {
               action: 'pipeToOutputChannel'
               useEmoji: boolean
           }
+    /** Array of builtin props generators to disable. Pass `true` to retain original manifest, however in this case:
+     * - `extendPropsGenerators` would run anyway
+     * - IDs would resolved anyway
+     */
+    disablePropsGenerators: boolean | Array<keyof typeof propsGenerators>
+    /** User propsGenerators. Not available in JSON config. See guide 09 */
+    extendPropsGenerators: UserPropGenerator[]
     /** Development-only settings. They don't affect production build */
     development: {
         // TODO implies executable = insiders
@@ -40,6 +51,8 @@ export interface Config {
          * - opening other folder/workspace will clear effect and enable extensions back
          */
         disableExtensions: boolean
+        /** Adds `*` to activation events, which makes extension active at start */
+        alwaysActivationEvent: boolean
         /** Set true to open Chrome DevTools at launch */
         openDevtools: boolean
         /**
@@ -69,7 +82,11 @@ export interface Config {
                    * - false - do nothing, but remeber you always can reload extension window with CTRL+R shortcut
                    */
                   forceReload: 'forced' | 'display-hint' | false
-                  /** TODO! */
+                  /** Add additional commands for development:
+                   * - `runActiveDevelopmentCommand` - run command that is regestired with `registerActiveDevelopmentCommand`
+                   * - `focusActiveDevelopmentExtensionOutput` - reveal output in extension
+                   * They're in `VSCode Framework` category. Available only in extension development window
+                   */
                   developmentCommands: boolean
                   hotReload:
                       | false
@@ -87,7 +104,28 @@ export interface Config {
 
 export type UserConfig = PartialDeep<Config>
 
+export type UserPropGenerator = (data: {
+    /** Manifest that is generated after propsGenerators. Usually cleanued up */
+    generatedManifest: ManifestType
+    /** Original package.json, but with resolved IDs (if enabled) */
+    sourceManifest: ManifestType
+    /** Conrfig with all resolved values (uesr + default) */
+    resolvedConfig: Config
+    /** Meta info that was designed for builtin generators */
+    meta: PropsGeneratorsMeta
+}) => MaybePromise<
+    | PartialDeep<ManifestType>
+    | [
+          PartialDeep<ManifestType>,
+          {
+              overwrite: boolean
+          },
+      ]
+>
+
 export type BuildTargetType = 'desktop' | 'web'
+
+export type ExtensionBootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false>
 
 export const defaultConfig: Config = {
     esbuildConfig: {},
@@ -98,10 +136,13 @@ export const defaultConfig: Config = {
         // TODO
         useEmoji: false,
     },
+    disablePropsGenerators: false,
+    extendPropsGenerators: [],
     development: {
         executable: 'code',
         disableExtensions: true,
         openDevtools: false,
+        alwaysActivationEvent: true,
         extensionBootstrap: {
             revealOutputChannel: false,
             closeWindowOnExit: true,
