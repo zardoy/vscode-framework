@@ -196,7 +196,7 @@ const buildExtension = async ({
         outDir,
         resolvedManifest: generatedManifest,
         async afterSuccessfulBuild(rebuildCount) {
-            if (rebuildCount === 0) await afterBuild!({ ipcChannel: serverIpcChannel })
+            if (rebuildCount === 0) await afterBuild?.({ ipcChannel: serverIpcChannel })
             else ipcEmitExtension?.('app:reload')
         },
         overrideBuildConfig: defaultsDeep(
