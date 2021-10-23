@@ -138,7 +138,7 @@ commander.command(
         },
         loadConfig: true,
     },
-    async ({ path }, { config }) => {
+    async ({ skipTypechecking, path }, { config }) => {
         // TODO apply same process.exit as above here
 
         // TODO build path
@@ -146,7 +146,7 @@ commander.command(
         if (!config.target.desktop && !config.target.web)
             throw new Error('Both targets are disabled in config. Enable either desktop or wb')
 
-        if (fsExtra.existsSync('./tsconfig.json')) {
+        if (!skipTypechecking && fsExtra.existsSync('./tsconfig.json')) {
             const date = Date.now()
             console.log(kleur.green('Executing tsc for type-checking...'))
             // just to simplify, don't see a reason for programmatic usage
