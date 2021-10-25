@@ -1,6 +1,6 @@
 declare namespace NodeJS {
     interface ProcessEnv {
-        /** De-facto standard. Similar to ctx.extensionMode */
+        /** Use this instead of `ctx.extensionMode` */
         NODE_ENV: 'development' | 'production'
         /** `name` of package.json */
         EXTENSION_ID_NAME: string
@@ -9,8 +9,7 @@ declare namespace NodeJS {
         /** Set to "false" to not reveal output pannel (on development only) */
         REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT: string
         /**
-         * similar to `process.type`.
-         * @deprecated use `vscode.env.appHost` instead
+         * Use this instead of `vscode.env.appHost`
          *  */
         PLATFORM: 'node' | 'web'
     }

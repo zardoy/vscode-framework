@@ -68,17 +68,43 @@ To test your extension on the web use `vscode-framework start --web` command. ~~
 
 ### Environment Variables
 
-See [Environment Variables](build/client.d.ts) that are injected.
+See [Environment Variables](../build/client.d.ts) that are injected.
 
-<!-- To get them in intellisense create `globals.d.ts` file in your source root with `///<reference lib="">` at the top. -->
+They are injected automatically when you write import anything from `vscode-framework`.
+
+There are already `ctx.extensionMode` and `vscode.env.appHost` for checking mode and environment. **Don't use them!**
+
+Use `process.env.NODE_ENV` and `process.env.PLATFORM` instead by using them unreachable code won't be bundled.
+
+Examples:
+
+```ts
+if (process.env.NODE_ENV !== 'production') {
+    // this code will be removed from production code
+}
+```
+
+```ts
+if (process.env.PLATFORM === 'node') {
+    const depcheck = require('depcheck') as typeof import('depcheck')
+    await depcheck.doSomeCrazyThing()
+    await vscode.window.showInformationWindow(result)
+}
+```
+
+<!-- TODO include more comprehensive example with commands -->
+
+Here we're importing module that doesn't have browser support, in browser bundle (`extension-web.js`) the `depcheck` module won't be included.
+
+> Note: we could also use `import` here but since VSCode doesn't support ESM it doesn't matter for now
+
+<!-- To get them in intellisense create `globals.d.ts` file in your source root with `///<reference lib="vscode-framework/build/client">` at the top. -->
 
 ## TypeChecking
 
 <!-- > The fix is coming -->
 
 You might noticed the speed of bundling. This is because esbuild doesn't perform type-checking of your project. But don't worry this affects only development workflow, with `build` command it will perform typechecking by using `tsc` from your project, but only if you have `tsconfig.json` (but not jsconfig) at the root. You can also pass `--skip-typechecking` to disable it.
-
-<!-- TODO build: perform typechecking flag -->
 
 <!-- ## Hot Reload -->
 ## Reload
