@@ -1,3 +1,4 @@
+import { camelCase } from 'change-case'
 import fs from 'fs'
 import { join, resolve } from 'path'
 import Debug from '@prisma/debug'
@@ -204,12 +205,18 @@ const buildExtension = async ({
                 define: {
                     EXTENSION_BOOTSTRAP_CONFIG: serverIpcChannel
                         ? ({
-                              // TODO!
-                              developmentCommands: true,
+                              developmentCommands:
+                                  config.development.extensionBootstrap &&
+                                  config.development.extensionBootstrap.developmentCommands,
                               ...config.development.extensionBootstrap,
                               serverIpcChannel,
                           } as BootstrapConfig)
                         : false,
+                    IDS_PREFIX: config.prependIds
+                        ? config.prependIds.style === 'camelCase'
+                            ? camelCase(generatedManifest.name)
+                            : generatedManifest.name
+                        : undefined,
                 },
             },
             config.esbuildConfig,
