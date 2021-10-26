@@ -8,8 +8,8 @@ declare namespace NodeJS {
         EXTENSION_DISPLAY_NAME: string
         /** Set to "false" to not reveal output pannel (in development only) */
         REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT: string
-        /** Prefix of IDs for contributions (commands / configuration) (defined only when isn't disabled in config) */
-        IDS_PREFIX: string
+        /** Prefix of IDs for contributions (commands / configuration). Defined only when isn't disabled in config */
+        IDS_PREFIX?: string
         /**
          * Use this instead of `vscode.env.appHost`
          *  */

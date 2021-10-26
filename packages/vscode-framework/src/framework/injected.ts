@@ -1,4 +1,13 @@
 import vscode from 'vscode'
+import { Commands, Settings } from './generated'
+
+// methods that works with injected env
+
+export const getExtensionCommandId = (command: Commands['regular']) =>
+    process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.${command}` : command
+
+export const getExtensionSettingId = (setting: keyof Settings) =>
+    process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.${setting}` : setting
 
 // methods that works only with injected code
 
