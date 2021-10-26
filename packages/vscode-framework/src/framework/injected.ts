@@ -5,9 +5,9 @@ import { Commands, Settings } from './generated'
 
 export const getExtensionContributionsPrefix = () => (process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.` : '')
 
-export const getExtensionCommandId = (command: Commands['regular']) => `${getExtensionContributionsPrefix()}.${command}`
+export const getExtensionCommandId = (command: Commands['regular']) => `${getExtensionContributionsPrefix()}${command}`
 
-export const getExtensionSettingId = (setting: keyof Settings) => `${getExtensionContributionsPrefix()}.${setting}`
+export const getExtensionSettingId = (setting: keyof Settings) => `${getExtensionContributionsPrefix()}${setting}`
 
 // methods that works only with injected code (extensionBootstrap.ts)
 
