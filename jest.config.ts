@@ -1,7 +1,7 @@
 import { defineJestConfig } from '@zardoy/jest-config'
 
-const config = defineJestConfig({}, true)
-
-// console.log(config)
+const config = {
+    testPathIgnorePatterns: ['/build/'],
+}
 
 export default config

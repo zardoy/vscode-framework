@@ -20,7 +20,7 @@ const sliceExtensionId = (name: string) => name.split('.').slice(1).join('.')
 export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeModulesDir?: string } = {}) => {
     // TODO!
     // TODOgenerateskeleteonanyway
-    const manifest = await readDirectoryManifest()
+    const manifest = await readDirectoryManifest() // ensure prepandIds doesn't affect generated code
     if (!manifest.contributes) throw new GracefulError("Contributes property doesn't exist. Nothing to generate from")
 
     const { commands, configuration } = manifest.contributes

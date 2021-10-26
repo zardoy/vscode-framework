@@ -35,7 +35,10 @@ export const generateAndWriteManifest = async ({
             await fs.promises.unlink(outputPath)
         else return
 
-    const sourceManifest = await readManifest({ manifestPath: getManifestPathFromRoot() })
+    const sourceManifest = await readManifest({
+        manifestPath: getManifestPathFromRoot(),
+        prependIds: config.prependIds,
+    })
     let generatedManifest =
         config.disablePropsGenerators === true
             ? sourceManifest

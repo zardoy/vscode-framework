@@ -18,6 +18,10 @@
         "trailingComma": "all"
     },
     "devDependencies": {
+        "@babel/cli": "^7.15.7",
+        "@babel/core": "^7.15.8",
+        "@babel/preset-env": "^7.15.8",
+        "@babel/preset-typescript": "^7.15.0",
         "@types/jest": "^27.0.2",
         "@types/node": "^16.11.0",
         "@zardoy/jest-config": "^0.0.1",
@@ -35,7 +39,6 @@
         "modify-json-file": "^1.2.1",
         "prettier": "^2.4.1",
         "quicktype-core": "^6.0.70",
-        "ts-jest": "^27.0.6",
         "ts-node": "^10.3.0",
         "tsc-watch": "^4.5.0",
         "type-fest": "^2.5.0",

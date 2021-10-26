@@ -1,4 +1,5 @@
 import path from 'path'
+import { camelCase } from 'change-case'
 import { mapKeys } from 'lodash'
 import { readFile } from 'jsonfile'
 import { Except } from 'type-fest'
@@ -10,24 +11,32 @@ import { ManifestType } from './frameworkTypes'
 
 // package: generate package
 
-interface ReadManifestOptions {
+export interface ReadManifestOptions {
     /**
-     * Try to restore extension ID where they are missing. e.g.
+     * Try to restore and prepend extension ID where they are missing. e.g.
      * ```json
      * "contributes": {
-     *     "commands": [ { "command": "say-hello", ... } ] -> "commands": [ { "command": "extension.say-hello", ... } ]
+     *     "commands": [ { "command": "sayHello", ... } ] -> "commands": [ { "command": "extension.sayHello", ... } ]
      *     // But, be aware of that!
-     *     "commands": [ { "command": "ext.say-hello", ... } ] -> "commands": [ { "command": "extension.ext.say-hello", ... } ]
+     *     "commands": [ { "command": "ext.sayHello", ... } ] -> "commands": [ { "command": "extension.ext.sayHello", ... } ]
      *     // but will skip this
-     *     "commands": [ { "command": "extension.say-hello", ... } ] -> "commands": [ { "command": "extension.say-hello", ... } ]
+     *     "commands": [ { "command": "extension.sayHello", ... } ] -> "commands": [ { "command": "extension.sayHello", ... } ]
      * }
      * ```
      * Works only on contribution fields where full ids (with extension name) are needed.
-     * Set to false to disable this behaviour.
+     * Set to false to fully disable this.
      * @note The setting will be probably removed.
-     * @default true
+     * @default { style: 'camelCase' }
      */
-    restoreIds?: boolean | string[]
+    prependIds?:
+        | {
+              /** - `original` usually implies pascal-case
+               * - `camelCase` transform `name` prop into lowerCase
+               */
+              style: 'original' | 'camelCase'
+              // ignoreContributions: string[]
+          }
+        | false
     /**
      * set to `false` to skip validation but in this case you need to handle it manually.
      * see exports of validateManifest.ts for more
@@ -51,10 +60,11 @@ export const readDirectoryManifest = async ({
  */
 export const readManifest = async ({
     manifestPath,
-    // TODO-high change to false
-    restoreIds = true,
+    prependIds,
     throwIfInvalid = true,
 }: ReadManifestOptions): Promise<ManifestType> => {
+    const prependIdsStyle = (prependIds ? prependIds.style : prependIds) ?? 'camelCase'
+
     const manifest: ManifestType = await readFile(manifestPath)
 
     if (throwIfInvalid) validateOrThrow(manifest)
@@ -71,12 +81,14 @@ export const readManifest = async ({
     ) => {
         const parts = id.split('.')
         // TODO! produce warning
-        if (parts.length >= 2 && parts[0] === manifest.name) return id
-        const generateId = restoreIds === true || (Array.isArray(restoreIds) && restoreIds.includes(where))
-        return generateId ? `${manifest.name}.${id}` : id
+
+        const name = prependIdsStyle === 'camelCase' ? camelCase(manifest.name) : manifest.name
+        if (parts.length >= 2 && parts[0] === name) return id
+        const generateId = prependIdsStyle || (Array.isArray(prependIdsStyle) && prependIdsStyle.includes(where))
+        return generateId ? `${name}.${id}` : id
     }
 
-    if (restoreIds && manifest.contributes) {
+    if (prependIdsStyle && manifest.contributes) {
         const { configuration, commands, menus } = manifest.contributes
         if (commands)
             manifest.contributes.commands = commands.map(c => ({

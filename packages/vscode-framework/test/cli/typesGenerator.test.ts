@@ -11,20 +11,21 @@ test('Generates types propertly', async () => {
     spy.mockImplementationOnce((savePath, content, callback) => {
         expect(savePath).toBe(path.posix.resolve(__dirname, '../../../../node_modules/.vscode-framework/index.d.ts'))
         // TODO make readable
+        // TODO! missing @default
         expect(content).toMatchInlineSnapshot(`
-"export interface Commands {
-    regular: \\"startRecording\\";
-}
+            "export interface Commands {
+                regular: \\"startRecording\\";
+            }
 
-export interface Settings {
-    /** Record sound */
-    \\"record-sound\\": boolean;
-    \\"save-dir\\": string;
-    /** Record quality */
-    \\"record-quality\\": \\"4K\\" | \\"FullHD\\" | \\"HD\\";
-}
-"
-`)
+            export interface Settings {
+                /** Record sound */
+                \\"recordSound\\": boolean;
+                \\"saveDir\\": string;
+                /** Record quality */
+                \\"recordQuality\\": \\"4K\\" | \\"FullHD\\" | \\"HD\\";
+            }
+            "
+        `)
         callback(null)
     })
     await generateTypes()

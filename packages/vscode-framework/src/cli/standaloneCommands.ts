@@ -4,6 +4,7 @@ import globby from 'globby'
 import { SuperCommander } from './commander'
 import { launchVscode } from './launcher'
 import { propsGenerators } from './manifest-generator/propsGenerators'
+import { ReadManifestOptions } from 'vscode-manifest/build/readManifest'
 
 export const addStandaloneCommands = (commander: SuperCommander<any>) => {
     commander.command(
@@ -23,10 +24,19 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
         'maintance',
         // TODO update command
         "Use where framework can't be used. Updates package.json checks or adds fields etc...",
-        {},
-        async () => {
+        {
+            options: {
+                '--prepend-ids': {
+                    defaultValue: 'camelCase' as 'camelCase' | 'original' | 'disabled',
+                    description: 'Values: camelCase (default), original (use name untouched), disabled',
+                },
+            },
+        },
+        async ({ prependIds }) => {
             // writes esbuild-scripts review and rename yourself
-            const manifest = await readDirectoryManifest()
+            const manifest = await readDirectoryManifest({
+                prependIds: prependIds === 'disabled' ? false : { style: prependIds },
+            })
             const { scripts } = manifest
             // TODO
             if (!scripts) throw new Error('no scripts field')

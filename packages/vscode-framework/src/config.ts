@@ -1,6 +1,7 @@
 import { BuildOptions } from 'esbuild'
 import { PartialDeep } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
+import { ReadManifestOptions } from 'vscode-manifest/build/readManifest'
 import type { propsGenerators, PropsGeneratorsMeta } from './cli/manifest-generator/propsGenerators'
 import { MaybePromise } from './util'
 
@@ -11,9 +12,6 @@ export interface Config {
     esbuildConfig: BuildOptions
     /** Effects only `build` command */
     target: Record<BuildTargetType, boolean>
-    /** Try to restore IDs in contributions. disable or add contributions keys (implies blacklist) only if have issues with that */
-    // Will enable in case of any issues
-    // restoreId: boolean | string[]
     /** Category that will be used in `contibutes.commands` by default */
     defaultCategory: 'extensionName' | { custom: string }
     /**
@@ -40,6 +38,8 @@ export interface Config {
     disablePropsGenerators: boolean | Array<keyof typeof propsGenerators>
     /** User propsGenerators. Not available in JSON config. See guide 09 */
     extendPropsGenerators: UserPropGenerator[]
+    /** Configuration for auto-prepanding IDs in contribution */
+    prependIds: ReadManifestOptions['prependIds']
     /** Development-only settings. They don't affect production build */
     development: {
         // TODO implies executable = insiders
@@ -138,6 +138,9 @@ export const defaultConfig: Config = {
     },
     disablePropsGenerators: false,
     extendPropsGenerators: [],
+    prependIds: {
+        style: 'camelCase',
+    },
     development: {
         executable: 'code',
         disableExtensions: true,

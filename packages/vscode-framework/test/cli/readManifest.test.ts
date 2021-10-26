@@ -12,13 +12,13 @@ test('Places IDs in contributes props', async () => {
         Object {
           "commands": Array [
             Object {
-              "command": "screen-recorder.start-recording",
+              "command": "screenRecorder.startRecording",
               "title": "Start Screen Recording",
             },
           ],
           "configuration": Object {
             "properties": Object {
-              "screen-recorder.record-quality": Object {
+              "screenRecorder.recordQuality": Object {
                 "description": "Record quality",
                 "enum": Array [
                   "4K",
@@ -27,11 +27,12 @@ test('Places IDs in contributes props', async () => {
                 ],
                 "type": "string",
               },
-              "screen-recorder.record-sound": Object {
+              "screenRecorder.recordSound": Object {
+                "default": false,
                 "description": "Record sound",
                 "type": "boolean",
               },
-              "screen-recorder.save-dir": Object {
+              "screenRecorder.saveDir": Object {
                 "description": "",
                 "type": "string",
               },
@@ -40,7 +41,7 @@ test('Places IDs in contributes props', async () => {
           "menus": Object {
             "commandPalette": Array [
               Object {
-                "command": "screen-recorder.start-recording",
+                "command": "screenRecorder.startRecording",
                 "when": "!virtualWorkspace",
               },
             ],
@@ -83,7 +84,7 @@ test('Places IDs in contributes props', async () => {
           Object {
             "order": 1,
             "properties": Object {
-              "screen-recorder.enable-me": Object {
+              "screenRecorder.enable-me": Object {
                 "default": false,
                 "description": "whether is am i enabled",
                 "type": "boolean",
@@ -94,7 +95,7 @@ test('Places IDs in contributes props', async () => {
           Object {
             "order": 2,
             "properties": Object {
-              "screen-recorder.show-tips": Object {
+              "screenRecorder.show-tips": Object {
                 "default": false,
                 "description": "show tips",
                 "type": "boolean",
@@ -114,7 +115,7 @@ test('Generates schema properly in production', async () => {
     expect(generatedManifest).toMatchInlineSnapshot(`
         Object {
           "activationEvents": Array [
-            "onCommand:start-recording",
+            "onCommand:startRecording",
           ],
           "categories": Array [
             "Other",
@@ -123,13 +124,13 @@ test('Generates schema properly in production', async () => {
             "commands": Array [
               Object {
                 "category": "Screen Recorder",
-                "command": "start-recording",
+                "command": "startRecording",
                 "title": "Start Screen Recording",
               },
             ],
             "configuration": Object {
               "properties": Object {
-                "record-quality": Object {
+                "recordQuality": Object {
                   "description": "Record quality",
                   "enum": Array [
                     "4K",
@@ -138,11 +139,12 @@ test('Generates schema properly in production', async () => {
                   ],
                   "type": "string",
                 },
-                "record-sound": Object {
+                "recordSound": Object {
+                  "default": false,
                   "description": "Record sound",
                   "type": "boolean",
                 },
-                "save-dir": Object {
+                "saveDir": Object {
                   "description": "",
                   "type": "string",
                 },
@@ -151,7 +153,7 @@ test('Generates schema properly in production', async () => {
             "menus": Object {
               "commandPalette": Array [
                 Object {
-                  "command": "start-recording",
+                  "command": "startRecording",
                   "when": "!virtualWorkspace",
                 },
               ],

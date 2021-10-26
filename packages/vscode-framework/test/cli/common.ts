@@ -29,24 +29,25 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
         commands: [
             {
                 // In this case both command and title would be prefixed
-                command: 'start-recording',
+                command: 'startRecording',
                 title: 'Start Screen Recording',
             },
         ],
         configuration: {
             // title: 'Screen Recorder',
             properties: {
-                'record-sound': {
+                recordSound: {
                     type: 'boolean',
                     // TODO make description optional when it means the same as setting id
+                    default: false,
                     description: 'Record sound',
                 },
                 // TODO make no-sync and optional
-                'save-dir': {
+                saveDir: {
                     type: 'string',
                     description: '',
                 },
-                'record-quality': {
+                recordQuality: {
                     description: 'Record quality',
                     type: 'string',
                     enum: ['4K', 'FullHD', 'HD'],
@@ -56,7 +57,7 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
         menus: {
             commandPalette: [
                 {
-                    command: 'start-recording',
+                    command: 'startRecording',
                     when: '!virtualWorkspace',
                 },
             ],
