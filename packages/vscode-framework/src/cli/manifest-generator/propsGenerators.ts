@@ -91,11 +91,9 @@ export const propsGenerators = makeGenerators({
         const { contributes, displayName } = manifest
         const commands = [
             ...additionalCommands,
-            ...(contributes?.commands ?? []).map(({ command, title, category = displayName }) => ({
-                // category: category ? displayName : category,
+            ...(contributes?.commands ?? []).map(({ category = displayName, ...rest }) => ({
                 category,
-                command,
-                title,
+                ...rest,
             })),
         ]
         return commands.length > 0

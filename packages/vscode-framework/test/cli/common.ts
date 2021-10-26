@@ -32,6 +32,12 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
                 command: 'startRecording',
                 title: 'Start Screen Recording',
             },
+            {
+                command: 'editRecording',
+                title: 'Edit Screen Recording',
+                shortTitle: 'Edit',
+                icon: '$(edit)',
+            },
         ],
         configuration: {
             // title: 'Screen Recorder',
@@ -59,6 +65,17 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
                 {
                     command: 'startRecording',
                     when: '!virtualWorkspace',
+                },
+                {
+                    command: 'editRecording',
+                    when: 'resourceExtname == .mpeg',
+                },
+            ],
+            'editor/title': [
+                {
+                    command: 'editRecording',
+                    group: 'navigation',
+                    when: 'resourceExtname == .mpeg',
                 },
             ],
         },

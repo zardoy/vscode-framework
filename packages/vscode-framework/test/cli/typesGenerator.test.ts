@@ -14,7 +14,7 @@ test('Generates types propertly', async () => {
         // TODO! missing @default
         expect(content).toMatchInlineSnapshot(`
             "export interface Commands {
-                regular: \\"startRecording\\";
+                regular: \\"startRecording\\" | \\"editRecording\\";
             }
 
             export interface Settings {

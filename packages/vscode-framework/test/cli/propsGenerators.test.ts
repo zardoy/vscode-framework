@@ -42,6 +42,13 @@ Object {
         "command": "startRecording",
         "title": "Start Screen Recording",
       },
+      Object {
+        "category": "Screen Recorder",
+        "command": "editRecording",
+        "icon": "$(edit)",
+        "shortTitle": "Edit",
+        "title": "Edit Screen Recording",
+      },
     ],
   },
 }
@@ -51,6 +58,7 @@ Object {
 Object {
   "activationEvents": Array [
     "onCommand:startRecording",
+    "onCommand:editRecording",
   ],
 }
 `),

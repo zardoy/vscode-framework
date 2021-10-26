@@ -15,6 +15,12 @@ test('Places IDs in contributes props', async () => {
               "command": "screenRecorder.startRecording",
               "title": "Start Screen Recording",
             },
+            Object {
+              "command": "screenRecorder.editRecording",
+              "icon": "$(edit)",
+              "shortTitle": "Edit",
+              "title": "Edit Screen Recording",
+            },
           ],
           "configuration": Object {
             "properties": Object {
@@ -43,6 +49,17 @@ test('Places IDs in contributes props', async () => {
               Object {
                 "command": "screenRecorder.startRecording",
                 "when": "!virtualWorkspace",
+              },
+              Object {
+                "command": "screenRecorder.editRecording",
+                "when": "resourceExtname == .mpeg",
+              },
+            ],
+            "editor/title": Array [
+              Object {
+                "command": "screenRecorder.editRecording",
+                "group": "navigation",
+                "when": "resourceExtname == .mpeg",
               },
             ],
           },
@@ -116,6 +133,7 @@ test('Generates schema properly in production', async () => {
         Object {
           "activationEvents": Array [
             "onCommand:startRecording",
+            "onCommand:editRecording",
           ],
           "categories": Array [
             "Other",
@@ -126,6 +144,13 @@ test('Generates schema properly in production', async () => {
                 "category": "Screen Recorder",
                 "command": "startRecording",
                 "title": "Start Screen Recording",
+              },
+              Object {
+                "category": "Screen Recorder",
+                "command": "editRecording",
+                "icon": "$(edit)",
+                "shortTitle": "Edit",
+                "title": "Edit Screen Recording",
               },
             ],
             "configuration": Object {
@@ -155,6 +180,17 @@ test('Generates schema properly in production', async () => {
                 Object {
                   "command": "startRecording",
                   "when": "!virtualWorkspace",
+                },
+                Object {
+                  "command": "editRecording",
+                  "when": "resourceExtname == .mpeg",
+                },
+              ],
+              "editor/title": Array [
+                Object {
+                  "command": "editRecording",
+                  "group": "navigation",
+                  "when": "resourceExtname == .mpeg",
                 },
               ],
             },
