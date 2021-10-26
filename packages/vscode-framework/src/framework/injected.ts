@@ -3,13 +3,13 @@ import { Commands, Settings } from './generated'
 
 // methods that works with injected env
 
-export const getExtensionCommandId = (command: Commands['regular']) =>
-    process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.${command}` : command
+export const getExtensionContributionsPrefix = () => (process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.` : '')
 
-export const getExtensionSettingId = (setting: keyof Settings) =>
-    process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.${setting}` : setting
+export const getExtensionCommandId = (command: Commands['regular']) => `${getExtensionContributionsPrefix()}.${command}`
 
-// methods that works only with injected code
+export const getExtensionSettingId = (setting: keyof Settings) => `${getExtensionContributionsPrefix()}.${setting}`
+
+// methods that works only with injected code (extensionBootstrap.ts)
 
 declare const vscode_framework_set_debug_enabled: any
 declare const __VSCODE_FRAMEWORK_CONTEXT: vscode.ExtensionContext

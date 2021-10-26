@@ -1,12 +1,14 @@
 import vscode from 'vscode'
+import { getExtensionContributionsPrefix } from './injected'
 import { MaybePromise } from '../util'
 import { Commands } from './generated'
 import { extensionCtx } from './injected'
 
 export const registerExtensionCommand = (command: RegularCommands, handler: CommandHandler) => {
-    const extensionIdName = extensionCtx.extension.id.split('.')[1]!
     extensionCtx.subscriptions.push(
-        vscode.commands.registerCommand(`${extensionIdName}.${command}`, (...args) => handler({ command }, ...args)),
+        vscode.commands.registerCommand(`${getExtensionContributionsPrefix()}${command}`, (...args) =>
+            handler({ command }, ...args),
+        ),
     )
 }
 
