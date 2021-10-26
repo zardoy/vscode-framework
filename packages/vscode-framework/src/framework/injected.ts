@@ -13,7 +13,7 @@ export const extensionCtx = __VSCODE_FRAMEWORK_CONTEXT
 
 /**
  * Get ID of current running extension
- * @param full By default returns only name (first part before dot). Pass true, to return publisher.name
+ * @param full By default returns only name (first part before dot). Pass `true`, to return also `publisher.name` as second part
  */
 export const getExtensionId = (full = false) => {
     const ctx = __VSCODE_FRAMEWORK_CONTEXT
