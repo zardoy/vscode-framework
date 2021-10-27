@@ -1,3 +1,5 @@
+import { JSONSchema } from 'json-schema-typed'
+import { SetRequired } from 'type-fest'
 // manually
 
 // Isn't precise TODO extract from schema too
@@ -8,17 +10,18 @@ interface ICommand {
     category?: string
 }
 
-interface IConfigurationProperty {
-    enum?: string[]
-    description: string
-    type: string | string[]
-    default?: any
+// TODO combine with JSONSchemaType<any> from ajv
+interface PropertySchema
+    extends SetRequired<Omit<JSONSchema, `$${string}` | 'definitions' | 'readOnly'>, 'type' | 'default'> {
+    scope?: 'application' | 'machine' | 'machine-overridable' | 'window' | 'resource' | 'language-overridable'
+    patternErrorMessage?: string
+    enumDescription?: string[]
 }
 
 interface IConfiguration {
     title?: string
     order?: number
-    properties: Record<string, IConfigurationProperty>
+    properties: Record<string, PropertySchema>
 }
 
 interface IDebugger {
