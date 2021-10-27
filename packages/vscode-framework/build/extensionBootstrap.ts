@@ -39,7 +39,7 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
             )
         })
 
-    if (bootstrapConfig.serverIpcChannel) {
+    if (process.env.PLATFORM === 'node' && bootstrapConfig.serverIpcChannel) {
         const nodeIpc = require('node-ipc') as typeof import('node-ipc')
         nodeIpc.config.retry = 1000
         nodeIpc.config.silent = true
@@ -47,20 +47,17 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
             // STATUS: connecting
             // maxRetries: 1, timeout: 1000
             const { serverIpcChannel } = bootstrapConfig
-            console.time('ipc-connect')
-            console.log('connecting')
+            // console.time('ipc-connect')
             nodeIpc.connectTo(serverIpcChannel!, () => {
-                console.log('created')
-                const ipc = nodeIpc.of[serverIpcChannel!]!
-                ipc.on('error', err => {
+                nodeIpc.of[serverIpcChannel!]!.on('error', err => {
                     if (err.code === 'ECONNREFUSED') return
                     console.error('[ipc]', err)
                 })
-                ipc.on('connect', () => {
-                    console.timeEnd('ipc-connect')
-                    ipc.on('message', message => {
-                        console.log('ipc-recieve', message)
-                    })
+                nodeIpc.of[serverIpcChannel!]!.on('connect', () => {
+                    // console.timeEnd('ipc-connect')
+                })
+                nodeIpc.of[serverIpcChannel!]!.on('message', message => {
+                    console.log('ipc-recieve', String(message))
                 })
             })
         })

@@ -95,7 +95,7 @@ export const buildExtensionAndWatch = async (
                         // workbench.action.quit
                         // workbench.action.closeWindow
                         // search.action.focusActiveEditor
-                        nodeIpc.server.emit('message', 'app:close')
+                        nodeIpc.server.emit(ipcSocket, 'message', 'app:close')
                     })
                 },
                 ipcEmitExtension: event => {
