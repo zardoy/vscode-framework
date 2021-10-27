@@ -1,10 +1,9 @@
 import vscode from 'vscode'
-import { Settings } from './generated'
-import { getExtensionContributionsPrefix } from './injected'
+import { Settings } from '..'
 
 // TODO! check with empty string (when disabled prefix)
 export const getExtensionSetting = <T extends keyof Settings>(key: T): Settings[T] =>
-    vscode.workspace.getConfiguration(process.env.IDS_PREFIX).get<Settings[T]>(key)
+    vscode.workspace.getConfiguration(process.env.IDS_PREFIX).get<Settings[T]>(key)!
 
 /** Pass `undefined` as value to reset the setting */
 export const updateExtensionSetting = async <T extends keyof Settings>(

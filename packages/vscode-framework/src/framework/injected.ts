@@ -1,11 +1,11 @@
 import vscode from 'vscode'
-import { Commands, Settings } from './generated'
+import type { RegularCommands, Settings } from '../index'
 
 // methods that works with injected env
 
 export const getExtensionContributionsPrefix = () => (process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.` : '')
 
-export const getExtensionCommandId = (command: Commands['regular']) => `${getExtensionContributionsPrefix()}${command}`
+export const getExtensionCommandId = (command: RegularCommands) => `${getExtensionContributionsPrefix()}${command}`
 
 export const getExtensionSettingId = (setting: keyof Settings) => `${getExtensionContributionsPrefix()}${setting}`
 

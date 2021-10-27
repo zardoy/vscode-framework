@@ -115,7 +115,7 @@ importers:
       exit-hook: 2.2.1
       filesize: 8.0.3
       fs-extra: 10.0.0
-      generated-module: 0.0.2
+      generated-module: 0.0.2_typescript@4.4.4
       github-remote-info: 1.0.3
       globby: 11.0.4
       jsonfile: 6.1.0
@@ -134,13 +134,13 @@ importers:
       '@types/lodash': 4.14.175
       '@types/semver': 7.3.9
       '@types/vscode': 1.61.0
-      '@zardoy/tsconfig': 1.2.2
+      '@zardoy/tsconfig': 1.2.2_typescript@4.4.4
       kleur: 4.1.4
       modify-json-file: 1.2.1
       pinst: 2.1.6
       semver: 7.3.5
       terser: 5.9.0
-      ttypescript: 1.5.12
+      ttypescript: 1.5.12_ts-node@10.3.0+typescript@4.4.4
       type-fest: 2.5.0
 
   packages/vscode-manifest:
@@ -162,6 +162,7 @@ importers:
       change-case: 4.1.2
       json-schema-typed: 7.0.3
       lodash: 4.17.21
+      type-fest: 2.3.4
     devDependencies:
       ajv: 8.6.3
       chalk: 4.1.2
@@ -171,7 +172,6 @@ importers:
       path-exists-cli: 2.0.0
       pinst: 2.1.6
       ts-json-schema-generator: 0.95.0
-      type-fest: 2.3.4
       typescript-json-schema: 0.51.0
 
 packages:
@@ -2118,13 +2118,6 @@ packages:
       jest: 27.2.5_ts-node@10.3.0
       jest-watch-select-projects: 2.0.0
       jsonfile: 6.1.0
-    dev: true
-
-  /@zardoy/tsconfig/1.2.2:
-    resolution: {integrity: sha512-flS4ev5KdSbeY+aHM6WCbYTwhp6c6twX9IwrhyZgjjDIJ28fuqNi1a/aG1TQSwoxp7w2WpfRGoWGgkY/0sm+hQ==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      typescript: ^4.3.2
     dev: true
 
   /@zardoy/tsconfig/1.2.2_typescript@4.4.4:
@@ -4189,7 +4182,7 @@ packages:
     resolution: {integrity: sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=}
     dev: true
 
-  /generated-module/0.0.2:
+  /generated-module/0.0.2_typescript@4.4.4:
     resolution: {integrity: sha512-7lYkwjKP3ymFvDZh4hGcALdFGyf/vZbHZNR/8qrY/FVTUBja/bMA2OzVq8HneMuKi9UFdgXBLXVDjdvdZxGLVg==}
     peerDependencies:
       typescript: ^4.4.3
@@ -4201,6 +4194,7 @@ packages:
       fs-extra: 10.0.0
       jsonfile: 6.1.0
       ts-morph: 12.0.0
+      typescript: 4.4.4
     dev: false
 
   /gensync/1.0.0-beta.2:
@@ -7288,7 +7282,7 @@ packages:
       typescript: 4.4.4
     dev: true
 
-  /ttypescript/1.5.12:
+  /ttypescript/1.5.12_ts-node@10.3.0+typescript@4.4.4:
     resolution: {integrity: sha512-1ojRyJvpnmgN9kIHmUnQPlEV1gq+VVsxVYjk/NfvMlHSmYxjK5hEvOOU2MQASrbekTUiUM7pR/nXeCc8bzvMOQ==}
     hasBin: true
     peerDependencies:
@@ -7296,6 +7290,8 @@ packages:
       typescript: '>=3.2.2'
     dependencies:
       resolve: 1.20.0
+      ts-node: 10.3.0_036181877a83ed913a2bbec8dcc74354
+      typescript: 4.4.4
     dev: true
 
   /type-check/0.3.2:
@@ -7350,7 +7346,7 @@ packages:
   /type-fest/2.3.4:
     resolution: {integrity: sha512-2UdQc7cx8F4Ky81Xj7NYQKPhZVtDFbtorrkairIW66rW7xQj5msAhioXa04HqEdP4MD4K2G6QAF7Zyiw/Hju1Q==}
     engines: {node: '>=12.20'}
-    dev: true
+    dev: false
 
   /type-fest/2.5.0:
     resolution: {integrity: sha512-wB5vE+XXZ2g2mDRo18yZMae1joUhquomLTm+BkxeuRHnwmrNWzVPNrFah9z7pjsKNiVAaJL33+uQbgbPSARyqw==}

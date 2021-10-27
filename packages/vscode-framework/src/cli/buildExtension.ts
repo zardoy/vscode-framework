@@ -1,6 +1,6 @@
-import { camelCase } from 'change-case'
 import fs from 'fs'
 import { join, resolve } from 'path'
+import { camelCase } from 'change-case'
 import Debug from '@prisma/debug'
 import fsExtra from 'fs-extra'
 import kleur from 'kleur'
@@ -13,6 +13,7 @@ import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
 import { runEsbuild } from './esbuild/esbuild'
+declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:bulid-extension')
 
@@ -141,6 +142,8 @@ const getEnableIpc = (config: Config): boolean => {
     return false
 }
 
+const ensureArr = <T>(arg: T | T[]): T[] => (Array.isArray(arg) ? arg : [arg])
+
 const buildExtension = async ({
     mode,
     target,
@@ -189,6 +192,35 @@ const buildExtension = async ({
 
     // -> ASSETS
     // TODO
+
+    if (__DEV__) {
+        const noId = (arg: string) => arg.slice(arg.indexOf('.') + 1)
+        const contents = `
+declare module 'vscode-framework' {
+    interface RegularCommands {
+        ${generatedManifest.contributes.commands?.map(({ command }) => `"${noId(command)}": true`).join('\n')}
+    }
+    // // extremely simplified for a moment
+    interface Settings {
+        ${ensureArr(generatedManifest.contributes.configuration)
+            .map(d =>
+                Object.entries(d!.properties)
+                    .map(
+                        ([id, type]) =>
+                            `"${noId(id)}": ${
+                                ['string', 'number', 'boolean'].includes(type.type as any) ? type.type : 'any'
+                            }`,
+                    )
+                    .join('\n'),
+            )
+            .join('')}
+    }
+}
+
+export {}`
+
+        await fs.promises.writeFile('./src/generated.ts', contents, 'utf-8')
+    }
 
     // -> EXTENSION ENTRYPOINT
     return runEsbuild({
