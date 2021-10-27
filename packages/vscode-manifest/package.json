@@ -17,6 +17,7 @@
         "vscode",
         "extracted",
         "package.json",
+        "extensions",
         "manifest",
         "read",
         "parse",
