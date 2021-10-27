@@ -3,15 +3,23 @@
 import fs from 'fs'
 import { join } from 'path'
 import { PackageJson } from 'type-fest'
+import { validRange } from 'semver'
 import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
 import { defaultConfig } from '../../src/config'
 import { screenRecorderManifest } from './common'
+import { pick } from 'lodash'
 
 type HaveOwnTests = 'repository'
 
 type Tests = {
     [K in Exclude<keyof typeof propsGenerators, HaveOwnTests>]: (packageJson: PackageJson) => void
 }
+
+const productionMeta = {
+    target: { desktop: true, web: true },
+    mode: 'production',
+    config: defaultConfig.development,
+} as const
 
 // TODO-low transfer test from here
 test('Repository field', async () => {
@@ -29,6 +37,21 @@ url=https://github.com/test-author/vscode-extension-name.git
           "repository": "https://github.com/test-author/vscode-extension-name",
         }
     `)
+})
+
+// TODO!
+describe.skip('Generated commands', () => {
+    test("Doesn't touch original", async () => {
+        await propsGenerators['contributes.commands'](
+            {
+                ...pick(screenRecorderManifest, 'name', 'displayName'),
+                contributes: {
+                    commands: [],
+                },
+            },
+            productionMeta,
+        )
+    })
 })
 
 const tests: Tests = {
@@ -62,14 +85,7 @@ Object {
   ],
 }
 `),
-    engines: expected =>
-        expect(expected).toMatchInlineSnapshot(`
-Object {
-  "engines": Object {
-    "vscode": "^1.61.0",
-  },
-}
-`),
+    engines: expected => expect(validRange(expected.engines!.vscode)).not.toBeNull(),
     extensionEntryPoint: expected =>
         expect(expected).toMatchInlineSnapshot(`
 Object {
@@ -88,11 +104,5 @@ Object {
 test.each<{ name: keyof Tests; expect: (data) => void }>(
     Object.entries(tests).map(([name, expect]) => ({ name, expect })),
 )('Auto-generated field $name', async ({ name, expect }) => {
-    expect(
-        await propsGenerators[name](screenRecorderManifest, {
-            target: { desktop: true, web: true },
-            mode: 'production',
-            config: defaultConfig.development,
-        }),
-    )
+    expect(await propsGenerators[name](screenRecorderManifest, productionMeta))
 })

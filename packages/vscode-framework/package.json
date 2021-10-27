@@ -35,11 +35,13 @@
         "@types/fs-extra": "^9.0.13",
         "@types/jsonfile": "^6.0.1",
         "@types/lodash": "^4.14.175",
+        "@types/semver": "^7.3.9",
         "@types/vscode": "^1.61.0",
         "@zardoy/tsconfig": "^1.2.2",
         "kleur": "^4.1.4",
         "modify-json-file": "^1.2.1",
         "pinst": "^2.1.6",
+        "semver": "^7.3.5",
         "terser": "^5.9.0",
         "ttypescript": "^1.5.12",
         "type-fest": "^2.5.0"

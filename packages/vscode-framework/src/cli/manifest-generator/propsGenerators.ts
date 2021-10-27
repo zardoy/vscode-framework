@@ -70,7 +70,7 @@ export const propsGenerators = makeGenerators({
         }
     },
     'contributes.commands': (
-        manifest: PickManifest<'contributes' | 'name' | 'displayName'>,
+        manifest: PickManifest<'name' | 'displayName'> & { contributes: Pick<ManifestType['contributes'], 'commands'> },
         { mode, config: { extensionBootstrap } },
     ) => {
         const additionalCommands =
@@ -88,6 +88,7 @@ export const propsGenerators = makeGenerators({
                       },
                   ]
                 : []
+        // TODO! default category should respect config
         const { contributes, displayName } = manifest
         const commands = [
             ...additionalCommands,

@@ -5,7 +5,7 @@ import path from 'path'
 import { generateTypes } from '../../src/cli/typesGenerator'
 import { mockManifestOnce, screenRecorderManifest } from './common'
 
-test('Generates types propertly', async () => {
+test('Types generators: simple typse', async () => {
     mockManifestOnce(screenRecorderManifest)
     const spy = jest.spyOn(fs, 'writeFile')
     spy.mockImplementationOnce((savePath, content, callback) => {
