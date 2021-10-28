@@ -1,17 +1,21 @@
 # Extension Code
 
-For example if you declare `make-project-awesome` command, you can register it:
+## General Tips
+
+- I generally recommend always use default import for `vscode` API, like `import vscode from 'vscode'` or `import vsc from 'vscode'` to exclude collisions with libraries & other code.
+
+## Example with Commands
+
+If you declare `make-project-awesome` command, you can register it:
 
 ```ts
 //📁 src/extension.ts
 import vscode from 'vscode';
-import { VscodeFramework, showQuickPick } from 'vscode-framework';
+import { registerExtensionCommand } from 'vscode-framework';
 
-export const activate = (ctx: vscode.ExtensionContext) => {
-    const framework = new VscodeFramework(ctx);
-
-    framework.registerCommand('make-project-awesome', async () => {
-        const packageManager = await showQuickPick([
+export const activate = () => {
+    registerExtensionCommand('make-project-awesome', async () => {
+        const packageManager = await vscode.window.showQuickPick([
             {
                 label: 'Yarn (fast)',
                 value: 'yarn1'
@@ -25,13 +29,21 @@ export const activate = (ctx: vscode.ExtensionContext) => {
                 value: 'pnpm'
             }
         ]);
-        // Will be handled for you soon, but for now use snippet (also coming soon)
         if (packageManager === undefined) return;
         // will be printed in output pane
-        console.log('Selected', packageManager);
+        console.log('Selected', packageManager.value);
     });
 }
 ```
+
+### Background on Code Generation
+
+For now, whenever you change manifest in watch mode types from contributions of `package.json` will be generated into `src/generated.ts`.
+
+Previously it putted generated pieces into `.vscode-framework` directory under node_modules (like `@prisma/client` does). However there are 2 reasons why it's not possible anymore:
+
+- every time, types were generated *TypeScript language service* needed full reload to pickup fresh types (this is was annoying on *package.json* frequent changes)
+- when the module is linked in development it leaded to buggy TS lookup behavior for the `.vscode-framework`
 
 <!-- - `vscode-framework` reexports `vscode-extra`, which consists [useful methods](../vscode-extra) in additional to standard `vscode` module. -->
 
@@ -39,7 +51,7 @@ export const activate = (ctx: vscode.ExtensionContext) => {
 
 <!-- TODO script -->
 
-Let's finally start the extension with `vscode-framework start` command.
+To start the extension, run `vscode-framework start`.
 
 It will check and transform your manifest, to remove the differences we talk earlier. All files for your extension (including manifest) will be placed into `out/` directory. It will be `node_modules/.vscode-extension` in future.
 You shouldn't modify anything here, as your changes will be lost, instead, gitignore this folder.
@@ -50,7 +62,7 @@ Then, it will start your extension build in watch mode. You can also edit manife
 
 `start` command, by default opens desktop VSCode, however you can:
 
-- Skip launching VSCode and only build extension, this can be useful if you want to use your launch config for debugging
+- Skip launching VSCode and only build extension, this can be useful if you want to use your *launch config* for debugging
 
 To do this, append `--skip-launching` option, like so: `vscode-framework start --skip-launching`. But note, that with this command you can develop extension without opening IDE and creating `launch.json`. It will be slightly faster, because you don't use the builtin debugger in this way.
 

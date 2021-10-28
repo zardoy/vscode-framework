@@ -23,12 +23,10 @@ This is a full-featured set of tools to develop [VSCode extensions](https://code
 
 ## Usage
 
-- Install it in your project: `npm i -D vscode-framework`
-- Read the [DOCS](./docs/01-extension-manifest.md)
+- Install it in your project: `npm i vscode-framework --dev`
+- Read the [DOCS](./docs/)
 
 ## Brief Overview
-
-Let's take basic example:
 
 ```ts
 import vscode from 'vscode'

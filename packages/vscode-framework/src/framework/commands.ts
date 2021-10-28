@@ -13,6 +13,10 @@ export const registerExtensionCommand = (command: keyof RegularCommands, handler
     )
 }
 
+export const registerAllExtensionCommands = (commands: { [C in keyof RegularCommands]: CommandHandler }) => {
+    for (const [command, handler] of Object.entries(commands)) registerExtensionCommand(command, handler)
+}
+
 // TODO! disallow production
 export const registerActiveDevelopmentCommand = (
     handler: (data: { command: '' }, ...args: any[]) => MaybePromise<void>,
@@ -24,7 +28,3 @@ export const registerActiveDevelopmentCommand = (
 
 /** would never run. something like `test.skip` */
 export const registerNoop = (description: string, handler: CommandHandler) => {}
-
-export const registerAllExtensionCommands = (commands: { [C in keyof RegularCommands]: CommandHandler }) => {
-    for (const [command, handler] of Object.entries(commands)) registerExtensionCommand(command, handler)
-}
