@@ -70,7 +70,7 @@ const { dirname, join, extname } = pathPosix
                                 return contents.replace(/RegularCommandsTypeToReplace/g, '[k in keyof RegularCommands]')
                             },
                             'packages/vscode-framework/build/framework/settings.d.ts'(contents) {
-                                return contents.replace(/"SettingsTypeToReplace"/g, 'Settings')
+                                return contents.replace(/"SettingsTypeToReplace"/g, 'keyof Settings')
                             },
                         }
                         // TODO! combine with incremental
