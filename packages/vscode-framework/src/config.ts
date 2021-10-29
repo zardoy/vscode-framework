@@ -1,7 +1,8 @@
 import { BuildOptions } from 'esbuild'
+import { Except } from 'type-fest'
 import { PartialDeep } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
-import { ReadManifestOptions } from 'vscode-manifest/build/readManifest'
+import { ReadManifestOptions } from 'vscode-manifest/src/readManifest'
 import type { propsGenerators, PropsGeneratorsMeta } from './cli/manifest-generator/propsGenerators'
 import { MaybePromise } from './util'
 
@@ -9,7 +10,7 @@ import { MaybePromise } from './util'
 
 export interface Config {
     /** Override (extend) esbuild config for development and production */
-    esbuildConfig: BuildOptions
+    esbuildConfig: EsbuildConfig
     /** Effects only `build` command */
     target: Record<BuildTargetType, boolean>
     /** Category that will be used in `contibutes.commands` by default */
@@ -81,23 +82,18 @@ export interface Config {
                   pipeConsole: boolean
                   /** Whether to close extension development window on development process exit (e.g. when you stop `vscode-framework start`) */
                   closeWindowOnExit: boolean
-                  // TODO unify display-hint with hotReload
                   /**
-                   * What to do when source is changed:
-                   * - forced - automatically reload window with extension (drops unsaved data)
-                   * - display-hint - display hint in statusbar, when extension source is changed and it's need to be reloaded
-                   * - false - do nothing, but remeber you always can reload extension window with CTRL+R shortcut
+                   * What to do when you save changed code:
+                   * - forced - reload extension development window (drops unsaved data)
+                   * - hot - NOT IMPLEMENTED YET
+                   * - false - do nothing, but statusbar item will notify you to reload with CTRL+R shortcut
                    */
-                  forceReload: 'forced' | 'display-hint' | false
-                  /** Add additional commands for development:
-                   * - `runActiveDevelopmentCommand` - run command that is regestired with `registerActiveDevelopmentCommand`
-                   * - `focusActiveDevelopmentExtensionOutput` - reveal output in extension
-                   * They're in `VSCode Framework` category. Available only in extension development window
-                   */
-                  developmentCommands: boolean
-                  hotReload:
-                      | false
+                  autoReload:
                       | {
+                            type: 'forced'
+                        }
+                      | {
+                            type: 'hot'
                             /** Mocks `vscode` import with auto disposing */
                             automaticDispose: {
                                 enabled: boolean
@@ -105,8 +101,56 @@ export interface Config {
                                 ignore: string[]
                             }
                         }
+                      | false
+                  /** Displays whether reload is needed as statusbar item in development window. Applied only when `autoReload.type != forced` */
+                  statusbarReloadInfo: boolean
+                  /** Add additional commands for development:
+                   * - `runActiveDevelopmentCommand` - run command that is regestired with `registerActiveDevelopmentCommand`
+                   * - `focusActiveDevelopmentExtensionOutput` - reveal output in extension
+                   * They're in `VSCode Framework` category. Available only in extension development window
+                   */
+                  developmentCommands: boolean
               }
     }
+}
+
+export const defaultConfig: Config = {
+    esbuildConfig: {
+        entryPoint: 'src/extension.ts',
+    },
+    defaultCategory: 'extensionName',
+    target: { desktop: true, web: false },
+    consoleStatements: {
+        action: 'pipeToOutputChannel',
+        // TODO
+        useEmoji: false,
+    },
+    disablePropsGenerators: false,
+    extendPropsGenerators: [],
+    prependIds: {
+        style: 'camelCase',
+    },
+    development: {
+        executable: 'code',
+        disableExtensions: true,
+        openDevtools: false,
+        alwaysActivationEvent: true,
+        // actionOnExtensionClose: 'exit',
+        extensionBootstrap: {
+            revealOutputChannel: false,
+            closeWindowOnExit: true,
+            pipeConsole: false,
+            autoReload: false,
+            statusbarReloadInfo: true,
+            developmentCommands: true,
+        },
+    },
+}
+
+type EsbuildConfig = Except<BuildOptions, 'entryPoints' | 'define'> & {
+    entryPoint: string
+    /** should be used instead of define. will prepend `process.env.` and stringify values */
+    defineEnv?: Record<string, string | boolean | number>
 }
 
 export type UserConfig = PartialDeep<Config>
@@ -134,33 +178,10 @@ export type BuildTargetType = 'desktop' | 'web'
 
 export type ExtensionBootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false>
 
-export const defaultConfig: Config = {
-    esbuildConfig: {},
-    defaultCategory: 'extensionName',
-    target: { desktop: true, web: false },
-    consoleStatements: {
-        action: 'pipeToOutputChannel',
-        // TODO
-        useEmoji: false,
-    },
-    disablePropsGenerators: false,
-    extendPropsGenerators: [],
-    prependIds: {
-        style: 'camelCase',
-    },
-    development: {
-        executable: 'code',
-        disableExtensions: true,
-        openDevtools: false,
-        alwaysActivationEvent: true,
-        // actionOnExtensionClose: 'exit',
-        extensionBootstrap: {
-            revealOutputChannel: false,
-            closeWindowOnExit: true,
-            pipeConsole: false,
-            forceReload: 'display-hint',
-            developmentCommands: true,
-            hotReload: false,
-        },
-    },
+export const getBootstrapFeature = <T>(
+    config: Config,
+    callback: (bootstrapConfig: ExtensionBootstrapConfig) => T,
+): T | undefined => {
+    if (!config.development.extensionBootstrap) return undefined
+    return callback(config.development.extensionBootstrap)
 }

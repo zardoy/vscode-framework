@@ -52,7 +52,12 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
                     console.error('[ipc]', err)
                 })
                 client.on('message', (message: IpcEvents['extension']) => {
-                    if (message === 'action:reload' && bootstrapConfig.forceReload) {
+                    if (bootstrapConfig.debugIpc) console.debug('[ipc] recieve:', message)
+                    if (
+                        message === 'action:reload' &&
+                        bootstrapConfig.autoReload &&
+                        bootstrapConfig.autoReload.type === 'forced'
+                    ) {
                         void vscode.commands.executeCommand('workbench.action.reloadWindow')
                         return
                     }
@@ -65,7 +70,7 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
         })
     }
 
-    if (bootstrapConfig?.hotReload) {
+    if (bootstrapConfig?.autoReload && bootstrapConfig.autoReload.type === 'hot') {
         // const { enableHotReload, hotRequire } = require('@hediet/node-reload') as typeof import('@hediet/node-reload')
         // enableHotReload({ entryModule: module })
         // // TODO return type

@@ -6,10 +6,11 @@ import kleur from 'kleur'
 import { ManifestType } from 'vscode-manifest'
 import Debug from '@prisma/debug'
 import filesize from 'filesize'
-import { BuildTargetType, Config } from '../../config'
+import { BuildTargetType, Config, getBootstrapFeature } from '../../config'
 import { clearConsole, logConsole } from '../logger'
-import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
+import { BootstrapConfig, EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 import { esbuildDefineEnv } from './utils'
+import { omit } from 'lodash'
 
 type MaybePromise<T> = Promise<T> | T
 
@@ -23,19 +24,21 @@ export const runEsbuild = async ({
     mode,
     outDir,
     afterSuccessfulBuild = () => {},
-    overrideBuildConfig = {},
+    defineEnv,
     resolvedManifest,
     injectConsole,
+    config,
 }: {
     target: BuildTargetType
     mode: ModeType
     outDir: string
     afterSuccessfulBuild?: (buildCount: number) => MaybePromise<void>
-    overrideBuildConfig?: Config['esbuildConfig']
+    defineEnv: Record<string, any>
     resolvedManifest: ManifestType
     injectConsole: boolean
+    config: Config
 }) => {
-    const extensionEntryPoint = 'src/extension.ts'
+    const extensionEntryPoint = config.esbuildConfig.entryPoint
     const realEntryPoint = join(__dirname, '../../extensionBootstrap.ts')
     debug('Esbuild starting...')
     debug('Entry points', {
@@ -46,7 +49,7 @@ export const runEsbuild = async ({
         target,
         injectConsole,
         outDir,
-        overrideBuildConfig,
+        defineEnv,
     })
     const consoleInjectCode = injectConsole
         ? await fs.promises.readFile(join(__dirname, './consoleInject.js'), 'utf-8')
@@ -63,10 +66,10 @@ export const runEsbuild = async ({
         format: 'cjs',
         entryPoints: [realEntryPoint],
         metafile: true,
-        ...overrideBuildConfig,
+        ...omit(config.esbuildConfig, 'entryPoint'),
         write: false,
         // sourcemap: true,
-        external: ['vscode', '@hediet/node-reload', ...(overrideBuildConfig.external ?? [])],
+        external: ['vscode', ...(config.esbuildConfig.external ?? [])],
         define: {
             ...esbuildDefineEnv({
                 NODE_ENV: mode,
@@ -76,7 +79,8 @@ export const runEsbuild = async ({
                 // 'REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT': true,
                 PLATFORM: target === 'desktop' ? 'node' : 'web',
                 EXTENSION_ENTRYPOINT: join(process.cwd(), extensionEntryPoint),
-                ...overrideBuildConfig.define,
+                ...config.esbuildConfig.defineEnv,
+                ...defineEnv,
             }),
         },
         plugins: [
@@ -85,6 +89,7 @@ export const runEsbuild = async ({
                 setup(build) {
                     let rebuildCount = 0
                     let date: number
+                    let prevSize: number | undefined
                     build.onStart(() => {
                         date = Date.now()
                         if (!debug.enabled) clearConsole(true, false)
@@ -97,6 +102,17 @@ export const runEsbuild = async ({
 
                         // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
                         const outputFile = outputFiles![0]!
+                        const newSize = outputFile.contents.byteLength
+                        // 1. Sometimes esbuild does rebulid when you change file outside src/ (suppose it's a bug)
+                        // 2. Esbulid emits rebuild when you save file, but output size remains the same e.g. you if you format the file
+                        // size isn't changed = code isn't changed so we don't need to emit reload
+                        if (newSize === prevSize) {
+                            // to reformat message
+                            logConsole('log', 'No new changes')
+                            return
+                        }
+
+                        prevSize = newSize
                         // investigate performance
                         debug('Start writing with inject')
                         await fs.promises.writeFile(
@@ -106,12 +122,27 @@ export const runEsbuild = async ({
                         )
                         debug('End writing with inject')
 
-                        // TODO no=rebuild / hot-reload / reload
-                        const reloadType = ''
+                        const reloadType = getBootstrapFeature(
+                            config,
+                            ({ autoReload }) => autoReload && autoReload.type,
+                        )
                         logConsole(
                             'log',
-                            kleur.green(rebuildCount === 0 ? 'build' : 'rebuild'),
+                            kleur.green(
+                                rebuildCount === 0
+                                    ? 'build'
+                                    : reloadType === 'forced'
+                                    ? 'reload'
+                                    : reloadType === 'hot'
+                                    ? 'hot-reload'
+                                    : 'rebuild',
+                            ),
                             kleur.gray(`${Date.now() - date}ms`),
+                            // ...(reloadType === 'force'
+                            //     ? [kleur.green('Reloading...')]
+                            //     : reloadType === 'hot'
+                            //     ? [kleur.dim().green('Hot reloading...')]
+                            //     : []),
                         )
                         debug('afterSuccessfulBuild called')
                         await afterSuccessfulBuild(rebuildCount++)
@@ -175,7 +206,7 @@ export const runEsbuild = async ({
                 },
             },
         ],
-        ...(overrideBuildConfig.plugins ?? []),
+        ...(config.esbuildConfig.plugins ?? []),
     })
     // TODO output packed file and this file sizes at prod
     if (mode === 'production') {

@@ -221,19 +221,15 @@ const buildExtension = async ({
         mode,
         outDir,
         resolvedManifest: generatedManifest,
-        overrideBuildConfig: defaultsDeep(
-            {
-                define: {
-                    IDS_PREFIX: config.prependIds
-                        ? config.prependIds.style === 'camelCase'
-                            ? camelCase(generatedManifest.name)
-                            : generatedManifest.name
-                        : undefined,
-                    ...define,
-                },
-            },
-            config.esbuildConfig,
-        ),
+        defineEnv: {
+            IDS_PREFIX: config.prependIds
+                ? config.prependIds.style === 'camelCase'
+                    ? camelCase(generatedManifest.name)
+                    : generatedManifest.name
+                : undefined,
+            ...define,
+        },
+        config,
         // TODO handle other options
         injectConsole: config.consoleStatements !== false && config.consoleStatements.action === 'pipeToOutputChannel',
         ...bundlerParams,
@@ -252,7 +248,7 @@ export const checkEntrypoint = (config: Config) => {
     // 2. warning: enforce to use export before const. otherwise it takes > 1s to check
     // 3. doesn't work with functions
     console.time('check')
-    const entryPoint = config.esbuildConfig.entryPoints?.[0] ?? './src/extension.ts'
+    const { entryPoint } = config.esbuildConfig
     const project = new Project({
         skipAddingFilesFromTsConfig: true,
         compilerOptions,
