@@ -2,23 +2,24 @@
 
 import fs from 'fs'
 import { join } from 'path'
-import { PackageJson } from 'type-fest'
 import { validRange } from 'semver'
+import { Except, PackageJson } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
-import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
+import { propsGenerators, PropsGeneratorsMeta } from '../../src/cli/manifest-generator/propsGenerators'
 import { defaultConfig } from '../../src/config'
 import { screenRecorderManifest, screenRecorderManifestBase } from './fixtures'
 
-type HaveOwnTests = 'repository'
-
 type Tests = {
-    [K in Exclude<keyof typeof propsGenerators, HaveOwnTests>]: (packageJson: PackageJson) => void
+    // these have its own tests
+    [K in keyof Except<typeof propsGenerators, 'repository' /*  | 'contributes.configuration' */>]: (
+        packageJson: PackageJson,
+    ) => void
 }
 
-const productionMeta = {
+const productionMeta: PropsGeneratorsMeta = {
     target: { desktop: true, web: true },
     mode: 'production',
-    config: defaultConfig.development,
+    config: defaultConfig,
 } as const
 
 // TODO-low transfer test from here
@@ -46,7 +47,7 @@ const screenRecorderManifestWithCommands: ManifestType = {
     },
 }
 
-describe('Generated activation events', () => {
+describe('Generated activationEvents', () => {
     test('Nothing to change', async () => {
         const result = propsGenerators.activationEvents(
             {
@@ -75,6 +76,40 @@ describe('Generated activation events', () => {
         `)
     })
 })
+
+// describe('Generated contributes.configuration', () => {
+//     test("Replaces #settingID# in markdown* props", async () => {
+//         const result = propsGenerators['contributes.configuration'](
+//             makeManifestFromBase({
+//                 contributes: {
+//                     // TODO merge with base configuration
+//                     //@ts-ignore
+//                     configuration: {
+//                         properties: {
+//                             enableFeature: {
+//                                 //@ts-ignore
+//                                 markdownDescription: 'Whether to **enable** feature',
+//                             },
+//                             enableFeatureType: {
+//                                 markdownEnumDescriptions: [
+//                                     'Usage of #enableFeature# on full power',
+//                                     'Usage of #enableFeature# only on half-power',
+//                                 ],
+//                             },
+//                             enableFeatureOld: {
+//                                 markdownDeprecationMessage: 'Deprecated. Use #enableFeature# instead',
+//                             },
+//                         },
+//                     },
+//                 },
+//             }),
+//         )
+//         expect(result.contributes).toMatchInlineSnapshot()
+//     })
+//     test('Throws on incorrect #setting# link', () => {
+
+//     })
+// })
 
 const tests: Tests = {
     'contributes.commands': expected =>

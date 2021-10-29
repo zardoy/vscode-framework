@@ -1,5 +1,6 @@
-import { ManifestType } from 'vscode-manifest'
 import jsonfile from 'jsonfile'
+import { SetOptional } from 'type-fest'
+import { ManifestType } from 'vscode-manifest'
 
 // TODO mock config in all tests to ensure stability
 
@@ -17,14 +18,22 @@ const deepFreeze = (obj: ManifestType) => {
     return obj
 }
 
-export const screenRecorderManifestBase: ManifestType = {
+const makeManifest = <T extends ManifestType>(t: T) => t
+
+export const screenRecorderManifestBase = makeManifest({
     name: 'screen-recorder',
     displayName: 'Screen Recorder',
     publisher: 'yatki',
     version: 'invalid-doesnt-matter',
     categories: ['Other'],
     contributes: {},
-}
+})
+
+export const makeManifestFromBase = (manifest: SetOptional<ManifestType, keyof typeof screenRecorderManifestBase>) =>
+    deepFreeze({
+        ...screenRecorderManifestBase,
+        ...manifest,
+    })
 
 export const screenRecorderManifest: ManifestType = deepFreeze({
     ...screenRecorderManifestBase,

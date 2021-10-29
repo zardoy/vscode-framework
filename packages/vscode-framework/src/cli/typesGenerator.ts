@@ -5,7 +5,7 @@ import { generateTypes as generateTypesModule, StringWriters } from 'generated-m
 import { createJsdoc } from 'generated-module/build/ts-morph-utils'
 import { StatementStructures, StructureKind } from 'ts-morph'
 import { ExtensionManifest, readDirectoryManifest } from 'vscode-manifest'
-import { oneOf } from '../util'
+import { ensureArray, oneOf } from '../util'
 import { GracefulError } from './errors'
 
 const debug = Debug('vscode-framework:types-generator')
@@ -96,8 +96,6 @@ export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeMo
  * @param resolvedManifest final manifest after all propsGenerators are run
  */
 export const newTypesGenerator = async (resolvedManifest: ExtensionManifest) => {
-    const ensureArr = <T>(arg: T | T[]): T[] => (Array.isArray(arg) ? arg : [arg])
-
     const withoutId = (arg: string) => arg.slice(arg.indexOf('.') + 1)
     const contents = `
 declare module 'vscode-framework' {
@@ -112,7 +110,7 @@ declare module 'vscode-framework' {
     ${
         resolvedManifest.contributes?.configuration
             ? `interface Settings {
-        ${ensureArr(resolvedManifest.contributes.configuration)
+        ${ensureArray(resolvedManifest.contributes.configuration)
             .map(({ properties }) =>
                 Object.entries(properties)
                     .map(
@@ -121,7 +119,7 @@ declare module 'vscode-framework' {
                                 // eslint-disable-next-line zardoy-config/@typescript-eslint/restrict-template-expressions
                                 type.type === 'string' && type.enum
                                     ? type.enum.map(s => `"${s}"`).join(' | ')
-                                    : // @ts-ignore
+                                    : // @ts-expect-error
                                     ['string', 'number', 'boolean'].includes(type.type)
                                     ? type.type
                                     : 'any'

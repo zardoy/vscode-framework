@@ -1,8 +1,8 @@
 import Debug from '@prisma/debug'
 import { getGithubRemoteInfo } from 'github-remote-info'
-import { defaultsDeep } from 'lodash'
+import { defaultsDeep, mapValues } from 'lodash'
 import { UnionToIntersection } from 'type-fest'
-import { ManifestType } from 'vscode-manifest'
+import { ContributesConfigurationType, ManifestType } from 'vscode-manifest'
 import { Config, ExtensionBootstrapConfig } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
 import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
@@ -16,13 +16,15 @@ const debug = Debug('vscode-framework:propsGenerators')
 export type PropsGeneratorsMeta = {
     mode: ModeType
     target: Config['target']
-    config: {
-        alwaysActivationEvent: Config['development']['alwaysActivationEvent']
-        extensionBootstrap:
-            | {
-                  developmentCommands: ExtensionBootstrapConfig['developmentCommands']
-              }
-            | false
+    config: Pick<Config, 'prependIds'> & {
+        development: {
+            alwaysActivationEvent: Config['development']['alwaysActivationEvent']
+            extensionBootstrap:
+                | {
+                      developmentCommands: ExtensionBootstrapConfig['developmentCommands']
+                  }
+                | false
+        }
     }
 }
 
@@ -32,6 +34,9 @@ type MakePropsGenerators = Record<
 >
 
 type PickManifest<T extends keyof ManifestType> = Pick<ManifestType, T>
+type PickContributes<T extends keyof ManifestType['contributes']> = {
+    contributes: Pick<ManifestType['contributes'], T>
+}
 
 // MAKE TECH!
 const makeGenerators = <T extends MakePropsGenerators>(generators: T) => generators
@@ -71,7 +76,12 @@ export const propsGenerators = makeGenerators({
     },
     'contributes.commands': (
         manifest: PickManifest<'name' | 'displayName'> & { contributes: Pick<ManifestType['contributes'], 'commands'> },
-        { mode, config: { extensionBootstrap } },
+        {
+            mode,
+            config: {
+                development: { extensionBootstrap },
+            },
+        },
     ) => {
         const additionalCommands =
             mode !== 'production' && extensionBootstrap && extensionBootstrap.developmentCommands
@@ -105,9 +115,51 @@ export const propsGenerators = makeGenerators({
               }
             : {}
     },
+    // 'contributes.configuration': (
+    //     { name, contributes: { configuration } }: PickManifest<'name'> & PickContributes<'configuration'>,
+    //     { config: { prependIds } },
+    // ) => {
+    //     // TODO check anyway
+    //     if (!prependIds) return {}
+    //     const allKnownSettings = new Set<string>()
+    //     const parseMarkdownValue = (markdownString: string, prop: string, referencedSettingId: string) => {
+    //         markdownString.replace(/#(.+#)/, (match, settingId) => {
+    //             // GO INSANE: display position in markdown string
+    //             // TODO move from here to validate manifest
+    //             if (!allKnownSettings.has(settingId))
+    //                 throw new Error(`Setting ${settingId} was referenced from ${referencedSettingId} via ${prop}`)
+    //             return `#${}#`
+    //         })
+    //     }
+
+    //     const parseSetting = (setting: ContributesConfigurationType['properties']['']) => {
+    //         mapValues(setting, (value, key) => {
+    //             if (key.startsWith('markdown')) {
+    //             }
+    //         })
+    //     }
+
+    //     const parseConfig = (config: ContributesConfigurationType) => ({
+    //             ...config,
+    //             properties: Object.entries(config.properties).map(([id, setting]) => ({
+    //                 ...setting,
+    //             })),
+    //         })
+
+    //     return {
+    //         contributes: {
+    //             configuration,
+    //         },
+    //     }
+    // },
     activationEvents(
-        { contributes, activationEvents }: PickManifest<'contributes' | 'activationEvents'>,
-        { mode, config: { alwaysActivationEvent } },
+        { contributes, activationEvents }: PickManifest<'activationEvents'> & PickContributes<'commands'>,
+        {
+            mode,
+            config: {
+                development: { alwaysActivationEvent },
+            },
+        },
     ) {
         if (mode !== 'production' && alwaysActivationEvent)
             return {

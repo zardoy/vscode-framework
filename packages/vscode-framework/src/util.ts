@@ -21,3 +21,5 @@ export const oneOf = <T>(value: T, matches: T[]) => matches.includes(value)
 export const pickKeys = <T extends Record<string, any>, K extends keyof T>(array: T[], keys: K[]): Array<Pick<T, K>> =>
     array.map(object => pick(object, keys))
 export const pickObject = <T extends Record<string, any>, K extends keyof T>(object: T, keys: K[]) => pick(object, keys)
+
+export const ensureArray = <T>(arg: T | T[]): T[] => (Array.isArray(arg) ? arg : [arg])

@@ -141,6 +141,10 @@ commander.command(
                 defaultValue: false,
                 description: 'Will call tsc typecheck project if tsconfig.json is present',
             },
+            '--skip-packaging': {
+                defaultValue: false,
+                description: 'Skip creating .vsix file',
+            },
             ...commonBuildStartOptions,
         },
         loadConfig: true,
@@ -175,6 +179,28 @@ commander.command(
         }
     },
 )
+
+commander.command('init-config', 'Create vscode-config.js', {}, async () => {
+    const contents = `
+//@ts-check
+
+/** @type{import('vscode-framework/build/config').UserConfig} */
+const config = {
+
+}
+
+module.exports = config
+    `
+    await fsExtra.promises.writeFile('./vscode.config.js', contents, 'utf-8')
+})
+
+commander.command('gitignore', 'Add ignore entries to .gitignore of cwd', {}, async () => {
+    const contents = `
+        out
+        src/generated.ts
+    `
+    await fsExtra.promises.appendFile('./.gitignore', contents, 'utf-8')
+})
 
 addStandaloneCommands(commander)
 
