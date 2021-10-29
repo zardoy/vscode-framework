@@ -4,10 +4,10 @@ import fs from 'fs'
 import { join } from 'path'
 import { PackageJson } from 'type-fest'
 import { validRange } from 'semver'
+import { ManifestType } from 'vscode-manifest'
 import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
 import { defaultConfig } from '../../src/config'
-import { screenRecorderManifest } from './fixtures'
-import { pick } from 'lodash'
+import { screenRecorderManifest, screenRecorderManifestBase } from './fixtures'
 
 type HaveOwnTests = 'repository'
 
@@ -39,18 +39,40 @@ url=https://github.com/test-author/vscode-extension-name.git
     `)
 })
 
-// TODO!
-describe.skip('Generated commands', () => {
-    test("Doesn't touch original", async () => {
-        await propsGenerators['contributes.commands'](
+const screenRecorderManifestWithCommands: ManifestType = {
+    ...screenRecorderManifestBase,
+    contributes: {
+        commands: screenRecorderManifest.contributes.commands,
+    },
+}
+
+describe('Generated activation events', () => {
+    test('Nothing to change', async () => {
+        const result = propsGenerators.activationEvents(
             {
-                ...pick(screenRecorderManifest, 'name', 'displayName'),
-                contributes: {
-                    commands: [],
-                },
+                ...screenRecorderManifestWithCommands,
+                activationEvents: ['workspaceContains:package.json', 'onCommand:foo', 'onFileSystem:fs'],
             },
             productionMeta,
         )
+        expect(result.activationEvents).toBe(['workspaceContains:package.json', 'onCommand:foo', 'onFileSystem:fs'])
+    })
+    test("Doesn't touch original", async () => {
+        const result = propsGenerators.activationEvents(
+            {
+                ...screenRecorderManifestWithCommands,
+                activationEvents: ['workspaceContains:package.json', 'onCommands', 'onFileSystem:fs'],
+            },
+            productionMeta,
+        )
+        expect(result.activationEvents).toMatchInlineSnapshot(`
+            Array [
+              "workspaceContains:package.json",
+              "onCommand:startRecording",
+              "onCommand:editRecording",
+              "onFileSystem:fs",
+            ]
+        `)
     })
 })
 
@@ -76,15 +98,7 @@ Object {
   },
 }
 `),
-    activationEvents: expected =>
-        expect(expected).toMatchInlineSnapshot(`
-Object {
-  "activationEvents": Array [
-    "onCommand:startRecording",
-    "onCommand:editRecording",
-  ],
-}
-`),
+    activationEvents: expected => expect(expected).toMatchInlineSnapshot(`Object {}`),
     engines: expected => expect(validRange(expected.engines!.vscode)).not.toBeNull(),
     extensionEntryPoint: expected =>
         expect(expected).toMatchInlineSnapshot(`

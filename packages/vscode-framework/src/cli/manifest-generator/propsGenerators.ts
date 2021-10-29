@@ -113,20 +113,17 @@ export const propsGenerators = makeGenerators({
             return {
                 activationEvents: ['*'],
             }
+        const { commands } = contributes
         // Generate Activation Events From Commands
-        if (!contributes?.commands) return {}
-        const allCommands = contributes.commands.map(({ command }) => command)
-        // TODO! would override custom commands
-        if (
-            !activationEvents ||
-            (activationEvents.length === 1 && activationEvents[0] === 'onCommands') ||
-            activationEvents.every((event: string) => event.startsWith('onCommand:'))
-        )
-            // TODO
-            return {
-                activationEvents: allCommands.map(command => `onCommand:${command}`),
-            }
-        return {}
+        if (!commands || !activationEvents) return {}
+        const onCommandsIndex = activationEvents.indexOf('onCommands')
+        if (onCommandsIndex < 0) return {}
+        const allCommands = commands.map(({ command }) => command)
+        const newActivationEvents = [...activationEvents]
+        newActivationEvents.splice(onCommandsIndex, 1, ...allCommands.map(command => `onCommand:${command}`))
+        return {
+            activationEvents: newActivationEvents,
+        }
     },
     // requiredRuntimeDependency({
     //     dependencies = {},
