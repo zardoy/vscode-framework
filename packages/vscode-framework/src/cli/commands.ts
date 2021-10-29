@@ -8,7 +8,7 @@ import pkdDir from 'pkg-dir'
 import execa from 'execa'
 import kleur from 'kleur'
 import { BuildTargetType, Config, defaultConfig } from '../config'
-import { startExtensionBuild } from './buildExtension'
+import { buildExtension, startExtensionDevelopment } from './buildExtension'
 import { SuperCommander } from './commander'
 import { WebOpenType } from './launcher'
 import { addStandaloneCommands } from './standaloneCommands'
@@ -111,7 +111,7 @@ commander.command(
     async ({ skipLaunching, path, web, webDesktop, skipGeneratingTypes }, { config }) => {
         try {
             const target: BuildTargetType = web ? 'web' : 'desktop'
-            await startExtensionBuild({
+            await startExtensionDevelopment({
                 mode: 'development',
                 config,
                 launchVscodeParams: skipLaunching
@@ -156,7 +156,7 @@ commander.command(
         if (!skipTypechecking && fsExtra.existsSync('./tsconfig.json')) {
             const date = Date.now()
             console.log(kleur.green('Executing tsc for type-checking...'))
-            // just to simplify, don't see a reason for programmatic usage
+            // just for simplicity, don't see a reason for programmatic usage
             await execa('tsc', { stdio: 'inherit' })
             console.log(kleur.green('Type-checking done in '), `${Date.now() - date}ms`)
         }
@@ -165,10 +165,9 @@ commander.command(
             if (!enablement) continue
             // TODO does read manifest twice
             // eslint-disable-next-line no-await-in-loop
-            await startExtensionBuild({
+            await buildExtension({
                 mode: 'production',
                 config,
-                launchVscodeParams: false,
                 target: platform,
                 skipGeneratingTypes: true,
                 outDir: join(process.cwd(), path),

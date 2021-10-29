@@ -41,7 +41,7 @@ export type IpcEvents = {
 }
 
 /** does watch only in `development` mode actually */
-export const startExtensionBuild = async (
+export const startExtensionDevelopment = async (
     params: Except<Parameters<typeof buildExtension>[0], 'afterSuccessfulBuild'> & {
         /** Config for handling vscode launch, pass `false` to skip launching */
         launchVscodeParams: LauncherCLIParams | false
@@ -173,7 +173,7 @@ const getEnableIpc = (config: Config): boolean => {
 }
 
 /** build JS output whenever manifest changes */
-const buildExtension = async ({
+export const buildExtension = async ({
     mode,
     target,
     config,
