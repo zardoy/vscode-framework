@@ -1,14 +1,14 @@
+import fs from 'fs'
+import { join } from 'path'
 import Debug from '@prisma/debug'
 import { camelCase } from 'change-case'
 import exitHook from 'exit-hook'
-import fs from 'fs'
 import fsExtra from 'fs-extra'
 import { compilerOptions } from 'generated-module/build/ts-morph-utils'
 import kleur from 'kleur'
 import { defaultsDeep } from 'lodash'
 import { nanoid } from 'nanoid'
 import { Server as IpcServer } from 'net-ipc'
-import { join } from 'path'
 import { Project } from 'ts-morph'
 import { Except } from 'type-fest'
 import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
@@ -179,12 +179,14 @@ const buildExtension = async ({
     config,
     outDir,
     define,
+    skipGeneratingTypes,
     ...bundlerParams
 }: {
     config: Config
     mode: ModeType
     target: BuildTargetType
     outDir: string
+    skipGeneratingTypes: boolean
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
     await fsExtra.ensureDir(outDir)
@@ -211,7 +213,7 @@ const buildExtension = async ({
     // -> ASSETS
     // TODO
 
-    await newTypesGenerator(generatedManifest)
+    if (mode !== 'production' && !skipGeneratingTypes) await newTypesGenerator(generatedManifest)
 
     // -> EXTENSION ENTRYPOINT
     return runEsbuild({

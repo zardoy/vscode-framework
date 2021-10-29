@@ -100,11 +100,15 @@ commander.command(
                 defaultValue: false,
                 description: 'Start esbuild watch, but do not launch VSCode',
             },
+            '--skip-generating-types': {
+                defaultValue: false,
+                description: 'Do not generate types',
+            },
             ...commonBuildStartOptions,
         },
         loadConfig: true,
     },
-    async ({ skipLaunching, path, web, webDesktop }, { config }) => {
+    async ({ skipLaunching, path, web, webDesktop, skipGeneratingTypes }, { config }) => {
         try {
             const target: BuildTargetType = web ? 'web' : 'desktop'
             await startExtensionBuild({
@@ -117,6 +121,7 @@ commander.command(
                           webOpen: webDesktop ? 'desktop' : 'web',
                       },
                 target,
+                skipGeneratingTypes,
                 outDir: join(process.cwd(), path),
             })
         } catch (error) {
@@ -165,6 +170,7 @@ commander.command(
                 config,
                 launchVscodeParams: false,
                 target: platform,
+                skipGeneratingTypes: true,
                 outDir: join(process.cwd(), path),
             })
         }
