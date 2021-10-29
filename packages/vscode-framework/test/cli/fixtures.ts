@@ -9,22 +9,25 @@ export const mockManifestOnce = (manifest: ManifestType) => {
     spy.mockResolvedValueOnce(JSON.parse(JSON.stringify(manifest)))
 }
 
-const deepFreeze = <T extends Record<string, any>>(obj: T) => {
-    for (const [, value] of Object.entries(obj)) if (typeof value === 'object') deepFreeze(value)
+const deepFreeze = (obj: ManifestType) => {
+    for (const [, value] of Object.entries(obj))
+        if (typeof value === 'object' && value !== null) deepFreeze(value as any)
 
     Object.freeze(obj)
     return obj
 }
 
-export const screenRecorderManifest: ManifestType = deepFreeze({
+export const screenRecorderManifestBase: ManifestType = {
     name: 'screen-recorder',
     displayName: 'Screen Recorder',
     publisher: 'yatki',
     version: 'invalid-doesnt-matter',
     categories: ['Other'],
-    devDependencies: {
-        '@hediet/node-reload': '*',
-    },
+    contributes: {},
+}
+
+export const screenRecorderManifest: ManifestType = deepFreeze({
+    ...screenRecorderManifestBase,
     contributes: {
         commands: [
             {
@@ -82,4 +85,5 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
             ],
         },
     },
+    activationEvents: ['onCommands'],
 })

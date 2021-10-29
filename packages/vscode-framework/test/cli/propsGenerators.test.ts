@@ -98,7 +98,15 @@ Object {
   },
 }
 `),
-    activationEvents: expected => expect(expected).toMatchInlineSnapshot(`Object {}`),
+    activationEvents: expected =>
+        expect(expected).toMatchInlineSnapshot(`
+Object {
+  "activationEvents": Array [
+    "onCommand:startRecording",
+    "onCommand:editRecording",
+  ],
+}
+`),
     engines: expected => expect(validRange(expected.engines!.vscode)).not.toBeNull(),
     extensionEntryPoint: expected =>
         expect(expected).toMatchInlineSnapshot(`

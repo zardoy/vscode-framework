@@ -4,75 +4,54 @@ import { readDirectoryManifest } from 'vscode-manifest'
 import { generateManifest } from '../../src/cli'
 import { defaultConfig } from '../../src/config'
 import { mockManifestOnce, screenRecorderManifest } from './fixtures'
+import { mapValues } from 'lodash'
 
 test('Places IDs in contributes props', async () => {
     mockManifestOnce(screenRecorderManifest)
     const generatedManifest = await readDirectoryManifest()
-    expect(generatedManifest.contributes).toMatchInlineSnapshot(`
+    // COMMANDS IDS
+    expect(generatedManifest.contributes.commands!.map(({ command }) => command)).toMatchInlineSnapshot(`
+        Array [
+          "screenRecorder.startRecording",
+          "screenRecorder.editRecording",
+        ]
+    `)
+    // CONFIGURATION IDS
+    expect(
+        Object.entries(
+            (
+                generatedManifest.contributes.configuration! as Exclude<
+                    NonNullable<typeof generatedManifest.contributes.configuration>,
+                    any[]
+                >
+            ).properties,
+        ).map(([id]) => id),
+    ).toMatchInlineSnapshot(`
+        Array [
+          "screenRecorder.recordSound",
+          "screenRecorder.saveDir",
+          "screenRecorder.recordQuality",
+        ]
+    `)
+    // MENUS IDS
+    expect(mapValues(generatedManifest.contributes.menus!, arr => arr.map(({ command }) => command)))
+        .toMatchInlineSnapshot(`
         Object {
-          "commands": Array [
-            Object {
-              "command": "screenRecorder.startRecording",
-              "title": "Start Screen Recording",
-            },
-            Object {
-              "command": "screenRecorder.editRecording",
-              "icon": "$(edit)",
-              "shortTitle": "Edit",
-              "title": "Edit Screen Recording",
-            },
+          "commandPalette": Array [
+            "screenRecorder.startRecording",
+            "screenRecorder.editRecording",
           ],
-          "configuration": Object {
-            "properties": Object {
-              "screenRecorder.recordQuality": Object {
-                "description": "Record quality",
-                "enum": Array [
-                  "4K",
-                  "FullHD",
-                  "HD",
-                ],
-                "type": "string",
-              },
-              "screenRecorder.recordSound": Object {
-                "default": false,
-                "description": "Record sound",
-                "type": "boolean",
-              },
-              "screenRecorder.saveDir": Object {
-                "description": "",
-                "type": "string",
-              },
-            },
-          },
-          "menus": Object {
-            "commandPalette": Array [
-              Object {
-                "command": "screenRecorder.startRecording",
-                "when": "!virtualWorkspace",
-              },
-              Object {
-                "command": "screenRecorder.editRecording",
-                "when": "resourceExtname == .mpeg",
-              },
-            ],
-            "editor/title": Array [
-              Object {
-                "command": "screenRecorder.editRecording",
-                "group": "navigation",
-                "when": "resourceExtname == .mpeg",
-              },
-            ],
-          },
+          "editor/title": Array [
+            "screenRecorder.editRecording",
+          ],
         }
     `)
     mockManifestOnce({
         ...screenRecorderManifest,
         contributes: {
-            // TODO enhance
             configuration: [
                 {
                     title: 'Settings Section 1',
-                    order: 1,
                     properties: {
                         'enable-me': {
                             type: 'boolean',
@@ -83,7 +62,6 @@ test('Places IDs in contributes props', async () => {
                 },
                 {
                     title: 'Settings Section 2',
-                    order: 2,
                     properties: {
                         'show-tips': {
                             type: 'boolean',
@@ -99,7 +77,6 @@ test('Places IDs in contributes props', async () => {
     expect(generatedManifest2.contributes.configuration).toMatchInlineSnapshot(`
         Array [
           Object {
-            "order": 1,
             "properties": Object {
               "screenRecorder.enable-me": Object {
                 "default": false,
@@ -110,7 +87,6 @@ test('Places IDs in contributes props', async () => {
             "title": "Settings Section 1",
           },
           Object {
-            "order": 2,
             "properties": Object {
               "screenRecorder.show-tips": Object {
                 "default": false,
@@ -156,6 +132,7 @@ test('Generates schema properly in production', async () => {
             "configuration": Object {
               "properties": Object {
                 "recordQuality": Object {
+                  "default": "4K",
                   "description": "Record quality",
                   "enum": Array [
                     "4K",
@@ -170,6 +147,7 @@ test('Generates schema properly in production', async () => {
                   "type": "boolean",
                 },
                 "saveDir": Object {
+                  "default": null,
                   "description": "",
                   "type": "string",
                 },
