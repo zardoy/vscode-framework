@@ -6,6 +6,9 @@
     "categories": [
         "Other"
     ],
+    "activationEvents": [
+        "onCommands"
+    ],
     "contributes": {
         "commands": [
             {
