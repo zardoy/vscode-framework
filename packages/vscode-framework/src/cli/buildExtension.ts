@@ -48,7 +48,6 @@ export const startExtensionDevelopment = async (
     },
 ) => {
     const { mode, outDir, config } = params
-    // if (params.mode !== 'development') throw new Error('Watch is allowed only in development mode')
     debug('Building extension')
     debug({
         mode,
@@ -189,6 +188,11 @@ export const buildExtension = async ({
     skipGeneratingTypes: boolean
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
+    const outAssetsPath = join(outDir, 'assets')
+    // TODO watch assets dir
+    if (fs.existsSync('./assets') && fs.statSync('./assets').isDirectory() && !fs.existsSync(outAssetsPath))
+        await fs.promises.symlink(join(process.cwd(), './assets'), outAssetsPath, 'junction')
+
     await fsExtra.ensureDir(outDir)
 
     // -> MANIFEST
