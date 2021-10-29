@@ -1,9 +1,10 @@
+import fs from 'fs'
 import { join } from 'path'
 import Debug from '@prisma/debug'
 import { generateTypes as generateTypesModule, StringWriters } from 'generated-module'
 import { createJsdoc } from 'generated-module/build/ts-morph-utils'
 import { StatementStructures, StructureKind } from 'ts-morph'
-import { readDirectoryManifest } from 'vscode-manifest'
+import { ExtensionManifest, readDirectoryManifest } from 'vscode-manifest'
 import { oneOf } from '../util'
 import { GracefulError } from './errors'
 
@@ -15,6 +16,7 @@ const sliceExtensionId = (name: string) => name.split('.').slice(1).join('.')
 
 /**
  * Should be used directly in cli
+ * @deprecated slow and therefore needs refactor
  * @param cwd Directory with package.json (manifest) and node_modules
  */
 export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeModulesDir?: string } = {}) => {
@@ -86,4 +88,54 @@ export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeMo
             tsMorph: generatedStatements,
         },
     })
+}
+
+/**
+ * Places/rewrites generated file at ./src/generated.ts
+ * Signficantly faster then that is above
+ * @param resolvedManifest final manifest after all propsGenerators are run
+ */
+export const newTypesGenerator = async (resolvedManifest: ExtensionManifest) => {
+    const ensureArr = <T>(arg: T | T[]): T[] => (Array.isArray(arg) ? arg : [arg])
+
+    const withoutId = (arg: string) => arg.slice(arg.indexOf('.') + 1)
+    const contents = `
+declare module 'vscode-framework' {
+    interface RegularCommands {
+        ${
+            resolvedManifest.contributes?.commands
+                ?.map(({ command }) => `      "${withoutId(command)}": true`)
+                .join('\n') ?? ''
+        }
+    }
+    // // extremely simplified for a moment
+    ${
+        resolvedManifest.contributes?.configuration
+            ? `interface Settings {
+        ${ensureArr(resolvedManifest.contributes.configuration)
+            .map(({ properties }) =>
+                Object.entries(properties)
+                    .map(
+                        ([id, type]) =>
+                            `       "${withoutId(id)}": ${
+                                // eslint-disable-next-line zardoy-config/@typescript-eslint/restrict-template-expressions
+                                type.type === 'string' && type.enum
+                                    ? type.enum.map(s => `"${s}"`).join(' | ')
+                                    : // @ts-ignore
+                                    ['string', 'number', 'boolean'].includes(type.type)
+                                    ? type.type
+                                    : 'any'
+                            }`,
+                    )
+                    .join('\n'),
+            )
+            .join('')}
+    }`
+            : ''
+    }
+}
+
+export {}`
+
+    await fs.promises.writeFile('./src/generated.ts', contents, 'utf-8')
 }

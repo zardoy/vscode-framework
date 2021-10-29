@@ -4,7 +4,7 @@
 // file that placed into output directory as-is
 
 import vscode from 'vscode'
-import type { BootstrapConfig } from '../src/cli/buildExtension'
+import type { BootstrapConfig, IpcEvents } from '../src/cli/buildExtension'
 import type { MaybePromise } from '../src/util'
 
 type AsyncVoid = MaybePromise<void>
@@ -40,26 +40,28 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
         })
 
     if (process.env.PLATFORM === 'node' && bootstrapConfig.serverIpcChannel) {
-        const nodeIpc = require('node-ipc') as typeof import('node-ipc')
-        nodeIpc.config.retry = 1000
-        nodeIpc.config.silent = true
+        const { Client: IpcClient } = require('net-ipc') as typeof import('net-ipc')
         activateFunctions.push(() => {
-            // STATUS: connecting
             // maxRetries: 1, timeout: 1000
             const { serverIpcChannel } = bootstrapConfig
-            // console.time('ipc-connect')
-            nodeIpc.connectTo(serverIpcChannel!, () => {
-                nodeIpc.of[serverIpcChannel!]!.on('error', err => {
-                    if (err.code === 'ECONNREFUSED') return
+            const client = new IpcClient({
+                path: serverIpcChannel,
+            })
+            client.on('ready', () => {
+                client.on('error', err => {
                     console.error('[ipc]', err)
                 })
-                nodeIpc.of[serverIpcChannel!]!.on('connect', () => {
-                    // console.timeEnd('ipc-connect')
-                })
-                nodeIpc.of[serverIpcChannel!]!.on('message', message => {
-                    console.log('ipc-recieve', String(message))
+                client.on('message', (message: IpcEvents['extension']) => {
+                    if (message === 'action:reload' && bootstrapConfig.forceReload) {
+                        void vscode.commands.executeCommand('workbench.action.reloadWindow')
+                        return
+                    }
+
+                    if (message === 'action:close' && bootstrapConfig.closeWindowOnExit)
+                        void vscode.commands.executeCommand('workbench.action.closeWindow')
                 })
             })
+            client.connect().catch(console.error)
         })
     }
 

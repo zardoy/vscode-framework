@@ -42,6 +42,13 @@ export interface Config {
     prependIds: ReadManifestOptions['prependIds']
     /** Development-only settings. They don't affect production build */
     development: {
+        // TODO-current investigate or remove
+        /**
+         * - false - ignore
+         * - exit - kill development process
+         * - reopen - reopen extension development window. may be annoying
+         */
+        // actionOnExtensionClose: 'exit' | 'reopen' | false
         // TODO implies executable = insiders
         /** code- */
         executable: 'code' | 'code-insiders'
@@ -146,6 +153,7 @@ export const defaultConfig: Config = {
         disableExtensions: true,
         openDevtools: false,
         alwaysActivationEvent: true,
+        // actionOnExtensionClose: 'exit',
         extensionBootstrap: {
             revealOutputChannel: false,
             closeWindowOnExit: true,

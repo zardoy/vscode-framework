@@ -8,7 +8,7 @@ import pkdDir from 'pkg-dir'
 import execa from 'execa'
 import kleur from 'kleur'
 import { BuildTargetType, Config, defaultConfig } from '../config'
-import { buildExtensionAndWatch } from './buildExtension'
+import { startExtensionBuild } from './buildExtension'
 import { SuperCommander } from './commander'
 import { WebOpenType } from './launcher'
 import { addStandaloneCommands } from './standaloneCommands'
@@ -59,7 +59,9 @@ commander.command(
 commander.command(
     'generate-types',
     'Generate TypeScript typings (from contribution points) and place them to nearest node_modules for working with framework',
-    {},
+    {
+        hidden: true,
+    },
     async () => {
         await generateTypes({ nodeModulesDir: __DEV__ ? (await pkdDir(__dirname))! : process.cwd() })
     },
@@ -105,7 +107,7 @@ commander.command(
     async ({ skipLaunching, path, web, webDesktop }, { config }) => {
         try {
             const target: BuildTargetType = web ? 'web' : 'desktop'
-            await buildExtensionAndWatch({
+            await startExtensionBuild({
                 mode: 'development',
                 config,
                 launchVscodeParams: skipLaunching
@@ -158,7 +160,7 @@ commander.command(
             if (!enablement) continue
             // TODO does read manifest twice
             // eslint-disable-next-line no-await-in-loop
-            await buildExtensionAndWatch({
+            await startExtensionBuild({
                 mode: 'production',
                 config,
                 launchVscodeParams: false,

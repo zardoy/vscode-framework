@@ -30,8 +30,8 @@ export const runEsbuild = async ({
     target: BuildTargetType
     mode: ModeType
     outDir: string
-    afterSuccessfulBuild: (buildCount: number) => MaybePromise<void>
-    overrideBuildConfig: Config['esbuildConfig']
+    afterSuccessfulBuild?: (buildCount: number) => MaybePromise<void>
+    overrideBuildConfig?: Config['esbuildConfig']
     resolvedManifest: ManifestType
     injectConsole: boolean
 }) => {

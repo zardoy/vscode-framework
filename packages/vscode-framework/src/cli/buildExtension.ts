@@ -1,26 +1,32 @@
-import fs from 'fs'
-import { join, resolve } from 'path'
-import { camelCase } from 'change-case'
 import Debug from '@prisma/debug'
+import { camelCase } from 'change-case'
+import exitHook from 'exit-hook'
+import fs from 'fs'
 import fsExtra from 'fs-extra'
+import { compilerOptions } from 'generated-module/build/ts-morph-utils'
 import kleur from 'kleur'
 import { defaultsDeep } from 'lodash'
 import { nanoid } from 'nanoid'
-import nodeIpc from 'node-ipc'
-import exitHook from 'exit-hook'
+import { Server as IpcServer } from 'net-ipc'
+import { join } from 'path'
+import { Project } from 'ts-morph'
 import { Except } from 'type-fest'
 import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
+import { runEsbuild } from './esbuild/esbuild'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
-import { runEsbuild } from './esbuild/esbuild'
+import { newTypesGenerator } from './typesGenerator'
 declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:bulid-extension')
+
+const ipcDebug = Debug('vscode-framework:ipc')
 
 /** for ipc. used in extensionBootstrap.ts */
 export type BootstrapConfig = ExtensionBootstrapConfig & {
     /** `undefined` means don't enable IPC */
     serverIpcChannel: string | undefined
+    debugIpc: boolean
 }
 
 /** Build mode.
@@ -31,14 +37,17 @@ export type ModeType = 'development' | 'production'
 
 export type IpcEvents = {
     // app:reload not necessarily reloads window. it means changes happened and new file is on disk
-    extension: 'app:close' | 'app:reload'
+    extension: 'action:close' | 'action:reload'
 }
 
 /** does watch only in `development` mode actually */
-export const buildExtensionAndWatch = async (
-    params: Except<Parameters<typeof buildExtension>[0], 'ipcEmitExtension' | 'afterBuild'>,
+export const startExtensionBuild = async (
+    params: Except<Parameters<typeof buildExtension>[0], 'afterSuccessfulBuild'> & {
+        /** Config for handling vscode launch, pass `false` to skip launching */
+        launchVscodeParams: LauncherCLIParams | false
+    },
 ) => {
-    const { mode, outDir } = params
+    const { mode, outDir, config } = params
     // if (params.mode !== 'development') throw new Error('Watch is allowed only in development mode')
     debug('Building extension')
     debug({
@@ -52,56 +61,77 @@ export const buildExtensionAndWatch = async (
 
     // TODO! why do we need to stop esbuild?
     let stopEsbuild: (() => void) | undefined
-    let isLaunched = false
-    let ipcSocket
+
+    // #region IPC
+    /** An unique ID is required because extensions can be launched */
+    const serverIpcChannel = getEnableIpc(config) ? `vscode-framework:${nanoid(5)}` : undefined
+    const server = new IpcServer({
+        path: serverIpcChannel,
+        max: 1,
+    })
+    const sendMessage = (message: IpcEvents['extension']) => {
+        // we're not logging failures since it's common to have errors on load
+        // TODO fix this violation
+        server.connections[0]?.send(message)
+    }
+
+    server.on('ready', () => {
+        ipcDebug('server started')
+    })
+    server.on('connect', () => {
+        ipcDebug('connected to extension')
+    })
+    let skipSendExtensionClose = false
+    server.on('disconnect', (_client, reason) => {
+        // ipcDebug('disconnected from extension')
+        console.log('Extension disconnected', reason)
+        // const { actionOnExtensionClose } = config.development
+        // if (actionOnExtensionClose === false) return
+        // if (actionOnExtensionClose === 'exit') {
+        //     skipSendExtensionClose = true
+        //     console.log('Extension development window ');
+        //     process.exit(0)
+        // } else if (actionOnExtensionClose === 'reopen') {
+
+        // }
+    })
+    exitHook(() => {
+        if (skipSendExtensionClose) {
+            skipSendExtensionClose = false
+            return
+        }
+
+        sendMessage('action:close')
+    })
+    void server.start()
+    const extensionBootstrapConfig: BootstrapConfig | false = serverIpcChannel
+        ? {
+              ...(config.development.extensionBootstrap as ExtensionBootstrapConfig),
+              serverIpcChannel,
+              debugIpc: ipcDebug.enabled,
+          }
+        : false
+    // #endregion
     const restartBuild = async () => {
         if (stopEsbuild) stopEsbuild()
         stopEsbuild = (
             await buildExtension({
                 ...params,
-                async afterBuild({ ipcChannel: serverIpcChannel }) {
-                    // TODO web
-                    if (isLaunched) return
-                    if (params.launchVscodeParams)
-                        await launchVscode(params.outDir, {
-                            ...params.launchVscodeParams,
-                            // TODO ...params.config
-                            development: params.config.development,
-                        })
+                async afterSuccessfulBuild(rebuildCount) {
+                    if (rebuildCount === 0) {
+                        if (params.launchVscodeParams)
+                            await launchVscode(outDir, {
+                                ...params.launchVscodeParams,
+                                // TODO ...params.config
+                                development: config.development,
+                            })
+                        return
+                    }
 
-                    isLaunched = true
-                    if (!serverIpcChannel) return
-                    debug('starting ipc', serverIpcChannel)
-                    // if (isServerIpcStarted) throw new Error('IPC is already started. the first one must be closed')
-
-                    // TODO don't use global nodeIpc
-                    nodeIpc.config.id = serverIpcChannel
-                    nodeIpc.config.silent = !debug.enabled
-                    await new Promise<void>(resolve => {
-                        nodeIpc.serve(resolve)
-                        nodeIpc.server.start()
-                    })
-                    nodeIpc.server.on('connect', socket => {
-                        ipcSocket = socket
-                    })
-                    nodeIpc.server.on('error', err => {
-                        // investigate
-                        throw err
-                    })
-                    console.log('ipc server started')
-                    debug('ipc server started')
-
-                    exitHook(() => {
-                        // workbench.action.quit
-                        // workbench.action.closeWindow
-                        // search.action.focusActiveEditor
-                        nodeIpc.server.emit(ipcSocket, 'message', 'app:close')
-                    })
+                    sendMessage('action:reload')
                 },
-                ipcEmitExtension: event => {
-                    // TODO! emit on package.json update
-                    if (!ipcSocket) return
-                    nodeIpc.server.emit(ipcSocket, 'message', event)
+                define: {
+                    EXTENSION_BOOTSTRAP_CONFIG: extensionBootstrapConfig,
                 },
             })
         ).stop
@@ -142,34 +172,22 @@ const getEnableIpc = (config: Config): boolean => {
     return false
 }
 
-const ensureArr = <T>(arg: T | T[]): T[] => (Array.isArray(arg) ? arg : [arg])
-
+/** build JS output whenever manifest changes */
 const buildExtension = async ({
     mode,
     target,
     config,
     outDir,
-    ipcEmitExtension,
-    afterBuild,
+    define,
+    ...bundlerParams
 }: {
     config: Config
     mode: ModeType
     target: BuildTargetType
     outDir: string
-    // TODO remove
-    /** Config for handling vscode launch, pass `false` to skip launching */
-    launchVscodeParams: LauncherCLIParams | false
-    ipcEmitExtension?: (event: 'app:reload') => void | Promise<void>
-    afterBuild?: (params: { ipcChannel?: string }) => void | Promise<void>
-}) => {
+    define?: Record<string, any>
+} & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
     await fsExtra.ensureDir(outDir)
-
-    // #region prepare bootstrap config
-    /** An unique ID is required because multiple instances of extension can be launched */
-    const serverIpcChannel =
-        mode !== 'production' && afterBuild && getEnableIpc(config) ? `vscode-framework:server_${nanoid(5)}` : undefined
-
-    // #endregion
 
     // -> MANIFEST
     const generatedManifest = await generateAndWriteManifest({
@@ -193,34 +211,7 @@ const buildExtension = async ({
     // -> ASSETS
     // TODO
 
-    if (__DEV__) {
-        const noId = (arg: string) => arg.slice(arg.indexOf('.') + 1)
-        const contents = `
-declare module 'vscode-framework' {
-    interface RegularCommands {
-        ${generatedManifest.contributes.commands?.map(({ command }) => `"${noId(command)}": true`).join('\n')}
-    }
-    // // extremely simplified for a moment
-    interface Settings {
-        ${ensureArr(generatedManifest.contributes.configuration)
-            .map(d =>
-                Object.entries(d!.properties)
-                    .map(
-                        ([id, type]) =>
-                            `"${noId(id)}": ${
-                                ['string', 'number', 'boolean'].includes(type.type as any) ? type.type : 'any'
-                            }`,
-                    )
-                    .join('\n'),
-            )
-            .join('')}
-    }
-}
-
-export {}`
-
-        await fs.promises.writeFile('./src/generated.ts', contents, 'utf-8')
-    }
+    await newTypesGenerator(generatedManifest)
 
     // -> EXTENSION ENTRYPOINT
     return runEsbuild({
@@ -228,37 +219,46 @@ export {}`
         mode,
         outDir,
         resolvedManifest: generatedManifest,
-        async afterSuccessfulBuild(rebuildCount) {
-            if (rebuildCount === 0) await afterBuild?.({ ipcChannel: serverIpcChannel })
-            else ipcEmitExtension?.('app:reload')
-        },
         overrideBuildConfig: defaultsDeep(
             {
                 define: {
-                    EXTENSION_BOOTSTRAP_CONFIG: serverIpcChannel
-                        ? ({
-                              developmentCommands:
-                                  config.development.extensionBootstrap &&
-                                  config.development.extensionBootstrap.developmentCommands,
-                              ...config.development.extensionBootstrap,
-                              serverIpcChannel,
-                          } as BootstrapConfig)
-                        : false,
                     IDS_PREFIX: config.prependIds
                         ? config.prependIds.style === 'camelCase'
                             ? camelCase(generatedManifest.name)
                             : generatedManifest.name
                         : undefined,
+                    ...define,
                 },
             },
             config.esbuildConfig,
         ),
         // TODO handle other options
         injectConsole: config.consoleStatements !== false && config.consoleStatements.action === 'pipeToOutputChannel',
+        ...bundlerParams,
     })
 }
 
 export const EXTENSION_ENTRYPOINTS = {
     node: 'extension-node.js',
     web: 'extension-web.js',
+}
+
+/** Check that entrypoint exists and `activate` function is exported */
+export const checkEntrypoint = (config: Config) => {
+    // TODO
+    // 1. default export is still fine
+    // 2. warning: enforce to use export before const. otherwise it takes > 1s to check
+    // 3. doesn't work with functions
+    console.time('check')
+    const entryPoint = config.esbuildConfig.entryPoints?.[0] ?? './src/extension.ts'
+    const project = new Project({
+        skipAddingFilesFromTsConfig: true,
+        compilerOptions,
+    })
+    const source = project.addSourceFileAtPath(entryPoint)
+    // TODO fancy errors
+    if (!source.getVariableDeclarationOrThrow('activate').isExported())
+        throw new Error("activate function isn't exported")
+
+    console.timeEnd('check')
 }
