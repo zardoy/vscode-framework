@@ -1,0 +1,25 @@
+{
+    "name": "hello-world",
+    "displayName": "Hello World",
+    "publisher": "publisher",
+    "version": "0.0.0-development",
+    "categories": [
+        "Other"
+    ],
+    "contributes": {
+        "commands": [
+            {
+                "command": "sayHello",
+                "title": "Say Hello"
+            }
+        ]
+    },
+    "dependencies": {
+        "vscode-framework": "workspace:*",
+        "@zardoy/tsconfig": "^1.2.2",
+        "@types/vscode": "^1.61.0"
+    },
+    "scripts": {
+        "start": "vscode-framework start"
+    }
+}
