@@ -6,7 +6,8 @@ import { SetRequired } from 'type-fest'
 interface ICommand {
     command: string
     title: string
-
+    shortTitle?: string
+    icon?: string
     category?: string
 }
 
