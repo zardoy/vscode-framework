@@ -3,7 +3,7 @@
 import fs from 'fs'
 import path from 'path'
 import { generateTypes } from '../../src/cli/typesGenerator'
-import { mockManifestOnce, screenRecorderManifest } from './common'
+import { mockManifestOnce, screenRecorderManifest } from './fixtures'
 
 test('Types generators: simple typse', async () => {
     mockManifestOnce(screenRecorderManifest)

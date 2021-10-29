@@ -3,7 +3,7 @@
 import { readDirectoryManifest } from 'vscode-manifest'
 import { generateManifest } from '../../src/cli'
 import { defaultConfig } from '../../src/config'
-import { mockManifestOnce, screenRecorderManifest } from './common'
+import { mockManifestOnce, screenRecorderManifest } from './fixtures'
 
 test('Places IDs in contributes props', async () => {
     mockManifestOnce(screenRecorderManifest)

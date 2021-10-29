@@ -6,7 +6,7 @@ import { PackageJson } from 'type-fest'
 import { validRange } from 'semver'
 import { propsGenerators } from '../../src/cli/manifest-generator/propsGenerators'
 import { defaultConfig } from '../../src/config'
-import { screenRecorderManifest } from './common'
+import { screenRecorderManifest } from './fixtures'
 import { pick } from 'lodash'
 
 type HaveOwnTests = 'repository'

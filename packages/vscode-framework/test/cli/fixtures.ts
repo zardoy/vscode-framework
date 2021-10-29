@@ -51,12 +51,14 @@ export const screenRecorderManifest: ManifestType = deepFreeze({
                 // TODO make no-sync and optional
                 saveDir: {
                     type: 'string',
+                    default: null,
                     description: '',
                 },
                 recordQuality: {
                     description: 'Record quality',
                     type: 'string',
                     enum: ['4K', 'FullHD', 'HD'],
+                    default: '4K',
                 },
             },
         },
