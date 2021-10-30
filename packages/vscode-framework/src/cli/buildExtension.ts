@@ -11,6 +11,7 @@ import { nanoid } from 'nanoid'
 import { Server as IpcServer } from 'net-ipc'
 import { Project } from 'ts-morph'
 import { Except } from 'type-fest'
+import del from 'del'
 import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
 import { runEsbuild } from './esbuild/esbuild'
 import { LauncherCLIParams, launchVscode } from './launcher'
@@ -53,6 +54,9 @@ export const startExtensionDevelopment = async (
         mode,
         outDir,
     })
+    await del(
+        Object.values(EXTENSION_ENTRYPOINTS).flatMap(jsOut => [join(outDir, jsOut), join(outDir, `${jsOut}.map`)]),
+    )
     if (mode === 'production') {
         await buildExtension(params)
         return
