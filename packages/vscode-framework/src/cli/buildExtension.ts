@@ -117,7 +117,7 @@ export const startExtensionDevelopment = async (
             await buildExtension({
                 ...params,
                 async afterSuccessfulBuild(rebuildCount) {
-                    if (rebuildCount === 0) {
+                    if (rebuildCount === 0 && !stopEsbuild) {
                         if (params.launchVscodeParams)
                             await launchVscode(outDir, {
                                 ...params.launchVscodeParams,
@@ -204,7 +204,7 @@ export const buildExtension = async ({
             mode,
             // TS is literally killing the target type!
             target: mode === 'development' ? ({ [target]: true } as any) : config.target,
-            config: config.development,
+            config,
         },
     })
     if (!generatedManifest) throw new Error('Extension manifest (package.json) is missing.')

@@ -49,7 +49,7 @@ commander.command(
         await fsExtra.ensureDir(devExtensionPath)
         await generateAndWriteManifest({
             config,
-            propsGeneratorsMeta: { mode: 'production', target: config.target, config: { ...config.development } },
+            propsGeneratorsMeta: { mode: 'production', target: config.target, config },
             outputPath: join(devExtensionPath, 'package.json'),
             overwrite,
         })
