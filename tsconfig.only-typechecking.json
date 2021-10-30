@@ -1,4 +1,4 @@
 {
     "extends": "@zardoy/tsconfig/node",
-    "include": ["packages/vscode-framework/build/extensionBootstrap.ts"]
+    "include": ["packages/vscode-framework/build/extensionBootstrap.ts", "packages/*/test"]
 }

@@ -56,7 +56,8 @@ describe('Generated activationEvents', () => {
             },
             productionMeta,
         )
-        expect(result.activationEvents).toBe(['workspaceContains:package.json', 'onCommand:foo', 'onFileSystem:fs'])
+        // empty - nothing to change
+        expect(result.activationEvents).toEqual({})
     })
     test("Doesn't touch original", async () => {
         const result = propsGenerators.activationEvents(
