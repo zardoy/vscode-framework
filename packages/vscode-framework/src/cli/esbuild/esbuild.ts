@@ -1,16 +1,16 @@
 import fs from 'fs'
 import { join } from 'path'
+import Debug from '@prisma/debug'
 import { build as esbuildBuild } from 'esbuild'
 import escapeStringRegexp from 'escape-string-regexp'
-import kleur from 'kleur'
-import { ManifestType } from 'vscode-manifest'
-import Debug from '@prisma/debug'
 import filesize from 'filesize'
+import kleur from 'kleur'
+import { omit, partition } from 'lodash'
+import { ManifestType } from 'vscode-manifest'
 import { BuildTargetType, Config, getBootstrapFeature } from '../../config'
+import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 import { clearConsole, logConsole } from '../logger'
-import { BootstrapConfig, EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 import { esbuildDefineEnv } from './utils'
-import { omit } from 'lodash'
 
 type MaybePromise<T> = Promise<T> | T
 
@@ -101,7 +101,11 @@ export const runEsbuild = async ({
                         }
 
                         // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
-                        const outputFile = outputFiles![0]!
+                        const [sourceMaps, jsFiles] = partition(outputFiles, ({ path }) => path.endsWith('.map'))
+                        for (const sourcemap of sourceMaps)
+                            await fs.promises.writeFile(sourcemap.path, sourcemap.contents)
+
+                        const outputFile = jsFiles[0]!
                         const newSize = outputFile.contents.byteLength
                         // 1. Sometimes esbuild does rebulid when you change file outside src/ (suppose it's a bug)
                         // 2. Esbulid emits rebuild when you save file, but output size remains the same e.g. you if you format the file
