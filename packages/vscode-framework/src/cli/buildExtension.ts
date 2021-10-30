@@ -192,10 +192,10 @@ export const buildExtension = async ({
     skipGeneratingTypes: boolean
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
-    const outAssetsPath = join(outDir, 'assets')
+    const outAssetsPath = join(outDir, 'resources')
     // TODO watch assets dir
-    if (fs.existsSync('./assets') && fs.statSync('./assets').isDirectory() && !fs.existsSync(outAssetsPath))
-        await fs.promises.symlink(join(process.cwd(), './assets'), outAssetsPath, 'junction')
+    if (fs.existsSync('./resources') && fs.statSync('./resources').isDirectory() && !fs.existsSync(outAssetsPath))
+        await fs.promises.symlink(join(process.cwd(), './resources'), outAssetsPath, 'junction')
 
     await fsExtra.ensureDir(outDir)
 
