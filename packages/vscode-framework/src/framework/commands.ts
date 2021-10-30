@@ -42,7 +42,7 @@ export const registerExtensionCommand = (command: keyof RegularCommands, handler
                 if (error instanceof GracefulCommandError) {
                     const firstArgs = error.options.modal
                         ? ([
-                              `Running command "${getCommandTitle(command)}" failed`,
+                              `Running command '${getCommandTitle(command)}' failed`,
                               {
                                   modal: true,
                                   detail: error.message,
@@ -54,14 +54,16 @@ export const registerExtensionCommand = (command: keyof RegularCommands, handler
                         ...(error.options.actions ? error.options.actions.map(({ label }) => label) : []),
                     )
                     if (action) await error.options.actions!.find(({ label }) => label === action)!.action()
+                    return
                 }
 
                 // show more graceful (AND HELPFUL!) errors
                 // TODO add github report report, like sindresorhus did in module for Electron
-                await vscode.window.showErrorMessage(`Command "${getCommandTitle(command)}" failed`, {
+                await vscode.window.showErrorMessage(`Command '${getCommandTitle(command)}' failed`, {
                     modal: true,
                     detail: error.message,
                 })
+                throw error
             }
         }),
     )
