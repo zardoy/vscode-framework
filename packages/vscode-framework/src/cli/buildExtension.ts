@@ -192,10 +192,18 @@ export const buildExtension = async ({
     skipGeneratingTypes: boolean
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
-    const outAssetsPath = join(outDir, 'resources')
+    // Pick icons from here https://github.com/microsoft/vscode-codicons/tree/main/src/icons
+    const resourcesPaths = {
+        from: './resources',
+        to: join(outDir, 'resources'),
+    }
     // TODO watch assets dir
-    if (fs.existsSync('./resources') && fs.statSync('./resources').isDirectory() && !fs.existsSync(outAssetsPath))
-        await fs.promises.symlink(join(process.cwd(), './resources'), outAssetsPath, 'junction')
+    if (fs.existsSync(resourcesPaths.to)) await fs.promises.unlink(resourcesPaths.to)
+
+    if (fs.existsSync(resourcesPaths.from) && fs.statSync(resourcesPaths.from).isDirectory())
+        await (mode === 'production'
+            ? fsExtra.copy(resourcesPaths.from, resourcesPaths.to)
+            : fs.promises.symlink(resourcesPaths.from, resourcesPaths.to, 'junction'))
 
     await fsExtra.ensureDir(outDir)
 
