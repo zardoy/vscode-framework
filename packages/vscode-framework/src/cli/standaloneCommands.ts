@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { readDirectoryManifest } from 'vscode-manifest'
+import { ManifestType, readDirectoryManifest } from 'vscode-manifest'
 import globby from 'globby'
 import { SuperCommander } from './commander'
 import { launchVscode } from './launcher'
@@ -76,6 +76,32 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
         async ({ normalizeIds, skipValidation }) => {
             const manifest = await readDirectoryManifest({ throwIfInvalid: !skipValidation })
             const regeneratedManifest = propsGenerators
+        },
+    )
+
+    commander.command(
+        'make-demo-extension',
+        'Make VSIS with minimal extension that can run one command. Entrypoint must have one export: commandInvoke',
+        {
+            arguments: ['<nameWithOptionalVersion>', '<pathToEntrypoint>'] as [
+                '<nameWithOptionalVersion>',
+                '<pathToEntrypoint>',
+            ],
+        },
+        ({}, { arguments: { nameWithOptionalVersion, pathToEntrypoint } }) => {
+            const match = /^(?<name>[^@]+)(?<version>@\S+)?$/.exec(nameWithOptionalVersion)
+            const { name, version } = match!.groups!
+            // const minimalManifest: ManifestType = {
+            //     name,
+            //     // TODO isn't vsix does this normaliztion
+            //     displayName: name,
+            //     publisher: '',
+            //     version,
+            //     activationEvents: ['onCommand'],
+            //     contributes: {},
+            //     categories: ['Other'],
+            // }
+            // TODO create esbuild bundle
         },
     )
 }
