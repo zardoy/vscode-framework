@@ -140,7 +140,9 @@ export const defaultConfig: Config = {
             revealOutputChannel: false,
             closeWindowOnExit: true,
             pipeConsole: false,
-            autoReload: false,
+            autoReload: {
+                type: 'forced',
+            },
             statusbarReloadInfo: true,
             developmentCommands: true,
         },
