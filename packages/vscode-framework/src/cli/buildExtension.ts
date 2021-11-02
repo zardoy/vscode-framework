@@ -193,8 +193,9 @@ export const buildExtension = async ({
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
     // Pick icons from here https://github.com/microsoft/vscode-codicons/tree/main/src/icons
+    /** should be absolute */
     const resourcesPaths = {
-        from: './resources',
+        from: join(process.cwd(), 'resources'),
         to: join(outDir, 'resources'),
     }
     // TODO watch assets dir
