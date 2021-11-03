@@ -11,6 +11,7 @@ import { BuildTargetType, Config, getBootstrapFeature } from '../../config'
 import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 import { clearConsole, logConsole } from '../logger'
 import { esbuildDefineEnv } from './utils'
+import { getHashFromString } from '../../util'
 
 type MaybePromise<T> = Promise<T> | T
 
@@ -89,7 +90,7 @@ export const runEsbuild = async ({
                 setup(build) {
                     let rebuildCount = 0
                     let date: number
-                    let prevOutput: string | undefined
+                    let prevHashOutput: string | undefined
                     build.onStart(() => {
                         date = Date.now()
                         if (!debug.enabled) clearConsole(true, false)
@@ -105,23 +106,25 @@ export const runEsbuild = async ({
                             await fs.promises.writeFile(sourcemap.path, sourcemap.contents)
 
                         const outputFile = jsFiles[0]!
-                        const newOutput = outputFile.text
+                        console.time('get output hash')
+                        const newHashOutput = getHashFromString(outputFile.text)
+                        console.timeEnd('get output hash')
                         // 1. Sometimes esbuild does rebulid when you change file outside src/ (suppose it's a bug)
                         // 2. Esbulid emits rebuild when you save file, but output size remains the same e.g. you if you format the file
                         // size isn't changed = code isn't changed so we don't need to emit reload
-                        if (newOutput === prevOutput) {
+                        if (newHashOutput === prevHashOutput) {
                             // to reformat message
                             logConsole('log', 'No new changes')
                             return
                         }
 
-                        prevOutput = newOutput
+                        prevHashOutput = newHashOutput
                         // investigate performance
                         debug('Start writing with inject')
                         await fs.promises.writeFile(
                             outputFile.path,
                             // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
-                            `${injectedCode}${consoleInjectCode ?? ''}\n${newOutput}`,
+                            `${injectedCode}${consoleInjectCode ?? ''}\n${newHashOutput}`,
                             'utf-8',
                         )
                         debug('End writing with inject')
