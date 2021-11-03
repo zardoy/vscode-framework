@@ -2,6 +2,8 @@
     "extends": ["plugin:zardoy-config/recommended"],
     "rules": {
         // doesn't work correctly for TypeScript types
-        "no-unused-vars": "off"
+        "no-unused-vars": "off",
+        // doesn't work correctly with just falsey values
+        "zardoy-config/@typescript-eslint/prefer-optional-chain": "off"
     }
 }
