@@ -53,6 +53,7 @@
         "@prisma/debug": "^3.2.1",
         "@vscode/test-web": "^0.0.15",
         "change-case": "^4.1.2",
+        "chokidar": "^3.5.2",
         "commander": "^8.2.0",
         "cosmiconfig": "^7.0.1",
         "del": "^6.0.0",
@@ -72,6 +73,7 @@
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.2.5",
         "ts-morph": "^12.0.0",
+        "typescript-json-schema": "^0.51.0",
         "vscode-extra": "workspace:*",
         "vscode-manifest": "workspace:*"
     }
