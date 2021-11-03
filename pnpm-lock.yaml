@@ -56,6 +56,16 @@ importers:
       type-fest: 2.5.2
       typescript: 4.4.4
 
+  extension-samples/hello-world:
+    specifiers:
+      '@types/vscode': ^1.61.0
+      '@zardoy/tsconfig': ^1.2.2
+      vscode-framework: workspace:*
+    dependencies:
+      '@types/vscode': 1.61.0
+      '@zardoy/tsconfig': 1.2.2_typescript@4.4.4
+      vscode-framework: link:../../packages/vscode-framework
+
   packages/vscode-extra:
     specifiers:
       tsd: ^0.17.0

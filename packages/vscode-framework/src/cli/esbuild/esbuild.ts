@@ -89,7 +89,7 @@ export const runEsbuild = async ({
                 setup(build) {
                     let rebuildCount = 0
                     let date: number
-                    let prevSize: number | undefined
+                    let prevOutput: string | undefined
                     build.onStart(() => {
                         date = Date.now()
                         if (!debug.enabled) clearConsole(true, false)
@@ -100,28 +100,28 @@ export const runEsbuild = async ({
                             return
                         }
 
-                        // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
                         const [sourceMaps, jsFiles] = partition(outputFiles, ({ path }) => path.endsWith('.map'))
                         for (const sourcemap of sourceMaps)
                             await fs.promises.writeFile(sourcemap.path, sourcemap.contents)
 
                         const outputFile = jsFiles[0]!
-                        const newSize = outputFile.contents.byteLength
+                        const newOutput = outputFile.text
                         // 1. Sometimes esbuild does rebulid when you change file outside src/ (suppose it's a bug)
                         // 2. Esbulid emits rebuild when you save file, but output size remains the same e.g. you if you format the file
                         // size isn't changed = code isn't changed so we don't need to emit reload
-                        if (newSize === prevSize) {
+                        if (newOutput === prevOutput) {
                             // to reformat message
                             logConsole('log', 'No new changes')
                             return
                         }
 
-                        prevSize = newSize
+                        prevOutput = newOutput
                         // investigate performance
                         debug('Start writing with inject')
                         await fs.promises.writeFile(
                             outputFile.path,
-                            `${injectedCode}${consoleInjectCode ?? ''}\n${outputFile.text}`,
+                            // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
+                            `${injectedCode}${consoleInjectCode ?? ''}\n${newOutput}`,
                             'utf-8',
                         )
                         debug('End writing with inject')
