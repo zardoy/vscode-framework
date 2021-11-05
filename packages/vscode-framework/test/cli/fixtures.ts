@@ -2,6 +2,7 @@ import jsonfile from 'jsonfile'
 import { SetOptional } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
 
+// Manifest fixtures
 // TODO mock config in all tests to ensure stability
 
 export const mockManifestOnce = (manifest: ManifestType) => {

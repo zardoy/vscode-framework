@@ -1,10 +1,13 @@
 import Debug from '@prisma/debug'
+import fs from 'fs'
 import { getGithubRemoteInfo } from 'github-remote-info'
 import { defaultsDeep, mapValues } from 'lodash'
 import { UnionToIntersection } from 'type-fest'
+import { parseJsoncString } from 'typed-jsonfile/build/parseJsonc'
 import { ContributesConfigurationType, ManifestType } from 'vscode-manifest'
 import { Config, ExtensionBootstrapConfig } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
+import { cachedGeneratedConfigurationPath, configurationTypeFile } from '../buildConfiguration'
 import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 
 // They're generating package.json properties
@@ -37,6 +40,7 @@ type PickManifest<T extends keyof ManifestType> = Pick<ManifestType, T>
 type PickContributes<T extends keyof ManifestType['contributes']> = {
     contributes: Pick<ManifestType['contributes'], T>
 }
+// TODO! rename to manifestGenerators
 
 // MAKE TECH!
 const makeGenerators = <T extends MakePropsGenerators>(generators: T) => generators
@@ -175,6 +179,22 @@ export const propsGenerators = makeGenerators({
         newActivationEvents.splice(onCommandsIndex, 1, ...allCommands.map(command => `onCommand:${command}`))
         return {
             activationEvents: newActivationEvents,
+        }
+    },
+    async generatedConfiguration({ contributes: { configuration } }: PickContributes<'configuration'>) {
+        if (!fs.existsSync(configurationTypeFile)) return {}
+        if (configuration)
+            throw new Error(
+                'contributes.configuration property must be removed from package.json when using configuration from configurationType.ts',
+            )
+        // TODO! pass config instead of reading it from fs
+        return {
+            contributes: {
+                configuration: {
+                    properties: parseJsoncString(await fs.promises.readFile(cachedGeneratedConfigurationPath, 'utf-8'))
+                        .properties,
+                },
+            },
         }
     },
     // requiredRuntimeDependency({

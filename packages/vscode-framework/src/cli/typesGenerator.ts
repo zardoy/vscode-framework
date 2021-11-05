@@ -7,7 +7,7 @@ import { StatementStructures, StructureKind } from 'ts-morph'
 import { ExtensionManifest, readDirectoryManifest } from 'vscode-manifest'
 import { ensureArray, oneOf } from '../util'
 import { GracefulError } from './errors'
-
+import { configurationTypeFile } from './buildConfiguration'
 const debug = Debug('vscode-framework:types-generator')
 
 // TODO make TS peer dep and use printer
@@ -97,20 +97,17 @@ export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeMo
  */
 export const newTypesGenerator = async (resolvedManifest: ExtensionManifest) => {
     const withoutId = (arg: string) => arg.slice(arg.indexOf('.') + 1)
-    const contents = `
-declare module 'vscode-framework' {
-    interface RegularCommands {
-        ${
-            resolvedManifest.contributes?.commands
-                ?.map(({ command }) => `      "${withoutId(command)}": true`)
-                .join('\n') ?? ''
-        }
-    }
-    // // extremely simplified for a moment
-    ${
-        resolvedManifest.contributes?.configuration
-            ? `interface Settings {
-        ${ensureArray(resolvedManifest.contributes.configuration)
+    const interfaceRegularCommands =
+        resolvedManifest.contributes?.commands
+            ?.map(({ command }) => `      "${withoutId(command)}": true`)
+            .join('\n') ?? ''
+    let interfaceSettings = ''
+    const hasConfigurationTypeFile = fs.existsSync(configurationTypeFile)
+    if (hasConfigurationTypeFile) {
+        interfaceSettings = 'interface Settings extends Required<Configuration> {}'
+    } else if (resolvedManifest.contributes?.configuration) {
+        interfaceSettings = 'interface Settings {'
+        interfaceSettings += ensureArray(resolvedManifest.contributes.configuration)
             .map(({ properties }) =>
                 Object.entries(properties)
                     .map(
@@ -127,10 +124,19 @@ declare module 'vscode-framework' {
                     )
                     .join('\n'),
             )
-            .join('')}
-    }`
-            : ''
+            .join('')
+        interfaceSettings += '}'
     }
+
+    const contents = `
+${
+    hasConfigurationTypeFile ? "import { Configuration } from './configurationType'\n" : ''
+}declare module 'vscode-framework' {
+    interface RegularCommands {
+${interfaceRegularCommands}
+    }
+    // // extremely simplified for a moment
+    ${interfaceSettings}
 }
 
 export {}`

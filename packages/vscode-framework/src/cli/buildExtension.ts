@@ -2,17 +2,19 @@ import fs from 'fs'
 import { join } from 'path'
 import Debug from '@prisma/debug'
 import { camelCase } from 'change-case'
+import { watch } from 'chokidar'
+import del from 'del'
 import exitHook from 'exit-hook'
 import fsExtra from 'fs-extra'
 import { compilerOptions } from 'generated-module/build/ts-morph-utils'
 import kleur from 'kleur'
-import { defaultsDeep } from 'lodash'
 import { nanoid } from 'nanoid'
 import { Server as IpcServer } from 'net-ipc'
 import { Project } from 'ts-morph'
 import { Except } from 'type-fest'
-import del from 'del'
 import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
+import { getFileHash } from '../util'
+import { configurationTypeFile, runConfigurationGenerator } from './buildConfiguration'
 import { runEsbuild } from './esbuild/esbuild'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
@@ -140,27 +142,44 @@ export const startExtensionDevelopment = async (
         ).stop
     }
 
-    await restartBuild()
-    let throttled = false
-    const manifestPath = './package.json'
+    const manifestPath = 'package.json'
     // it would still restart esbuild on ctrl+s on file
-    const manifestWatcher = fs.watch(manifestPath, async () => {
-        if (throttled) return
-        throttled = true
-        setTimeout(() => {
-            throttled = false
-        }, 200)
-        if (fs.existsSync(manifestPath)) {
-            await restartBuild()
-            // investigate clearing console here
+    // previous was settingsType.ts thinking about renaming it back
+    console.log('watching', [manifestPath, configurationTypeFile])
+    const watcher = watch([manifestPath, configurationTypeFile])
+    const prevHashes = new Map<string, string>()
+    const neededFileWasChanged = async (changedFilePath: string, neededPath: string) => {
+        if (!changedFilePath.endsWith(neededPath)) return false
+        const newHash = await getFileHash(neededPath)
+        if (prevHashes.get(neededPath) === newHash) return false
+        prevHashes.set(neededPath, newHash)
+        return true
+    }
 
+    const onFileChange = async (path: string) => {
+        if (await neededFileWasChanged(path, manifestPath)) {
+            await restartBuild()
             console.log('[vscode-framework] Manifest updated.')
-        } else {
-            console.log(kleur.red('[vscode-framework] Manifest is missing! Return it back.'))
         }
+
+        if (await neededFileWasChanged(path, configurationTypeFile)) {
+            await runConfigurationGenerator(process.cwd())
+            // TODO! doesn't restart
+            await restartBuild()
+            console.log('[vscode-framework] Configuration updated.')
+        }
+    }
+
+    watcher.on('change', onFileChange)
+    watcher.on('add', onFileChange)
+    watcher.on('unlink', async path => {
+        // TODO also run typesGenerator
+        if (path.endsWith(manifestPath))
+            console.log(kleur.red('[vscode-framework] Manifest is missing! Return it back.'))
+        // TODO! run typesGenerator configurationType.ts was removed, for now need to rerun start script
     })
     return {
-        manifestWatcher,
+        watcher,
         stopEsbuild,
     }
 }
@@ -258,7 +277,7 @@ export const EXTENSION_ENTRYPOINTS = {
     web: 'extension-web.js',
 }
 
-/** Check that entrypoint exists and `activate` function is exported */
+/** Check that entrypoint exists and `activate` function is exported. Not used for now, as it's slow */
 export const checkEntrypoint = (config: Config) => {
     // TODO
     // 1. default export is still fine

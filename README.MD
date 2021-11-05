@@ -8,7 +8,7 @@ Warning: still WIP, not all functionality are available.
 - 📦 Optimized Single File Build with zero config
 - 🚀 Use `console` methods in production (creates extension output for you)
 - 🛠️ Configurable
-
+- ⚙️ Use TypeScript type for `configuration` instead of schema in *package.json*
 
 
 

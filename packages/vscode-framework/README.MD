@@ -10,7 +10,7 @@ Warning: still WIP, not all functionality are available.
 - 📦 Publish Production-ready Build with zero config
 - 🚀 Use `console` methods in production (creates extension output for you)
 - 🛠️ Verbose Configuration
-- 📝 Use TypeScript type for `configuration` instead of schema in *package.json*
+- ⚙️ Use TypeScript type for `configuration` instead of schema in *package.json*
 
 <!-- And even more: pnpm support, CI, [API wrappers](packages/vscode-extra/). -->
 

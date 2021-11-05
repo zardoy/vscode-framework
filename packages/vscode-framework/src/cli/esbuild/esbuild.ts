@@ -124,7 +124,7 @@ export const runEsbuild = async ({
                         await fs.promises.writeFile(
                             outputFile.path,
                             // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
-                            `${injectedCode}${consoleInjectCode ?? ''}\n${newHashOutput}`,
+                            `${injectedCode}${consoleInjectCode ?? ''}\n${outputFile.text}`,
                             'utf-8',
                         )
                         debug('End writing with inject')

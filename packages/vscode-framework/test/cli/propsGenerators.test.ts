@@ -10,10 +10,12 @@ import { defaultConfig } from '../../src/config'
 import { screenRecorderManifest, screenRecorderManifestBase } from './fixtures'
 
 type Tests = {
-    // these have its own tests
-    [K in keyof Except<typeof propsGenerators, 'repository' /*  | 'contributes.configuration' */>]: (
-        packageJson: PackageJson,
-    ) => void
+    [K in keyof Except<
+        typeof propsGenerators,
+        // these have its own tests
+        // but generatedConfiguration will be removed from here
+        'repository' | 'generatedConfiguration' /*  | 'contributes.configuration' */
+    >]: (packageJson: PackageJson) => void
 }
 
 const productionMeta: PropsGeneratorsMeta = {
@@ -57,7 +59,7 @@ describe('Generated activationEvents', () => {
             productionMeta,
         )
         // empty - nothing to change
-        expect(result.activationEvents).toEqual({})
+        expect(result).toEqual({})
     })
     test("Doesn't touch original", async () => {
         const result = propsGenerators.activationEvents(
