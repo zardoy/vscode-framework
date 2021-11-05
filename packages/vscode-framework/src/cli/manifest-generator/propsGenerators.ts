@@ -49,16 +49,20 @@ const makeGenerators = <T extends MakePropsGenerators>(generators: T) => generat
 export const propsGenerators = makeGenerators({
     // every generator's return type should be deeply merged
     async repository() {
-        // hard to test
-        const githubRepoUrl = await getGithubRemoteInfo(process.cwd())
-        if (!githubRepoUrl)
-            throw new Error(
-                "GitHub remote origin can't be detected on current cwd. Either disable generating repository property or consider publising your project to GitHub",
-            )
+        try {
+            // hard to test
+            const githubRepoUrl = await getGithubRemoteInfo(process.cwd())
+            if (!githubRepoUrl)
+                throw new Error(
+                    "GitHub remote origin can't be detected on current cwd. Either disable generating repository property or consider publising your project to GitHub",
+                )
 
-        const { name, owner } = githubRepoUrl
+            const { name, owner } = githubRepoUrl
 
-        return { repository: `https://github.com/${owner}/${name}` }
+            return { repository: `https://github.com/${owner}/${name}` }
+        } catch {
+            return {}
+        }
     },
     async engines() {
         const vscodeTypes = await readModulePackage('@types/vscode')
