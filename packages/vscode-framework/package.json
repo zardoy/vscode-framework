@@ -3,7 +3,10 @@
     "version": "0.0.7",
     "main": "build/index.js",
     "types": "build/index.d.ts",
-    "repository": "https://github.com/zardoy/vscode-tools.git",
+    "repository": {
+        "url": "https://github.com/zardoy/vscode-framework.git",
+        "directory": "packages/vscode-framework"
+    },
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
     "license": "MIT",
     "replaceKeywords": [

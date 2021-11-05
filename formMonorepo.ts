@@ -1,17 +1,18 @@
+// tsm formMonorepo.ts
 import fs from 'fs'
+import { join } from 'path'
 import { getGithubRemoteInfo } from 'github-remote-info'
 import jsonfile from 'jsonfile'
-import { modifyTsConfigJsonFile } from 'modify-json-file'
-import { join } from 'path'
+import { modifyPackageJsonFile, modifyTsConfigJsonFile } from 'modify-json-file'
 import { PackageJson, TsConfigJson } from 'type-fest'
 ;(async () => {
-    const fromMonorepo = (...p: string[]) => join(__dirname, 'packages', ...p)
+    const fromMonorepo = (...p: string[]) => join('packages', ...p)
     const packageTsconfigs = {
         dev: 'tsconfig.dev.json',
         prod: 'tsconfig.prod.json',
     }
     const packagesDirs = (await fs.promises.readdir(fromMonorepo())).filter(monorepoPackage => {
-        const fromPackage = (...p: string[]) => join(__dirname, 'packages', monorepoPackage, ...p)
+        const fromPackage = (...p: string[]) => join('packages', monorepoPackage, ...p)
         if (!fs.existsSync(fromPackage('package.json'))) return false
         const packageJson: PackageJson = jsonfile.readFileSync(fromPackage('package.json'))
         if (packageJson.private || !packageJson.types) return false
@@ -20,7 +21,16 @@ import { PackageJson, TsConfigJson } from 'type-fest'
     console.log(packagesDirs)
 
     for (const monorepoPackage of packagesDirs) {
-        const fromPackage = (...p: string[]) => join(__dirname, 'packages', monorepoPackage, ...p)
+        const fromPackage = (...p: string[]) => join('packages', monorepoPackage, ...p)
+        // eslint-disable-next-line no-await-in-loop
+        await modifyPackageJsonFile({ dir: fromPackage() }, packageJson => {
+            // temporarily
+            packageJson.repository = {
+                url: 'https://github.com/zardoy/vscode-framework.git',
+                directory: fromPackage().replace('\\', '/'),
+            }
+            return packageJson
+        })
         // if (fs.existsSync(fromPackage(packageTsconfigName))) {
         //     console.warn(monorepoPackage, 'has tsconfig.json')
         // }
@@ -56,10 +66,10 @@ import { PackageJson, TsConfigJson } from 'type-fest'
             })
     }
 
-    await modifyTsConfigJsonFile(join(__dirname, 'tsconfig.dev.json'), {
+    await modifyTsConfigJsonFile('tsconfig.dev.json', {
         references: packagesDirs.map(dir => ({ path: `packages/${dir}/${packageTsconfigs.dev}` })),
     })
-    await modifyTsConfigJsonFile(join(__dirname, 'tsconfig.prod.json'), {
+    await modifyTsConfigJsonFile('tsconfig.prod.json', {
         references: packagesDirs.map(dir => ({ path: `packages/${dir}/${packageTsconfigs.prod}` })),
     })
 

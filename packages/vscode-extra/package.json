@@ -2,7 +2,10 @@
     "name": "vscode-extra",
     "version": "0.0.1",
     "description": "Contains additional useful methods extensions that aren't provided by vscode API",
-    "repository": "zardoy/vscode-framework",
+    "repository": {
+        "url": "https://github.com/zardoy/vscode-framework.git",
+        "directory": "packages/vscode-extra"
+    },
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "keywords": [

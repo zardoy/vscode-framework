@@ -40,5 +40,9 @@
         "type-fest": "2.3.4",
         "json-schema-typed": "^7.0.3",
         "lodash": "^4.17.21"
+    },
+    "repository": {
+        "url": "https://github.com/zardoy/vscode-framework.git",
+        "directory": "packages/vscode-manifest"
     }
 }
