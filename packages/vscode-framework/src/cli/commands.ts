@@ -180,17 +180,16 @@ commander.command(
 )
 
 commander.command('init-config', 'Create vscode-config.js', {}, async () => {
-    const contents = `
-//@ts-check
+    const contents = `//@ts-check
 
 /** @type{import('vscode-framework/build/config').UserConfig} */
 const config = {
-
+\t
 }
 
 module.exports = config
-    `
-    await fsExtra.promises.writeFile('./vscode.config.js', contents, 'utf-8')
+`
+    await fsExtra.promises.writeFile('./vscode-framework.config.js', contents, 'utf-8')
 })
 
 commander.command('gitignore', 'Add ignore entries to .gitignore of cwd', {}, async () => {
