@@ -39,35 +39,44 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
             )
         })
 
-    if (process.env.PLATFORM === 'node' && bootstrapConfig.serverIpcChannel) {
-        const { Client: IpcClient } = require('net-ipc') as typeof import('net-ipc')
-        activateFunctions.push(() => {
-            // maxRetries: 1, timeout: 1000
-            const { serverIpcChannel } = bootstrapConfig
-            const client = new IpcClient({
-                path: serverIpcChannel,
-            })
-            client.on('ready', () => {
-                client.on('error', err => {
-                    console.error('[ipc]', err)
-                })
-                client.on('message', (message: IpcEvents['extension']) => {
-                    if (bootstrapConfig.debugIpc) console.debug('[ipc] recieve:', message)
-                    if (
-                        message === 'action:reload' &&
-                        bootstrapConfig.autoReload &&
-                        bootstrapConfig.autoReload.type === 'forced'
-                    ) {
-                        void vscode.commands.executeCommand('workbench.action.reloadWindow')
-                        return
-                    }
+    if (bootstrapConfig.webSocketPort) {
+        const { webSocketPort, debugWs, autoReload } = bootstrapConfig
+        const processMessage = (message: IpcEvents['extension']) => {
+            if (debugWs) console.debug('[ws] recieve:', message)
+            if (message === 'action:reload' && autoReload && autoReload.type === 'forced') {
+                void vscode.commands.executeCommand('workbench.action.reloadWindow')
+                return
+            }
 
-                    if (message === 'action:close' && bootstrapConfig.closeWindowOnExit)
-                        void vscode.commands.executeCommand('workbench.action.closeWindow')
+            if (message === 'action:close' && bootstrapConfig.closeWindowOnExit)
+                void vscode.commands.executeCommand('workbench.action.closeWindow')
+        }
+
+        if (process.env.PLATFORM === 'node') {
+            const { WebSocket } = require('ws') as typeof import('ws')
+            activateFunctions.push(() => {
+                // maxRetries: 1, timeout: 1000
+                const ws = new WebSocket(`ws://localhost:${webSocketPort}`)
+                ws.on('open', () => {
+                    if (debugWs) console.log('[ws] connected')
+                })
+                ws.on('message', data => {
+                    processMessage(String(data) as IpcEvents['extension'])
+                })
+                ws.on('close', (_, reason) => {
+                    console.log('ws got disconnected for some reason', reason)
                 })
             })
-            client.connect().catch(console.error)
-        })
+        }
+
+        if (process.env.PLATFORM === 'web') {
+            const ws = new WebSocket(`ws://localhost:${webSocketPort}`)
+            ws.addEventListener('open', () => debugWs && console.log('[ws] connected'))
+            ws.addEventListener('message', ({ data }) => processMessage(data))
+            ws.addEventListener('close', () => {
+                console.log('ws got disconnected for some reason')
+            })
+        }
     }
 
     if (bootstrapConfig?.autoReload && bootstrapConfig.autoReload.type === 'hot') {

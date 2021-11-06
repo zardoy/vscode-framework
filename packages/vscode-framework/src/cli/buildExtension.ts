@@ -9,7 +9,7 @@ import fsExtra from 'fs-extra'
 import { compilerOptions } from 'generated-module/build/ts-morph-utils'
 import kleur from 'kleur'
 import { nanoid } from 'nanoid'
-import { Server as IpcServer } from 'net-ipc'
+// import { Server as IpcServer } from 'net-ipc'
 import { Project } from 'ts-morph'
 import { Except } from 'type-fest'
 import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
@@ -19,6 +19,7 @@ import { runEsbuild } from './esbuild/esbuild'
 import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
 import { newTypesGenerator } from './typesGenerator'
+import { WebSocketServer } from 'ws'
 declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:bulid-extension')
@@ -27,9 +28,9 @@ const ipcDebug = Debug('vscode-framework:ipc')
 
 /** for ipc. used in extensionBootstrap.ts */
 export type BootstrapConfig = ExtensionBootstrapConfig & {
-    /** `undefined` means don't enable IPC */
-    serverIpcChannel: string | undefined
-    debugIpc: boolean
+    /** `undefined` means didn't enable server */
+    webSocketPort: number | undefined
+    debugWs: boolean
 }
 
 /** Build mode.
@@ -67,55 +68,51 @@ export const startExtensionDevelopment = async (
     // TODO! why do we need to stop esbuild?
     let stopEsbuild: (() => void) | undefined
 
-    // #region IPC
-    /** An unique ID is required because extensions can be launched */
-    const serverIpcChannel = getEnableIpc(config) ? `vscode-framework:${nanoid(5)}` : undefined
-    const server = new IpcServer({
-        path: serverIpcChannel,
-        max: 1,
-    })
+    // #region Spin up WebSocket
+    const wss = getEnableIpc(config)
+        ? new WebSocketServer({
+              // pick next available port
+              port: 0,
+          })
+        : undefined
+    let extensionBootstrapConfig: BootstrapConfig | false = false
+    let activeWebSocket: import('ws') | undefined
     const sendMessage = (message: IpcEvents['extension']) => {
         // we're not logging failures since it's common to have errors on load
         // TODO fix this violation
-        server.connections[0]?.send(message)
+        activeWebSocket?.send(message)
     }
 
-    server.on('ready', () => {
-        ipcDebug('server started')
-    })
-    server.on('connect', () => {
-        ipcDebug('connected to extension')
-    })
-    let skipSendExtensionClose = false
-    server.on('disconnect', (_client, reason) => {
-        // ipcDebug('disconnected from extension')
-        console.log('Extension disconnected', reason)
-        // const { actionOnExtensionClose } = config.development
-        // if (actionOnExtensionClose === false) return
-        // if (actionOnExtensionClose === 'exit') {
-        //     skipSendExtensionClose = true
-        //     console.log('Extension development window ');
-        //     process.exit(0)
-        // } else if (actionOnExtensionClose === 'reopen') {
+    if (wss) {
+        // wait until ws is ready
+        await new Promise<void>(resolve => {
+            wss.once('listening', resolve)
+        })
+        console.log('WebSocket server ready!')
+        wss.on('connection', ws => {
+            console.log('Extension connected')
+            if (activeWebSocket) {
+                console.warn('Warning: new extension connected, disconnecting previous extension')
+                activeWebSocket.close()
+            }
 
-        // }
-    })
-    exitHook(() => {
-        if (skipSendExtensionClose) {
-            skipSendExtensionClose = false
-            return
+            activeWebSocket = ws
+            ws.on('close', () => {
+                activeWebSocket = undefined
+            })
+        })
+        const wsLocalhostPort = (wss.address() as { port: number }).port
+        extensionBootstrapConfig = {
+            ...(config.development.extensionBootstrap as ExtensionBootstrapConfig),
+            webSocketPort: wsLocalhostPort,
+            debugWs: ipcDebug.enabled,
         }
+        exitHook(() => {
+            // ensure that we close vscode only when process exits, but not when connection is lost
+            sendMessage('action:close')
+        })
+    }
 
-        sendMessage('action:close')
-    })
-    void server.start()
-    const extensionBootstrapConfig: BootstrapConfig | false = serverIpcChannel
-        ? {
-              ...(config.development.extensionBootstrap as ExtensionBootstrapConfig),
-              serverIpcChannel,
-              debugIpc: ipcDebug.enabled,
-          }
-        : false
     // #endregion
     const restartBuild = async () => {
         if (stopEsbuild) stopEsbuild()
