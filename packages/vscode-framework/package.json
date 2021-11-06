@@ -1,12 +1,8 @@
 {
     "name": "vscode-framework",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "main": "build/index.js",
     "types": "build/index.d.ts",
-    "repository": {
-        "url": "https://github.com/zardoy/vscode-framework.git",
-        "directory": "packages/vscode-framework"
-    },
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
     "license": "MIT",
     "replaceKeywords": [

@@ -1,8 +1,9 @@
 {
     "name": "hello-world",
+    "private": true,
     "displayName": "Hello World",
     "publisher": "publisher",
-    "version": "0.0.0-development",
+    "version": "0.0.1",
     "categories": [
         "Other"
     ],

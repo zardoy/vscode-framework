@@ -1,6 +1,6 @@
 {
     "name": "vscode-manifest",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "files": [
@@ -40,9 +40,5 @@
         "type-fest": "2.3.4",
         "json-schema-typed": "^7.0.3",
         "lodash": "^4.17.21"
-    },
-    "repository": {
-        "url": "https://github.com/zardoy/vscode-framework.git",
-        "directory": "packages/vscode-manifest"
     }
 }

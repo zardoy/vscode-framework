@@ -5,7 +5,6 @@
         "start": "node prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node esbuild.mjs development\"",
         "eslint": "eslint packages/*/src/**/*.ts",
         "test": "jest",
-        "prepublishOnly": "pnpm build && jest",
         "build": "tsc -p tsconfig.only-typechecking.json && node prepare.mjs && tsc -b tsconfig.prod.json && node esbuild.mjs production"
     },
     "prettier": {
@@ -22,6 +21,7 @@
         "@babel/core": "^7.16.0",
         "@babel/preset-env": "^7.16.0",
         "@babel/preset-typescript": "^7.16.0",
+        "@changesets/cli": "^2.17.0",
         "@types/jest": "^27.0.2",
         "@types/node": "^16.11.6",
         "@zardoy/jest-config": "^0.0.1",
