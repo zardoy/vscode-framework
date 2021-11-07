@@ -11,5 +11,5 @@ test('Injected console code remains the same', async () => {
         join(__dirname, '../../build/cli/esbuild/consoleInject.js'),
         'utf-8',
     )
-    expect(injectedCode).toMatchSnapshot()
+    expect(injectedCode.split('\n').slice(1).join('\n')).toMatchSnapshot()
 })
