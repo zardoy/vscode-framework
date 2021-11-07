@@ -1,5 +1,7 @@
 # Command Errors
 
+Note: for convenience while debugging, these error modals are shown only in production. The behavior will be changed in the future.
+
 Whenever you register command with `registerExtensionCommand` or `registerAllExtensionCommands`, you enable more options for handling errors. Let's start with default behavior.
 
 These command handlers wraps with `try/catch` callback you pass, to display more graceful and helpful errors. Just compare:

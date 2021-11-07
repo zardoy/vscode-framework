@@ -57,13 +57,12 @@ export const registerExtensionCommand = (command: keyof RegularCommands, handler
                     return
                 }
 
-                // show more graceful (AND HELPFUL!) errors
-                // TODO add github report report, like sindresorhus did in module for Electron
-                await vscode.window.showErrorMessage(`Command '${getCommandTitle(command)}' failed`, {
+                // TODO-low add github report report, like sindresorhus did in module for Electron
+                if (process.env.NODE_ENV === 'development') throw error
+                void vscode.window.showErrorMessage(`Command '${getCommandTitle(command)}' failed`, {
                     modal: true,
                     detail: error.message,
                 })
-                throw error
             }
         }),
     )
