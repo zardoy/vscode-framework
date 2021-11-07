@@ -5,7 +5,7 @@
         "start": "node prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node esbuild.mjs development\"",
         "eslint": "eslint packages/*/src/**/*.ts",
         "test": "jest",
-        "build": "tsc -p tsconfig.only-typechecking.json && node prepare.mjs && tsc -b tsconfig.prod.json && node esbuild.mjs production"
+        "build": "node prepare.mjs && tsc -b tsconfig.prod.json && tsc -p tsconfig.only-typechecking.json && node esbuild.mjs production"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
