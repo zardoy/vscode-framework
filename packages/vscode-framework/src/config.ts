@@ -10,7 +10,7 @@ import { MaybePromise } from './util'
 
 export interface Config {
     /** Override (extend) esbuild config for development and production */
-    esbuildConfig: EsbuildConfig
+    esbuild: EsbuildConfig
     /** Effects only `build` command */
     target: Record<BuildTargetType, boolean>
     /** Category that will be used in `contibutes.commands` by default */
@@ -115,7 +115,7 @@ export interface Config {
 }
 
 export const defaultConfig: Config = {
-    esbuildConfig: {
+    esbuild: {
         entryPoint: 'src/extension.ts',
     },
     defaultCategory: 'extensionName',

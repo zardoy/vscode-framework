@@ -18,8 +18,8 @@ If you need to override entry point of the extension, use this config:
 
 ```json
 {
-    "esbuildConfig": {
-        "entryPoints": ["src/extension.ts"]
+    "esbuild": {
+        "entryPoint": "src/extension.ts"
     }
 }
 ```

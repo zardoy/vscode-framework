@@ -39,7 +39,7 @@ export const runEsbuild = async ({
     injectConsole: boolean
     config: Config
 }) => {
-    const extensionEntryPoint = config.esbuildConfig.entryPoint
+    const extensionEntryPoint = config.esbuild.entryPoint
     const realEntryPoint = join(__dirname, '../../extensionBootstrap.ts')
     debug('Esbuild starting...')
     debug('Entry points', {
@@ -67,10 +67,10 @@ export const runEsbuild = async ({
         format: 'cjs',
         entryPoints: [realEntryPoint],
         metafile: true,
-        ...omit(config.esbuildConfig, 'entryPoint'),
+        ...omit(config.esbuild, 'entryPoint'),
         write: false,
         // sourcemap: true,
-        external: ['vscode', ...(config.esbuildConfig.external ?? [])],
+        external: ['vscode', ...(config.esbuild.external ?? [])],
         define: {
             ...esbuildDefineEnv({
                 NODE_ENV: mode,
@@ -80,7 +80,7 @@ export const runEsbuild = async ({
                 // 'REVEAL_OUTPUT_PANEL_IN_DEVELOPMENT': true,
                 PLATFORM: target === 'desktop' ? 'node' : 'web',
                 EXTENSION_ENTRYPOINT: join(process.cwd(), extensionEntryPoint),
-                ...config.esbuildConfig.defineEnv,
+                ...config.esbuild.defineEnv,
                 ...defineEnv,
             }),
         },
@@ -213,7 +213,7 @@ export const runEsbuild = async ({
                 },
             },
         ],
-        ...(config.esbuildConfig.plugins ?? []),
+        ...(config.esbuild.plugins ?? []),
     })
     // TODO output packed file and this file sizes at prod
     if (mode === 'production') {

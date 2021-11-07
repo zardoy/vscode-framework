@@ -8,7 +8,6 @@ import exitHook from 'exit-hook'
 import fsExtra from 'fs-extra'
 import { compilerOptions } from 'generated-module/build/ts-morph-utils'
 import kleur from 'kleur'
-import { nanoid } from 'nanoid'
 // import { Server as IpcServer } from 'net-ipc'
 import { Project } from 'ts-morph'
 import { Except } from 'type-fest'
@@ -281,7 +280,7 @@ export const checkEntrypoint = (config: Config) => {
     // 2. warning: enforce to use export before const. otherwise it takes > 1s to check
     // 3. doesn't work with functions
     console.time('check')
-    const { entryPoint } = config.esbuildConfig
+    const { entryPoint } = config.esbuild
     const project = new Project({
         skipAddingFilesFromTsConfig: true,
         compilerOptions,
