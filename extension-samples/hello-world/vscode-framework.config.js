@@ -1,11 +1,10 @@
-/** @type{import('vscode-framework/build/config').UserConfig*/
+//@ts-check
+
+/** @type{import('vscode-framework/build/config').UserConfig} */
 const config = {
-    development: {
-        extensionBootstrap: {
-            autoReload: {
-                type: 'forced',
-            },
-        },
+    esbuild: {
+        sourcemap: true,
     },
 }
+
 module.exports = config
