@@ -7,15 +7,6 @@
         "test": "jest",
         "build": "tsc -p tsconfig.only-typechecking.json && node prepare.mjs && tsc -b tsconfig.prod.json && node esbuild.mjs production"
     },
-    "prettier": {
-        "tabWidth": 4,
-        "arrowParens": "avoid",
-        "singleQuote": true,
-        "proseWrap": "never",
-        "printWidth": 120,
-        "semi": false,
-        "trailingComma": "all"
-    },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
         "@babel/core": "^7.16.0",
@@ -45,7 +36,7 @@
         "type-fest": "^2.5.2",
         "typescript": "^4.4.4"
     },
-    "prttier": {
+    "prettier": {
         "semi": false,
         "singleQuote": true,
         "proseWrap": "never",
