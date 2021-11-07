@@ -26,5 +26,8 @@
     },
     "tsd": {
         "extends": "@zardoy/tsconfig/node"
+    },
+    "dependencies": {
+        "lodash": "^4.17.21"
     }
 }

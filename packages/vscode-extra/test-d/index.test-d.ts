@@ -21,3 +21,27 @@ expectType<string[] | undefined>(
         },
     ),
 )
+
+void showQuickPick(
+    ['yes', 'no'].map(val => ({ label: val, value: +val })),
+    {
+        onDidChangeActive(items) {
+            expectType<number>(items[0]!.value)
+        },
+        //@ts-expect-error no available without canPickMany: true
+        onDidChangeSelection(items) {},
+    },
+)
+
+void showQuickPick(
+    ['yes', 'no'].map(val => ({ label: val, value: +val })),
+    {
+        canPickMany: true,
+        onDidChangeActive(items) {
+            expectType<number>(items[0]!.value)
+        },
+        onDidChangeSelection(items) {
+            expectType<number>(items[0]!.value)
+        },
+    },
+)

@@ -72,7 +72,10 @@ importers:
 
   packages/vscode-extra:
     specifiers:
+      lodash: ^4.17.21
       tsd: ^0.17.0
+    dependencies:
+      lodash: 4.17.21
     devDependencies:
       tsd: 0.17.0
 
