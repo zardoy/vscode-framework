@@ -26,6 +26,8 @@ jobs:
               args: [--frozen-lockfile, --strict-peer-dependencies]
       - run: pnpm build
       - run: pnpm test
+        env:
+            FORCE_COLOR: "1"
         # for now, skipping eslint
       - run: pnpx -y zardoy-release-monorepo --publishTag next
         env:

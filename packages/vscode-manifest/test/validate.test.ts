@@ -17,7 +17,8 @@ test('Errors on missing and invalid props', async () => {
     }
     const spy = jest.spyOn(global.console, 'error')
     spy.mockImplementation(() => {})
-    expect(() => validateOrThrow(testManifest as any)).toThrow()
+    //@ts-expect-error
+    expect(() => validateOrThrow(testManifest)).toThrow()
     expect(spy.mock.calls.join('\n')).toMatchInlineSnapshot(`
 "[41m ERROR [49m,[31mInvalid package.json[39m
 [31mMissing root properties:[39m [31m[39m
