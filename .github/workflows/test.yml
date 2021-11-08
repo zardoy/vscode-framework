@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     branches:
-      - main-disabled
+      - main
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -12,21 +12,10 @@ jobs:
         with:
           node-version: '14'
           registry-url: 'https://registry.npmjs.org'
-      - name: Cache pnpm modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: latest
           run_install: |
               args: [--frozen-lockfile, --strict-peer-dependencies]
         # for now, skipping eslint
-      - run: pnpx -y zardoy-release pnpm-monorepo
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          FORCE_COLOR: "1"
+      - run: pnpx -y tsm test.ts
