@@ -8,17 +8,16 @@ import kleur from 'kleur'
 import { omit, partition } from 'lodash'
 import { ManifestType } from 'vscode-manifest'
 import { BuildTargetType, Config, getBootstrapFeature } from '../../config'
+import { getHashFromString } from '../../util'
 import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 import { clearConsole, logConsole } from '../logger'
 import { esbuildDefineEnv } from './utils'
-import { getHashFromString } from '../../util'
-
 type MaybePromise<T> = Promise<T> | T
 
 const debug = Debug('vscode-framework:esbuild')
 
 /** Always injected for framework functionality */
-const injectedCode = `let __VSCODE_FRAMEWORK_CONTEXT\n`
+const topLevelInjectedCode = `let __VSCODE_FRAMEWORK_CONTEXT;\n`
 
 export const runEsbuild = async ({
     target,
@@ -52,9 +51,7 @@ export const runEsbuild = async ({
         outDir,
         defineEnv,
     })
-    const consoleInjectCode = injectConsole
-        ? await fs.promises.readFile(join(__dirname, './consoleInject.js'), 'utf-8')
-        : undefined
+    const consoleInjectCode = injectConsole ? await fs.promises.readFile(join(__dirname, './consoleInject.js'), 'utf-8') : undefined
     // lodash-marker
     const { metafile, stop } = await esbuildBuild({
         bundle: true,
@@ -102,8 +99,8 @@ export const runEsbuild = async ({
                         }
 
                         const [sourceMaps, jsFiles] = partition(outputFiles, ({ path }) => path.endsWith('.map'))
-                        for (const sourcemap of sourceMaps)
-                            await fs.promises.writeFile(sourcemap.path, sourcemap.contents)
+                        const sourceMapsEnabled = sourceMaps.length > 0
+                        for (const sourcemap of sourceMaps) await fs.promises.writeFile(sourcemap.path, sourcemap.contents)
 
                         const outputFile = jsFiles[0]!
                         console.time('get output hash')
@@ -120,30 +117,21 @@ export const runEsbuild = async ({
 
                         prevHashOutput = newHashOutput
                         // investigate performance
+                        let codeToInject = `${topLevelInjectedCode}${consoleInjectCode ?? ''}\n`
+                        if (sourceMapsEnabled) codeToInject = codeToInject.replace(/\n/g, '')
                         debug('Start writing with inject')
                         await fs.promises.writeFile(
                             outputFile.path,
                             // using this workaround as we can't use shim in esbuild: https://github.com/evanw/esbuild/issues/1557
-                            `${injectedCode}${consoleInjectCode ?? ''}\n${outputFile.text}`,
+                            `${codeToInject}${outputFile.text}`,
                             'utf-8',
                         )
                         debug('End writing with inject')
 
-                        const reloadType = getBootstrapFeature(
-                            config,
-                            ({ autoReload }) => autoReload && autoReload.type,
-                        )
+                        const reloadType = getBootstrapFeature(config, ({ autoReload }) => autoReload && autoReload.type)
                         logConsole(
                             'log',
-                            kleur.green(
-                                rebuildCount === 0
-                                    ? 'build'
-                                    : reloadType === 'forced'
-                                    ? 'reload'
-                                    : reloadType === 'hot'
-                                    ? 'hot-reload'
-                                    : 'rebuild',
-                            ),
+                            kleur.green(rebuildCount === 0 ? 'build' : reloadType === 'forced' ? 'reload' : reloadType === 'hot' ? 'hot-reload' : 'rebuild'),
                             kleur.gray(`${Date.now() - date}ms`),
                             // ...(reloadType === 'force'
                             //     ? [kleur.green('Reloading...')]
@@ -162,10 +150,7 @@ export const runEsbuild = async ({
                 setup(build) {
                     // not used for now, config option will be available
                     const aliasModule = (aliasName: string | RegExp, target: string) => {
-                        const filter =
-                            aliasModule instanceof RegExp
-                                ? aliasModule
-                                : new RegExp(`^${escapeStringRegexp(aliasName as string)}(\\/.*)?$`)
+                        const filter = aliasModule instanceof RegExp ? aliasModule : new RegExp(`^${escapeStringRegexp(aliasName as string)}(\\/.*)?$`)
                         type PluginData = { resolveDir: string; aliasName: string }
                         const namespace = 'esbuild-import-alias'
 
@@ -205,9 +190,7 @@ export const runEsbuild = async ({
                     }))
                     build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: { resolveDir } }) => {
                         const target = path.replace(filter, '$1')
-                        const contents = [`export * from '${target}'`, `export { default } from '${target}';`].join(
-                            '\n',
-                        )
+                        const contents = [`export * from '${target}'`, `export { default } from '${target}';`].join('\n')
                         return { resolveDir, contents }
                     })
                 },
