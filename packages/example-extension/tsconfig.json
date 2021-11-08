@@ -1,4 +1,0 @@
-{
-    "extends": "@zardoy/tsconfig/node",
-    "include": ["src"]
-}
