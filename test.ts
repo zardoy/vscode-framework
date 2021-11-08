@@ -5,4 +5,6 @@ const fromPackage = (...p: string[]) => join('packages', 'vscode-framework', ...
 
 console.log(process.cwd())
 console.log(process.env['GITHUB_WORKSPACE'])
-console.log(await fs.promises.readFile('packages/vscode-framework/CHANGELOG.md', 'utf-8'))
+console.log(fromPackage('CHANGELOG.MD'))
+console.log('packages/vscode-framework/CHANGELOG.md')
+// console.log(await fs.promises.readFile('packages/vscode-framework/CHANGELOG.md', 'utf-8'))
