@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     branches:
-      - main-disabled
+      - main
 jobs:
   main:
     runs-on: ubuntu-latest
