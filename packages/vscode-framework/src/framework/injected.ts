@@ -5,7 +5,7 @@ import type { RegularCommands, Settings } from '../index'
 
 export const getExtensionContributionsPrefix = () => (process.env.IDS_PREFIX ? `${process.env.IDS_PREFIX}.` : '')
 
-export const getExtensionCommandId = (command: RegularCommands) => `${getExtensionContributionsPrefix()}${command}`
+export const getExtensionCommandId = (command: keyof RegularCommands) => `${getExtensionContributionsPrefix()}${command}`
 
 export const getExtensionSettingId = (setting: keyof Settings) => `${getExtensionContributionsPrefix()}${setting}`
 
