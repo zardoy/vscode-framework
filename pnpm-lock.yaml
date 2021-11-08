@@ -137,7 +137,7 @@ importers:
       exit-hook: 2.2.1
       filesize: 8.0.3
       fs-extra: 10.0.0
-      generated-module: 0.0.2
+      generated-module: 0.0.2_typescript@4.4.4
       github-remote-info: 1.0.3
       globby: 11.0.4
       jsonfile: 6.1.0
@@ -159,13 +159,13 @@ importers:
       '@types/semver': 7.3.9
       '@types/vscode': 1.61.0
       '@types/ws': 8.2.0
-      '@zardoy/tsconfig': 1.2.2
+      '@zardoy/tsconfig': 1.2.2_typescript@4.4.4
       kleur: 4.1.4
       modify-json-file: 1.2.1
       pinst: 2.1.6
       semver: 7.3.5
       terser: 5.9.0
-      ttypescript: 1.5.12
+      ttypescript: 1.5.12_ts-node@10.4.0+typescript@4.4.4
       type-fest: 2.5.0
 
   packages/vscode-manifest:
@@ -2358,13 +2358,6 @@ packages:
       jsonfile: 6.1.0
     dev: true
 
-  /@zardoy/tsconfig/1.2.2:
-    resolution: {integrity: sha512-flS4ev5KdSbeY+aHM6WCbYTwhp6c6twX9IwrhyZgjjDIJ28fuqNi1a/aG1TQSwoxp7w2WpfRGoWGgkY/0sm+hQ==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      typescript: ^4.3.2
-    dev: true
-
   /@zardoy/tsconfig/1.2.2_typescript@4.4.4:
     resolution: {integrity: sha512-flS4ev5KdSbeY+aHM6WCbYTwhp6c6twX9IwrhyZgjjDIJ28fuqNi1a/aG1TQSwoxp7w2WpfRGoWGgkY/0sm+hQ==}
     engines: {node: '>=12'}
@@ -4555,7 +4548,7 @@ packages:
     resolution: {integrity: sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=}
     dev: true
 
-  /generated-module/0.0.2:
+  /generated-module/0.0.2_typescript@4.4.4:
     resolution: {integrity: sha512-7lYkwjKP3ymFvDZh4hGcALdFGyf/vZbHZNR/8qrY/FVTUBja/bMA2OzVq8HneMuKi9UFdgXBLXVDjdvdZxGLVg==}
     peerDependencies:
       typescript: ^4.4.3
@@ -4567,6 +4560,7 @@ packages:
       fs-extra: 10.0.0
       jsonfile: 6.1.0
       ts-morph: 12.0.0
+      typescript: 4.4.4
     dev: false
 
   /gensync/1.0.0-beta.2:
@@ -7904,7 +7898,7 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /ttypescript/1.5.12:
+  /ttypescript/1.5.12_ts-node@10.4.0+typescript@4.4.4:
     resolution: {integrity: sha512-1ojRyJvpnmgN9kIHmUnQPlEV1gq+VVsxVYjk/NfvMlHSmYxjK5hEvOOU2MQASrbekTUiUM7pR/nXeCc8bzvMOQ==}
     hasBin: true
     peerDependencies:
@@ -7912,6 +7906,8 @@ packages:
       typescript: '>=3.2.2'
     dependencies:
       resolve: 1.20.0
+      ts-node: 10.4.0_0cb88d80cb04d25b21fa3ec194608c65
+      typescript: 4.4.4
     dev: true
 
   /type-check/0.3.2:
