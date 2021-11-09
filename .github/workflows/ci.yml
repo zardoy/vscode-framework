@@ -43,7 +43,7 @@ jobs:
           FORCE_COLOR: "1"
   releasePr:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/next'
+    if: success() && github.ref == 'refs/heads/next'
     steps:
       - uses: actions/checkout@master
         with:
