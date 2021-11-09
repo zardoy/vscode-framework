@@ -26,5 +26,10 @@ experiment-*
 
 .vscode-test
 
+# changesets
+
+extension-samples/*/CHANGELOG.md
+extension-samples/*/CHANGELOG.MD
+
 # vscode-framework
 generated.ts

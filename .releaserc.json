@@ -1,4 +1,7 @@
 {
+    "sharedActionsOverride": {
+        "runTests": false
+    },
     "preset": {
         "publishTag": "next"
     }
