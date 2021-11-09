@@ -56,7 +56,7 @@ jobs:
         with:
           version: latest
           run_install: |
-              args: [--frozen-lockfile, --strict-peer-dependencies, --ignore-scripts]
+              args: [--frozen-lockfile, --strict-peer-dependencies]
       - name: Create Release Pull Request
         uses: changesets/action@master
         env:
