@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         node:
-          - "12.17"
+          - "12.20.0"
           - "14"
           - "16"
         platform:
