@@ -13,6 +13,7 @@
         "@babel/preset-env": "^7.16.0",
         "@babel/preset-typescript": "^7.16.0",
         "@changesets/cli": "^2.18.0",
+        "@octokit/rest": "^18.12.0",
         "@types/jest": "^27.0.2",
         "@types/node": "^16.11.7",
         "@zardoy/jest-config": "^0.0.1",
