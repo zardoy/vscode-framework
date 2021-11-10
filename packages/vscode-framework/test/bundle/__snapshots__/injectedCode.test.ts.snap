@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Injected console code remains the same 1`] = `
-"const VSCODE_FRAMEWORK_OUTPUT = {
+"var VSCODE_FRAMEWORK_OUTPUT = {
   oldConsole: globalThis.console,
   channel: void 0,
   consoleTimeFormatter: new Intl.DateTimeFormat(\\"en-US\\", {
@@ -30,7 +30,7 @@ exports[`Injected console code remains the same 1`] = `
     return [stdout, stderr];
   })())
 };
-const process = {
+var process = {
   ...global.process,
   stderr: {
     ...global.process.stderr,
@@ -41,10 +41,7 @@ const process = {
     }
   }
 };
-const vscode_framework_set_debug_enabled = (isEnabled) => {
-  VSCODE_FRAMEWORK_OUTPUT.isDebugEnabled = isEnabled;
-};
-const console = {
+var console = {
   ...VSCODE_FRAMEWORK_OUTPUT.oldConsole,
   ...VSCODE_FRAMEWORK_OUTPUT.newConsole,
   ...{

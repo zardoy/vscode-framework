@@ -17,6 +17,8 @@ test('Errors on missing and invalid props', async () => {
     }
     const spy = jest.spyOn(global.console, 'error')
     spy.mockImplementation(() => {})
+    const force_color = process.env.FORCE_COLOR
+    process.env.FORCE_COLOR = '0'
     //@ts-expect-error
     expect(() => validateOrThrow(testManifest)).toThrow()
     expect(spy.mock.calls.join('\n')).toMatchInlineSnapshot(`
@@ -32,4 +34,5 @@ test('Errors on missing and invalid props', async () => {
 [31m- [1mname[22m must be string[39m"
 `)
     spy.mockRestore()
+    process.env.FORCE_COLOR = force_color
 })
