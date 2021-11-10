@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: ${{matrix.node}}
       - run: node -p "process.cwd()"
-      - run: node -p "fs.readdirSync(".")"
+      - run: node -p "fs.readdirSync('.')"
       - name: Cache pnpm modules
         uses: actions/cache@v2
         with:
