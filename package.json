@@ -2,10 +2,10 @@
     "name": "vscode-framework",
     "private": true,
     "scripts": {
-        "start": "node prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node esbuild.mjs development\"",
+        "start": "node prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node patch-ts-output.mjs\"",
         "eslint": "eslint packages/*/src/**/*.ts",
         "test": "jest",
-        "build": "node prepare.mjs && tsc -b tsconfig.prod.json && tsc -p tsconfig.only-typechecking.json && node esbuild.mjs production"
+        "build": "node prepare.mjs && tsc -b tsconfig.prod.json && tsc -p tsconfig.only-typechecking.json"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",

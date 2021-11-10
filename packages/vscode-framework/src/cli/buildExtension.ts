@@ -19,7 +19,6 @@ import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
 import { newTypesGenerator } from './typesGenerator'
 import { WebSocketServer } from 'ws'
-declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:bulid-extension')
 
@@ -56,9 +55,7 @@ export const startExtensionDevelopment = async (
         mode,
         outDir,
     })
-    await del(
-        Object.values(EXTENSION_ENTRYPOINTS).flatMap(jsOut => [join(outDir, jsOut), join(outDir, `${jsOut}.map`)]),
-    )
+    await del(Object.values(EXTENSION_ENTRYPOINTS).flatMap(jsOut => [join(outDir, jsOut), join(outDir, `${jsOut}.map`)]))
     if (mode === 'production') {
         await buildExtension(params)
         return
@@ -170,8 +167,7 @@ export const startExtensionDevelopment = async (
     watcher.on('add', onFileChange)
     watcher.on('unlink', async path => {
         // TODO also run typesGenerator
-        if (path.endsWith(manifestPath))
-            console.log(kleur.red('[vscode-framework] Manifest is missing! Return it back.'))
+        if (path.endsWith(manifestPath)) console.log(kleur.red('[vscode-framework] Manifest is missing! Return it back.'))
         // TODO! run typesGenerator configurationType.ts was removed, for now need to rerun start script
     })
     return {
@@ -254,11 +250,7 @@ export const buildExtension = async ({
         outDir,
         resolvedManifest: generatedManifest,
         defineEnv: {
-            IDS_PREFIX: config.prependIds
-                ? config.prependIds.style === 'camelCase'
-                    ? camelCase(generatedManifest.name)
-                    : generatedManifest.name
-                : undefined,
+            IDS_PREFIX: config.prependIds ? (config.prependIds.style === 'camelCase' ? camelCase(generatedManifest.name) : generatedManifest.name) : undefined,
             ...define,
         },
         config,
@@ -287,8 +279,7 @@ export const checkEntrypoint = (config: Config) => {
     })
     const source = project.addSourceFileAtPath(entryPoint)
     // TODO fancy errors
-    if (!source.getVariableDeclarationOrThrow('activate').isExported())
-        throw new Error("activate function isn't exported")
+    if (!source.getVariableDeclarationOrThrow('activate').isExported()) throw new Error("activate function isn't exported")
 
     console.timeEnd('check')
 }

@@ -17,18 +17,6 @@ import { getMonorepoPackages } from './common'
 
     for (const monorepoPackage of packagesDirs) {
         const fromPackage = (...p: string[]) => join('packages', monorepoPackage, ...p)
-        // eslint-disable-next-line no-await-in-loop
-        await modifyPackageJsonFile({ dir: fromPackage() }, packageJson => {
-            // temporarily
-            packageJson.repository = {
-                url: 'https://github.com/zardoy/vscode-framework.git',
-                directory: fromPackage().replace('\\', '/'),
-            }
-            return packageJson
-        })
-        // if (fs.existsSync(fromPackage(packageTsconfigName))) {
-        //     console.warn(monorepoPackage, 'has tsconfig.json')
-        // }
         for (const { path, tsconfig } of [
             {
                 path: packageTsconfigs.dev,
@@ -45,7 +33,7 @@ import { getMonorepoPackages } from './common'
                     extends: '@zardoy/tsconfig/node-lib',
                     compilerOptions: {
                         composite: true,
-                        emitDeclarationOnly: true,
+                        // emitDeclarationOnly: true,
                         rootDir: 'src',
                         outDir: 'build',
                     },

@@ -2,7 +2,6 @@
     "extends": "@zardoy/tsconfig/node-lib",
     "compilerOptions": {
         "composite": true,
-        "emitDeclarationOnly": true,
         "rootDir": "src",
         "outDir": "build"
     },

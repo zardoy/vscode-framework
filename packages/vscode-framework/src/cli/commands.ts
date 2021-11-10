@@ -13,7 +13,6 @@ import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateTypes } from './typesGenerator'
 import { generateAndWriteManifest } from '.'
-declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:cli')
 
@@ -55,16 +54,17 @@ commander.command(
     },
 )
 
-commander.command(
-    'generate-types',
-    'Generate TypeScript typings (from contribution points) and place them to nearest node_modules for working with framework',
-    {
-        hidden: true,
-    },
-    async () => {
-        await generateTypes({ nodeModulesDir: __DEV__ ? (await pkdDir(__dirname))! : process.cwd() })
-    },
-)
+// OLD types generator, isn't ready for this TS world
+// commander.command(
+//     'generate-types',
+//     'Generate TypeScript typings (from contribution points) and place them to nearest node_modules for working with framework',
+//     {
+//         hidden: true,
+//     },
+//     async () => {
+//         await generateTypes({ nodeModulesDir: __DEV__ ? (await pkdDir(__dirname))! : process.cwd() })
+//     },
+// )
 
 const useOutForDebugging = true
 const relativePath = useOutForDebugging ? 'out' : 'node_modules/.vscode-extension'
@@ -92,8 +92,7 @@ commander.command(
                 // TODO use config's default
                 defaultValue: false,
                 // reformat description
-                description:
-                    'If --web is present, you can launch web extension in desktop VSCode, instead of in browser',
+                description: 'If --web is present, you can launch web extension in desktop VSCode, instead of in browser',
             },
             '--skip-launching': {
                 defaultValue: false,
@@ -153,8 +152,7 @@ commander.command(
 
         // TODO build path
         // TODO move check to schema
-        if (!config.target.desktop && !config.target.web)
-            throw new Error('Both targets are disabled in config. Enable either desktop or wb')
+        if (!config.target.desktop && !config.target.web) throw new Error('Both targets are disabled in config. Enable either desktop or wb')
 
         if (!skipTypechecking && fsExtra.existsSync('./tsconfig.json')) {
             const date = Date.now()
