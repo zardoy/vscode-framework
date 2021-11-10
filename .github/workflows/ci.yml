@@ -10,9 +10,9 @@ jobs:
     strategy:
       matrix:
         node:
-          - '12.17'
-          - '14'
-          - '16'
+          - "12.17"
+          - "14"
+          - "16"
         platform:
           - ubuntu-latest
           - macos-latest
@@ -35,15 +35,16 @@ jobs:
         with:
           version: latest
           run_install: |
-              args: [--frozen-lockfile, --strict-peer-dependencies]
-    # TODO: idea generate changeset from title of pr ?
+            args: [--frozen-lockfile, --strict-peer-dependencies]
+      # TODO: idea generate changeset from title of pr ?
       - run: pnpm changeset status
       - run: pnpm test
         env:
           FORCE_COLOR: "1"
   releasePr:
     runs-on: ubuntu-latest
-    if: success() && github.ref == 'refs/heads/next'
+    needs: test
+    if: github.ref == 'refs/heads/next'
     steps:
       - uses: actions/checkout@master
         with:
@@ -51,12 +52,12 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@master
         with:
-            node-version: 14.x
+          node-version: 14.x
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: latest
           run_install: |
-              args: [--frozen-lockfile, --strict-peer-dependencies]
+            args: [--frozen-lockfile, --strict-peer-dependencies]
       - name: Create Release Pull Request
         uses: changesets/action@master
         env:
