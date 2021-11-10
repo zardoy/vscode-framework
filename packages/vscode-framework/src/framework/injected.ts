@@ -17,8 +17,9 @@ declare const __VSCODE_FRAMEWORK_CONTEXT: vscode.ExtensionContext
 /**
  * Can be used only inside function
  * and not used before extension activation!
+ *
  * */
-export const extensionCtx = __VSCODE_FRAMEWORK_CONTEXT
+export const extensionCtx: vscode.ExtensionContext = typeof __VSCODE_FRAMEWORK_CONTEXT === 'undefined' ? undefined! : __VSCODE_FRAMEWORK_CONTEXT
 
 /**
  * Get ID of current running extension

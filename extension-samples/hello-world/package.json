@@ -3,7 +3,7 @@
     "private": true,
     "displayName": "Hello World",
     "publisher": "publisher",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "categories": [
         "Other"
     ],
@@ -19,9 +19,9 @@
         ]
     },
     "dependencies": {
-        "vscode-framework": "workspace:*",
+        "@types/vscode": "^1.62.0",
         "@zardoy/tsconfig": "^1.2.2",
-        "@types/vscode": "^1.61.0"
+        "vscode-framework": "workspace:*"
     },
     "scripts": {
         "start": "vscode-framework start"

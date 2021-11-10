@@ -9,9 +9,7 @@ export type CommandHandler = (data: { command: keyof RegularCommands }, ...args:
 
 const getCommandTitle = (commandId: string) => {
     const fullCommandId = getExtensionCommandId(commandId as any)
-    const command = (extensionCtx.extension.packageJSON as ManifestType).contributes.commands!.find(
-        ({ command }) => command === fullCommandId,
-    )!
+    const command = (extensionCtx.extension.packageJSON as ManifestType).contributes.commands!.find(({ command }) => command === fullCommandId)!
     let msg = ''
     if (command.category) msg += `${command.category}: `
     msg += command.title
@@ -32,6 +30,7 @@ export class GracefulCommandError extends Error {
     }
 }
 
+/** Works only via `vscode-framework start` */
 export const registerExtensionCommand = (command: keyof RegularCommands, handler: CommandHandler) => {
     extensionCtx.subscriptions.push(
         vscode.commands.registerCommand(`${getExtensionContributionsPrefix()}${command}`, async (...args) => {
@@ -68,17 +67,15 @@ export const registerExtensionCommand = (command: keyof RegularCommands, handler
     )
 }
 
+/** Works only via `vscode-framework start` */
 export const registerAllExtensionCommands = (commands: { [C in keyof RegularCommands]: CommandHandler }) => {
     for (const [command, handler] of Object.entries(commands)) registerExtensionCommand(command, handler)
 }
 
 // TODO! disallow production
-export const registerActiveDevelopmentCommand = (
-    handler: (data: { command: '' }, ...args: any[]) => MaybePromise<void>,
-) => {
-    extensionCtx.subscriptions.push(
-        vscode.commands.registerCommand('runActiveDevelopmentCommand', (...args) => handler({ command: '' }, ...args)),
-    )
+/** Works only via `vscode-framework start` */
+export const registerActiveDevelopmentCommand = (handler: (data: { command: '' }, ...args: any[]) => MaybePromise<void>) => {
+    extensionCtx.subscriptions.push(vscode.commands.registerCommand('runActiveDevelopmentCommand', (...args) => handler({ command: '' }, ...args)))
 }
 
 /** would never run. something like `test.skip` */

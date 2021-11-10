@@ -5,19 +5,14 @@ import { getGithubRemoteInfo } from 'github-remote-info'
 import jsonfile from 'jsonfile'
 import { modifyPackageJsonFile, modifyTsConfigJsonFile } from 'modify-json-file'
 import { PackageJson, TsConfigJson } from 'type-fest'
+import { getMonorepoPackages } from './common'
 ;(async () => {
-    const fromMonorepo = (...p: string[]) => join('packages', ...p)
     const packageTsconfigs = {
         dev: 'tsconfig.dev.json',
         prod: 'tsconfig.prod.json',
     }
-    const packagesDirs = (await fs.promises.readdir(fromMonorepo())).filter(monorepoPackage => {
-        const fromPackage = (...p: string[]) => join('packages', monorepoPackage, ...p)
-        if (!fs.existsSync(fromPackage('package.json'))) return false
-        const packageJson: PackageJson = jsonfile.readFileSync(fromPackage('package.json'))
-        if (packageJson.private || !packageJson.types) return false
-        return true
-    })
+    const packagesDirs = await getMonorepoPackages()
+
     console.log(packagesDirs)
 
     for (const monorepoPackage of packagesDirs) {

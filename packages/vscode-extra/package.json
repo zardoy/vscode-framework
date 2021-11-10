@@ -19,7 +19,7 @@
         "@types/vscode": "^1.60.0"
     },
     "devDependencies": {
-        "tsd": "^0.17.0"
+        "tsd": "^0.18.0"
     },
     "scripts": {
         "prepublishOnly": "tsd"
