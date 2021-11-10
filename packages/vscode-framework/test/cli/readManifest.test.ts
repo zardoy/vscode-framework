@@ -1,10 +1,10 @@
 /// <reference types="jest" />
 
 import { readDirectoryManifest } from 'vscode-manifest'
+import { mapValues } from 'lodash'
 import { generateManifest } from '../../src/cli'
 import { defaultConfig } from '../../src/config'
 import { mockManifestOnce, screenRecorderManifest } from './fixtures'
-import { mapValues } from 'lodash'
 
 test('Places IDs in contributes props', async () => {
     mockManifestOnce(screenRecorderManifest)
@@ -19,12 +19,7 @@ test('Places IDs in contributes props', async () => {
     // CONFIGURATION IDS
     expect(
         Object.entries(
-            (
-                generatedManifest.contributes.configuration! as Exclude<
-                    NonNullable<typeof generatedManifest.contributes.configuration>,
-                    any[]
-                >
-            ).properties,
+            (generatedManifest.contributes.configuration! as Exclude<NonNullable<typeof generatedManifest.contributes.configuration>, any[]>).properties,
         ).map(([id]) => id),
     ).toMatchInlineSnapshot(`
         Array [
@@ -34,8 +29,7 @@ test('Places IDs in contributes props', async () => {
         ]
     `)
     // MENUS IDS
-    expect(mapValues(generatedManifest.contributes.menus!, arr => arr.map(({ command }) => command)))
-        .toMatchInlineSnapshot(`
+    expect(mapValues(generatedManifest.contributes.menus, arr => arr.map(({ command }) => command))).toMatchInlineSnapshot(`
         Object {
           "commandPalette": Array [
             "screenRecorder.startRecording",
@@ -105,7 +99,13 @@ test('Generates schema properly in production', async () => {
         sourceManifest: screenRecorderManifest,
         propsGeneratorsMeta: { target: defaultConfig.target, mode: 'production', config: defaultConfig },
     })
-    expect(generatedManifest).toMatchInlineSnapshot(`
+    expect(generatedManifest).toMatchInlineSnapshot(
+        {
+            engines: {
+                vscode: expect.any(String),
+            },
+        },
+        `
         Object {
           "activationEvents": Array [
             "onCommand:startRecording",
@@ -175,7 +175,7 @@ test('Generates schema properly in production', async () => {
           },
           "displayName": "Screen Recorder",
           "engines": Object {
-            "vscode": "^1.61.0",
+            "vscode": Any<String>,
           },
           "main": "extension-node.js",
           "name": "screen-recorder",
@@ -184,5 +184,6 @@ test('Generates schema properly in production', async () => {
           "repository": "https://github.com/zardoy/vscode-framework",
           "version": "invalid-doesnt-matter",
         }
-    `)
+    `,
+    )
 })
