@@ -1,6 +1,9 @@
 /// <reference types="jest" />
 
-import { validateOrThrow } from '../src/validateManifest'
+import { forceChalkColor } from './utils'
+// and what to do in esm?
+forceChalkColor(true)
+const { validateOrThrow } = require('../src/validateManifest')
 
 // read manifest functions are in global tests
 
@@ -17,8 +20,7 @@ test('Errors on missing and invalid props', async () => {
     }
     const spy = jest.spyOn(global.console, 'error')
     spy.mockImplementation(() => {})
-    const force_color = process.env.FORCE_COLOR
-    process.env.FORCE_COLOR = '0'
+    // const force_color = process.env.FORCE_COLOR
     //@ts-expect-error
     expect(() => validateOrThrow(testManifest)).toThrow()
     expect(spy.mock.calls.join('\n')).toMatchInlineSnapshot(`
@@ -34,5 +36,5 @@ test('Errors on missing and invalid props', async () => {
 [31m- [1mname[22m must be string[39m"
 `)
     spy.mockRestore()
-    process.env.FORCE_COLOR = force_color
+    // process.env.FORCE_COLOR = force_color
 })

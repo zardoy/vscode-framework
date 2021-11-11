@@ -34,6 +34,7 @@ import { getMonorepoPackages } from './common'
                     compilerOptions: {
                         composite: true,
                         // emitDeclarationOnly: true,
+                        // isolatedModules: true,
                         rootDir: 'src',
                         outDir: 'build',
                     },
