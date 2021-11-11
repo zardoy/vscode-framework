@@ -55,7 +55,9 @@ export const startExtensionDevelopment = async (
         mode,
         outDir,
     })
-    await del(Object.values(EXTENSION_ENTRYPOINTS).flatMap(jsOut => [join(outDir, jsOut), join(outDir, `${jsOut}.map`)]))
+    await del(
+        Object.values(EXTENSION_ENTRYPOINTS).flatMap(jsOut => [join(outDir, jsOut), join(outDir, `${jsOut}.map`)]),
+    )
     if (mode === 'production') {
         await buildExtension(params)
         return
@@ -167,7 +169,8 @@ export const startExtensionDevelopment = async (
     watcher.on('add', onFileChange)
     watcher.on('unlink', async path => {
         // TODO also run typesGenerator
-        if (path.endsWith(manifestPath)) console.log(kleur.red('[vscode-framework] Manifest is missing! Return it back.'))
+        if (path.endsWith(manifestPath))
+            console.log(kleur.red('[vscode-framework] Manifest is missing! Return it back.'))
         // TODO! run typesGenerator configurationType.ts was removed, for now need to rerun start script
     })
     return {
@@ -203,6 +206,7 @@ export const buildExtension = async ({
     skipGeneratingTypes: boolean
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
+    // -> ASSETS
     // Pick icons from here https://github.com/microsoft/vscode-codicons/tree/main/src/icons
     /** should be absolute */
     const resourcesPaths = {
@@ -220,28 +224,33 @@ export const buildExtension = async ({
     await fsExtra.ensureDir(outDir)
 
     // -> MANIFEST
-    const generatedManifest = await generateAndWriteManifest({
-        outputPath: join(outDir, 'package.json'),
-        overwrite: true,
-        config,
-        propsGeneratorsMeta: {
-            mode,
-            // TS is literally killing the target type!
-            target: mode === 'development' ? ({ [target]: true } as any) : config.target,
+    const { generatedManifest, sourceManifest } =
+        (await generateAndWriteManifest({
+            outputPath: join(outDir, 'package.json'),
+            overwrite: true,
             config,
-        },
-    })
+            propsGeneratorsMeta: {
+                mode,
+                // TS is literally killing the target type!
+                target: mode === 'development' ? ({ [target]: true } as any) : config.target,
+                config,
+            },
+        })) ?? {}
     if (!generatedManifest) throw new Error('Extension manifest (package.json) is missing.')
 
     // -> POST MANIFEST CHECKS
     if (generatedManifest.extensionKind?.length === 0)
-        // TODO also detect other cases
+        // TODO move to the schema
         console.warn("Warning: extensionKind in manifest is set to [] which means your extension won't be launched")
 
-    // -> ASSETS
-    // TODO
-
-    if (mode !== 'production' && !skipGeneratingTypes) await newTypesGenerator(generatedManifest)
+    // -> GENERATE TYPES
+    if (mode !== 'production' && !skipGeneratingTypes)
+        await newTypesGenerator({
+            // commands can have additional generated variants
+            commands: sourceManifest!.contributes.commands,
+            // configuration don't additional generated variants for now
+            configuration: generatedManifest.contributes.configuration,
+        })
 
     // -> EXTENSION ENTRYPOINT
     return runEsbuild({
@@ -250,7 +259,11 @@ export const buildExtension = async ({
         outDir,
         resolvedManifest: generatedManifest,
         defineEnv: {
-            IDS_PREFIX: config.prependIds ? (config.prependIds.style === 'camelCase' ? camelCase(generatedManifest.name) : generatedManifest.name) : undefined,
+            IDS_PREFIX: config.prependIds
+                ? config.prependIds.style === 'camelCase'
+                    ? camelCase(generatedManifest.name)
+                    : generatedManifest.name
+                : undefined,
             ...define,
         },
         config,
@@ -279,7 +292,8 @@ export const checkEntrypoint = (config: Config) => {
     })
     const source = project.addSourceFileAtPath(entryPoint)
     // TODO fancy errors
-    if (!source.getVariableDeclarationOrThrow('activate').isExported()) throw new Error("activate function isn't exported")
+    if (!source.getVariableDeclarationOrThrow('activate').isExported())
+        throw new Error("activate function isn't exported")
 
     console.timeEnd('check')
 }

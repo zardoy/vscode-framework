@@ -59,7 +59,7 @@ export const generateAndWriteManifest = async ({
         )
 
     await writeFile(outputPath, generatedManifest, { spaces: 4 })
-    return generatedManifest
+    return { generatedManifest, sourceManifest }
 }
 
 // TODO rethink and rename export
