@@ -1,7 +1,7 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         /** Use this instead of `ctx.extensionMode` */
-        NODE_ENV: 'development' | 'production'
+        NODE_ENV: 'development' | 'production' | 'test'
         /** `name` of package.json */
         EXTENSION_ID_NAME: string
         /** `displayName` of package.json */
