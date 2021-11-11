@@ -36,12 +36,9 @@ await fsExtra.copy(
 // BUILD INJECT CODE
 
 const { outputFiles } = await build({
-    bundle: true,
     platform: 'node',
     format: 'cjs',
+    logLevel: 'info',
     entryPoints: ['packages/vscode-framework/src/cli/esbuild/consoleInject.ts'],
     outfile: 'packages/vscode-framework/build/cli/esbuild/consoleInject.js',
-    write: false,
 })
-
-await fs.promises.writeFile(outputFiles[0].path, outputFiles[0].text.split('\n').slice(1).join('\n'), 'utf-8')

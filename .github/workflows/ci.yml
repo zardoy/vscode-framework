@@ -63,6 +63,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Change base branch to main
-        run: pnpx -y tsm scripts/change-changeset-base-branch.ts
+        run: pnpx -y tsm scripts/update-changeset-branch.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

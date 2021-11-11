@@ -29,7 +29,7 @@ experiment-*
 # changesets
 
 extension-samples/*/CHANGELOG.md
-extension-samples/*/CHANGELOG.MD
+integration-tests/fixtures/*/CHANGELOG.md
 
 # vscode-framework
 generated.ts
