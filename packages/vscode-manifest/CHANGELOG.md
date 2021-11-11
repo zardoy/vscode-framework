@@ -1,6 +1,14 @@
 # vscode-manifest
 
-## 0.0.5
+## 0.0.6
+
 ### Patch Changes
 
-- Continue to publish on next tag. First changelog line!
+-   eeb0f89: BREAKING: use TS compiler to ship code into NPM. It allows mocking of exported methods
+-   eeb0f89: BREAKING: Use TS compiler to ship code into NPM. It allows mocking of exported methods. Remove `build/vscode-manifest-schema.js` file with default schema export, read `build/vscode-manifest-schema.json` file instead.
+
+## 0.0.5
+
+### Patch Changes
+
+-   Continue to publish on next tag. First changelog line!
