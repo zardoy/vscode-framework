@@ -23,10 +23,12 @@ jobs:
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: latest
+          # we already tested with --frozen-lockfile on next when creating pr, now we need to fix bumped pkg by changeset
           run_install: |
-              args: [--frozen-lockfile, --strict-peer-dependencies]
+              args: [--strict-peer-dependencies]
         # for now, skipping eslint
       - run: node scripts/check-changeset.mjs
+      - run: git push
       - run: pnpx -y zardoy-release pnpm-monorepo
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
