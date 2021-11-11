@@ -4,7 +4,8 @@
     "scripts": {
         "start": "node scripts/prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node scripts/postBuild.mjs\"",
         "eslint": "eslint packages/*/src/**/*.ts",
-        "test": "jest && pnpm test-integration",
+        "test": "jest",
+        "test-not-ready-version": "jest && pnpm test-integration",
         "test-integration": "jest integration-tests/runTests.ts",
         "build": "node scripts/prepare.mjs && tsc -b tsconfig.prod.json && tsc -p tsconfig.only-typechecking.json && node scripts/postBuild.mjs"
     },
