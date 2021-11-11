@@ -18,7 +18,7 @@ Note: still WIP, not all functionality are available. Issues are welcome.
 
 ## Usage
 
-- Install it in your project: `npm i vscode-framework --dev`
+- Install it in your project: `npm i vscode-framework@next -D`
 - Read the [DOCS](./docs/)
 
 ## Brief Overview
