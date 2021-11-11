@@ -25,12 +25,12 @@ jobs:
           version: latest
           # we already tested with --frozen-lockfile on next when creating pr, now we need to fix bumped pkg by changeset
           run_install: |
-              args: [--strict-peer-dependencies]
+              args: [--no-frozen-lockfile, --strict-peer-dependencies]
         # for now, skipping eslint
       - run: node scripts/check-changeset.mjs
       - run: git push
+      # test, build, add meta fields, perform additional checks and finally publish
       - run: pnpx -y zardoy-release pnpm-monorepo
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          FORCE_COLOR: "1"
