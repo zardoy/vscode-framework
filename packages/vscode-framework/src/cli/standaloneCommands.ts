@@ -3,7 +3,7 @@ import { ManifestType, readDirectoryManifest } from 'vscode-manifest'
 import globby from 'globby'
 import { SuperCommander } from './commander'
 import { launchVscode } from './launcher'
-import { propsGenerators } from './manifest-generator/propsGenerators'
+import { manifestGenerators } from './manifest-generator/manifestGenerators'
 import { ReadManifestOptions } from 'vscode-manifest/build/readManifest'
 
 export const addStandaloneCommands = (commander: SuperCommander<any>) => {
@@ -75,7 +75,7 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
         },
         async ({ normalizeIds, skipValidation }) => {
             const manifest = await readDirectoryManifest({ throwIfInvalid: !skipValidation })
-            const regeneratedManifest = propsGenerators
+            const regeneratedManifest = manifestGenerators
         },
     )
 

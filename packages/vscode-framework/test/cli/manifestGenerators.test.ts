@@ -5,20 +5,20 @@ import { join } from 'path'
 import { validRange } from 'semver'
 import { Except, PackageJson } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
-import { propsGenerators, PropsGeneratorsMeta } from '../../src/cli/manifest-generator/propsGenerators'
+import { manifestGenerators, ManifestGeneratorsMeta } from '../../src/cli/manifest-generator/manifestGenerators'
 import { defaultConfig } from '../../src/config'
 import { screenRecorderManifest, screenRecorderManifestBase } from './fixtures'
 
 type Tests = {
     [K in keyof Except<
-        typeof propsGenerators,
+        typeof manifestGenerators,
         // these have its own tests
         // but generatedConfiguration will be removed from here
         'repository' | 'generatedConfiguration' /*  | 'contributes.configuration' */
     >]: (packageJson: PackageJson) => void
 }
 
-const productionMeta: PropsGeneratorsMeta = {
+const productionMeta: ManifestGeneratorsMeta = {
     target: { desktop: true, web: true },
     mode: 'production',
     config: defaultConfig,
@@ -35,7 +35,7 @@ url=https://github.com/test-author/vscode-extension-name.git
         expect(path).toBe(join(process.cwd(), '.git/config'))
         callback(null, testGitConfig as any)
     })
-    expect(await propsGenerators.repository()).toMatchInlineSnapshot(`
+    expect(await manifestGenerators.repository()).toMatchInlineSnapshot(`
         Object {
           "repository": "https://github.com/test-author/vscode-extension-name",
         }
@@ -51,7 +51,7 @@ const screenRecorderManifestWithCommands: ManifestType = {
 
 describe('Generated activationEvents', () => {
     test('Nothing to change', async () => {
-        const result = propsGenerators.activationEvents(
+        const result = manifestGenerators.activationEvents(
             {
                 ...screenRecorderManifestWithCommands,
                 activationEvents: ['workspaceContains:package.json', 'onCommand:foo', 'onFileSystem:fs'],
@@ -62,7 +62,7 @@ describe('Generated activationEvents', () => {
         expect(result).toEqual({})
     })
     test("Doesn't touch original", async () => {
-        const result = propsGenerators.activationEvents(
+        const result = manifestGenerators.activationEvents(
             {
                 ...screenRecorderManifestWithCommands,
                 activationEvents: ['workspaceContains:package.json', 'onCommands', 'onFileSystem:fs'],
@@ -164,5 +164,5 @@ Object {
 test.each<{ name: keyof Tests; expect: (data) => void }>(
     Object.entries(tests).map(([name, expect]) => ({ name, expect })),
 )('Auto-generated field $name', async ({ name, expect }) => {
-    expect(await propsGenerators[name](screenRecorderManifest, productionMeta))
+    expect(await manifestGenerators[name](screenRecorderManifest, productionMeta))
 })
