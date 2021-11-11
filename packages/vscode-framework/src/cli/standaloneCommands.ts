@@ -1,11 +1,10 @@
+import fs from 'fs'
 import { join } from 'path'
-import { ManifestType, readDirectoryManifest } from 'vscode-manifest'
 import globby from 'globby'
+import { readDirectoryManifest } from 'vscode-manifest'
 import { SuperCommander } from './commander'
 import { launchVscode } from './launcher'
 import { manifestGenerators } from './manifest-generator/manifestGenerators'
-import { ReadManifestOptions } from 'vscode-manifest/build/readManifest'
-
 export const addStandaloneCommands = (commander: SuperCommander<any>) => {
     commander.command(
         'launch',
@@ -17,6 +16,34 @@ export const addStandaloneCommands = (commander: SuperCommander<any>) => {
         },
         async (_, { config, arguments: { dir = process.cwd() } }) => {
             await launchVscode(dir, config)
+        },
+    )
+
+    commander.command(
+        'launch-config',
+        '[for debugging] Adds <cwd>/.vscode/launch.json config for launching extension with other extension disabled',
+        {},
+        async () => {
+            const launchConfigPath = '.vscode/launch.json'
+            if (fs.existsSync(launchConfigPath))
+                throw new Error('Launch config already exists. Move or delete it first.')
+            const launchJson = `
+{
+    "configurations": [
+        {
+            "name": "Launch Extension",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=\${workspaceFolder}/out",
+                "--disable-extensions"
+            ],
+            "outFiles": ["\${workspaceFolder}/out/**/*.js"]
+        }
+    ]
+}
+`
+            await fs.promises.writeFile(launchConfigPath, launchJson, 'utf-8')
         },
     )
 
