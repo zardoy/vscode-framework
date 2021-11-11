@@ -2,10 +2,10 @@
 
 <!-- > :fire: The fastest way to develop extensions for VSCode -->
 
-Warning: still WIP, not all functionality are available.
+**Full-featured set of tools to develop [VSCode extensions](https://code.visualstudio.com/api) with speed and minimal friction.**
 
 - 💡 Not Boilerplated
-- ⚡️ Hot Reload (WIP)
+- ⚡️ Auto Reload
 - 🔑 TypeScript Types from `package.json` Contribution Points
 - 📦 Publish Production-ready Build with zero config
 - 🚀 Use `console` methods in production (creates extension output for you)
@@ -14,13 +14,7 @@ Warning: still WIP, not all functionality are available.
 
 <!-- And even more: pnpm support, CI, [API wrappers](packages/vscode-extra/). -->
 
-Note: highly experimental, `start` works, but `build` wasn't battle-tested yet.
-
-## What is this?
-
-This is a full-featured set of tools to develop [VSCode extensions](https://code.visualstudio.com/api) with speed and minimal friction.
-
-<!-- The standard `vscode` module just slows me down. -->
+Note: still WIP, not all functionality are available. Issues are welcome.
 
 ## Usage
 
@@ -48,6 +42,7 @@ import vscode from 'vscode'
 import { getExtensionSetting, registerExtensionCommand } from 'vscode-framework'
 
 export const activate = () => {
+    // typesafe. ready for refactors
     registerExtensionCommand('command', () =>
         vscode.window.showInformationMessage(`Debug is ${getExtensionSetting('enableDebug') ? 'enabled' : 'disabled'}`),
     )
@@ -73,3 +68,5 @@ Note, that VSCode doesn't support keywords for the commands, so --> -->
 There are several things that I don't really liked, but one of the important parts was the boilerplated [generator-code](https://github.com/Microsoft/vscode-generator-code).
 
 Also, web extensions [must be bundled](https://docs.microsoft.com/en-us/answers/questions/368286/vc-2015-2019-install-check.html) into a single file, so just let the included esbuild do all the work.
+
+<!-- The standard `vscode` module just slows me down. -->
