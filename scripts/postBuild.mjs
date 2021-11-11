@@ -1,5 +1,6 @@
 //@ts-check
 import fs from 'fs'
+import fsExtra from 'fs-extra'
 import { build } from 'esbuild'
 
 // PATCH TS OUTPUT
@@ -22,12 +23,12 @@ for (const [path, patch] of Object.entries(pathsToPatch)) {
 
 // COPY ASSETS FILES
 
-await fs.promises.copyFile(
+await fsExtra.copy(
     'packages/vscode-manifest/src/generated/validate.js',
     'packages/vscode-manifest/build/generated/validate.js',
 )
 
-await fs.promises.copyFile(
+await fsExtra.copy(
     'packages/vscode-manifest/src/vscode-manifest-schema.json',
     'packages/vscode-manifest/build/vscode-manifest-schema.json',
 )

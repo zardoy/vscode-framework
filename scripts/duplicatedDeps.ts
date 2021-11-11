@@ -20,7 +20,7 @@ for (const packageDir of packagesDirs) {
     const commonDeps = intersection(rootDeps, packageDeps)
     if (commonDeps.length > 0) {
         console.warn('Must be removed from', packageDir, commonDeps)
-        if (action) await execa('pnpm', ['remove', ...commonDeps], { cwd: dir, stdin: 'inherit' })
+        if (action) await execa('pnpm', ['remove', ...commonDeps], { cwd: dir, stdio: 'inherit' })
     }
 
     // TODO remove them
