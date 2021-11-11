@@ -55,8 +55,9 @@ jobs:
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: latest
+        #   TODO! add back --strict-peer-dependencies
           run_install: |
-            args: [--frozen-lockfile, --strict-peer-dependencies]
+            args: [--frozen-lockfile]
       - name: Create Release Pull Request
         uses: changesets/action@master
         env:
