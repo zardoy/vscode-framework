@@ -20,11 +20,16 @@ for (const [path, patch] of Object.entries(pathsToPatch)) {
     await fs.promises.writeFile(path, patch(contents), 'utf-8')
 }
 
-// COPY validate
+// COPY ASSETS FILES
 
-fs.promises.copyFile(
+await fs.promises.copyFile(
     'packages/vscode-manifest/src/generated/validate.js',
     'packages/vscode-manifest/build/generated/validate.js',
+)
+
+await fs.promises.copyFile(
+    'packages/vscode-manifest/src/vscode-manifest-schema.json',
+    'packages/vscode-manifest/build/vscode-manifest-schema.json',
 )
 
 // BUILD INJECT CODE
