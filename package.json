@@ -4,7 +4,8 @@
     "scripts": {
         "start": "node scripts/prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node scripts/postBuild.mjs\"",
         "eslint": "eslint packages/*/src/**/*.ts",
-        "test": "jest",
+        "test": "jest && pnpm test-integration",
+        "test-integration": "jest integration-tests/runTests.ts",
         "build": "node scripts/prepare.mjs && tsc -b tsconfig.prod.json && tsc -p tsconfig.only-typechecking.json && node scripts/postBuild.mjs"
     },
     "devDependencies": {
@@ -14,6 +15,7 @@
         "@babel/preset-typescript": "^7.16.0",
         "@changesets/cli": "^2.18.0",
         "@octokit/rest": "^18.12.0",
+        "@types/fs-extra": "^9.0.13",
         "@types/jest": "^27.0.2",
         "@types/node": "^16.11.7",
         "@zardoy/tsconfig": "^1.2.2",
@@ -27,6 +29,7 @@
         "fs-extra": "^10.0.0",
         "github-remote-info": "^1.0.3",
         "globby": "^12.0.2",
+        "got": "^11.8.2",
         "jest": "^27.3.1",
         "jsonfile": "^6.1.0",
         "lodash-es": "^4.17.21",
