@@ -3,7 +3,7 @@
 import { forceChalkColor } from './utils'
 // and what to do in esm?
 forceChalkColor(true)
-const { validateOrThrow } = require('../src/validateManifest')
+const { validateOrThrow } = require('../src/validateManifest') as typeof import('../src/validateManifest')
 
 // read manifest functions are in global tests
 
