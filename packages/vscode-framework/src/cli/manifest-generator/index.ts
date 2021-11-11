@@ -6,7 +6,7 @@ import { defaultsDeep, omit } from 'lodash'
 import { ManifestType, readManifest } from 'vscode-manifest'
 import { defaultConfig, Config } from '../../config'
 import { getManifestPathFromRoot } from '../../util'
-import { propsGenerators, PropsGeneratorsMeta, runGeneratorsOnManifest } from './propsGenerators'
+import { manifestGenerators, ManifestGeneratorsMeta, runGeneratorsOnManifest } from './manifestGenerators'
 
 // TODO get off of config
 
@@ -19,7 +19,7 @@ interface Options {
     config: Config
     /** @default true */
     overwrite?: boolean
-    propsGeneratorsMeta: PropsGeneratorsMeta
+    propsGeneratorsMeta: ManifestGeneratorsMeta
 }
 
 /** Reads and validates manifest on <cwd>/package.json and writes manifest with generated props */
@@ -59,7 +59,7 @@ export const generateAndWriteManifest = async ({
         )
 
     await writeFile(outputPath, generatedManifest, { spaces: 4 })
-    return generatedManifest
+    return { generatedManifest, sourceManifest }
 }
 
 // TODO rethink and rename export
@@ -78,7 +78,7 @@ export const generateManifest = async ({
     sourceManifest: ManifestType
     /** Preserves only required props in generated package.json and removes other. Disable to preserve all source props + generated. */
     cleanupManifest?: boolean
-    propsGeneratorsMeta: PropsGeneratorsMeta
+    propsGeneratorsMeta: ManifestGeneratorsMeta
 }): Promise<ManifestType> => {
     // TODO warn about overwritted props and to run vscode-framework migrate
     sourceManifest = cleanupManifest
@@ -98,7 +98,7 @@ export const generateManifest = async ({
         sourceManifest,
         typeof skipPropGenerators === 'boolean'
             ? (!skipPropGenerators as true)
-            : (removeItems(Object.keys(propsGenerators), skipPropGenerators) as any[]),
+            : (removeItems(Object.keys(manifestGenerators), skipPropGenerators) as any[]),
         true,
         config,
     )

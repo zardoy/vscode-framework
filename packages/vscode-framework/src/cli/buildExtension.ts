@@ -19,7 +19,6 @@ import { LauncherCLIParams, launchVscode } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
 import { newTypesGenerator } from './typesGenerator'
 import { WebSocketServer } from 'ws'
-declare const __DEV__: boolean
 
 const debug = Debug('vscode-framework:bulid-extension')
 
@@ -207,6 +206,7 @@ export const buildExtension = async ({
     skipGeneratingTypes: boolean
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
+    // -> ASSETS
     // Pick icons from here https://github.com/microsoft/vscode-codicons/tree/main/src/icons
     /** should be absolute */
     const resourcesPaths = {
@@ -224,28 +224,33 @@ export const buildExtension = async ({
     await fsExtra.ensureDir(outDir)
 
     // -> MANIFEST
-    const generatedManifest = await generateAndWriteManifest({
-        outputPath: join(outDir, 'package.json'),
-        overwrite: true,
-        config,
-        propsGeneratorsMeta: {
-            mode,
-            // TS is literally killing the target type!
-            target: mode === 'development' ? ({ [target]: true } as any) : config.target,
+    const { generatedManifest, sourceManifest } =
+        (await generateAndWriteManifest({
+            outputPath: join(outDir, 'package.json'),
+            overwrite: true,
             config,
-        },
-    })
+            propsGeneratorsMeta: {
+                mode,
+                // TS is literally killing the target type!
+                target: mode === 'development' ? ({ [target]: true } as any) : config.target,
+                config,
+            },
+        })) ?? {}
     if (!generatedManifest) throw new Error('Extension manifest (package.json) is missing.')
 
     // -> POST MANIFEST CHECKS
     if (generatedManifest.extensionKind?.length === 0)
-        // TODO also detect other cases
+        // TODO move to the schema
         console.warn("Warning: extensionKind in manifest is set to [] which means your extension won't be launched")
 
-    // -> ASSETS
-    // TODO
-
-    if (mode !== 'production' && !skipGeneratingTypes) await newTypesGenerator(generatedManifest)
+    // -> GENERATE TYPES
+    if (mode !== 'production' && !skipGeneratingTypes)
+        await newTypesGenerator({
+            // commands can have additional generated variants
+            commands: sourceManifest!.contributes.commands,
+            // configuration don't additional generated variants for now
+            configuration: generatedManifest.contributes.configuration,
+        })
 
     // -> EXTENSION ENTRYPOINT
     return runEsbuild({

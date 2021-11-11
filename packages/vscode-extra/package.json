@@ -1,6 +1,6 @@
 {
     "name": "vscode-extra",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Contains additional useful methods extensions that aren't provided by vscode API",
     "main": "build/index.js",
     "types": "build/index.d.ts",

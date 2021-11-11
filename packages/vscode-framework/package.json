@@ -1,6 +1,6 @@
 {
     "name": "vscode-framework",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
@@ -70,8 +70,8 @@
         "ts-morph": "^12.2.0",
         "typed-jsonfile": "^0.2.0",
         "typescript-json-schema": "^0.51.0",
-        "vscode-extra": "workspace:0.0.2",
-        "vscode-manifest": "workspace:0.0.5",
+        "vscode-extra": "workspace:0.0.3",
+        "vscode-manifest": "workspace:0.0.6",
         "ws": "^8.2.3"
     }
 }

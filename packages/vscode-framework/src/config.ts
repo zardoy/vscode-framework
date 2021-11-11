@@ -3,7 +3,7 @@ import { Except } from 'type-fest'
 import { PartialDeep } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
 import { ReadManifestOptions } from 'vscode-manifest/src/readManifest'
-import type { propsGenerators, PropsGeneratorsMeta } from './cli/manifest-generator/propsGenerators'
+import type { manifestGenerators, ManifestGeneratorsMeta } from './cli/manifest-generator/manifestGenerators'
 import { MaybePromise } from './util'
 
 // TODO allow to export callback from mjs and ts to LfauncherCLIParams to return
@@ -36,7 +36,7 @@ export interface Config {
      * - `extendPropsGenerators` would run anyway
      * - IDs would resolved anyway
      */
-    disablePropsGenerators: boolean | Array<keyof typeof propsGenerators>
+    disablePropsGenerators: boolean | Array<keyof typeof manifestGenerators>
     /** User propsGenerators. Not available in JSON config. See guide 09 */
     extendPropsGenerators: UserPropGenerator[]
     /** Configuration for auto-prepanding IDs in contribution */
@@ -165,7 +165,7 @@ export type UserPropGenerator = (data: {
     /** Conrfig with all resolved values (uesr + default) */
     resolvedConfig: Config
     /** Meta info that was designed for builtin generators */
-    meta: PropsGeneratorsMeta
+    meta: ManifestGeneratorsMeta
 }) => MaybePromise<
     | PartialDeep<ManifestType>
     | [
@@ -178,7 +178,11 @@ export type UserPropGenerator = (data: {
 
 export type BuildTargetType = 'desktop' | 'web'
 
+// utils
 export type ExtensionBootstrapConfig = Exclude<Config['development']['extensionBootstrap'], false>
+export type PickContributes<T extends keyof ManifestType['contributes']> = {
+    contributes: Pick<ManifestType['contributes'], T>
+}
 
 export const getBootstrapFeature = <T>(
     config: Config,

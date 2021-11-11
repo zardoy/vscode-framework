@@ -1,5 +1,5 @@
 import type { ValidateFunction } from 'ajv'
-import { bold, red } from 'chalk'
+import chalk from 'chalk'
 import { displayError } from './displayError'
 import ajvValidateImport from './generated/validate.js'
 import { intoTwoArrays, onlyProperties } from './util'
@@ -28,17 +28,17 @@ export const validateOrThrow = (manifest: ManifestType) => {
         )
         if (missingPackageJsonProps.length > 0)
             console.error(
-                `${red('Missing root properties:')} ${missingPackageJsonProps
-                    .map(err => red(`\n- ${bold(err.params.missingProperty)}`))
+                `${chalk.red('Missing root properties:')} ${missingPackageJsonProps
+                    .map(err => chalk.red(`\n- ${chalk.bold(err.params.missingProperty)}`))
                     .join('')}`,
             )
 
         if (otherErrors.length > 0) {
-            if (missingPackageJsonProps.length > 0) console.error(red(`Other errors:`))
+            if (missingPackageJsonProps.length > 0) console.error(chalk.red(`Other errors:`))
             for (const error of otherErrors)
                 console.error(
-                    `${red(
-                        `- ${bold(
+                    `${chalk.red(
+                        `- ${chalk.bold(
                             error.instancePath === '' ? 'root' : error.instancePath.slice(1).replace(/\//g, '.'),
                         )} ${error.message!}`,
                     )}`,

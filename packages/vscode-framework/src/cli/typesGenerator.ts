@@ -93,21 +93,21 @@ export const generateTypes = async ({ nodeModulesDir = process.cwd() }: { nodeMo
 /**
  * Places/rewrites generated file at ./src/generated.ts
  * Signficantly faster then that is above
- * @param resolvedManifest final manifest after all propsGenerators are run
  */
-export const newTypesGenerator = async (resolvedManifest: ExtensionManifest) => {
+export const newTypesGenerator = async ({
+    commands,
+    configuration,
+}: Pick<NonNullable<ExtensionManifest['contributes']>, 'commands' | 'configuration'>) => {
     const withoutId = (arg: string) => arg.slice(arg.indexOf('.') + 1)
     const interfaceRegularCommands =
-        resolvedManifest.contributes?.commands
-            ?.map(({ command }) => `      "${withoutId(command)}": true`)
-            .join('\n') ?? ''
+        commands?.map(({ command }) => `      "${withoutId(command)}": true`).join('\n') ?? ''
     let interfaceSettings = ''
     const hasConfigurationTypeFile = fs.existsSync(configurationTypeFile)
     if (hasConfigurationTypeFile) {
         interfaceSettings = 'interface Settings extends Required<Configuration> {}'
-    } else if (resolvedManifest.contributes?.configuration) {
-        interfaceSettings = 'interface Settings {'
-        interfaceSettings += ensureArray(resolvedManifest.contributes.configuration)
+    } else if (configuration) {
+        interfaceSettings = 'interface Settings {\n'
+        interfaceSettings += ensureArray(configuration)
             .map(({ properties }) =>
                 Object.entries(properties)
                     .map(
@@ -125,7 +125,7 @@ export const newTypesGenerator = async (resolvedManifest: ExtensionManifest) => 
                     .join('\n'),
             )
             .join('')
-        interfaceSettings += '}'
+        interfaceSettings += '\n\t}'
     }
 
     const contents = `
