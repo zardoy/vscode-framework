@@ -1,5 +1,5 @@
 import vscode from 'vscode'
-import { showQuickPick } from '.'
+import { showQuickPick, VSCodeQuickPickItem } from '.'
 type MaybePromise<T> = T | Promise<T>
 
 // TODO rewrite description
@@ -8,23 +8,28 @@ type MaybePromise<T> = T | Promise<T>
  * In multiroot workspaces, shows quickPick with workspaces preselected:
  * - in case of open editor, workspace that holds opened file
  * - if no editor is open or open editor doesn't belong to current workspace first workspace
- * @argument prompt Pass false to not show quickPick and return preselected as described above
  * @returns `undefined` – in not workspaces & when select is canceled
- * @return `false` – when filter removed all workspaces
+ * @return `false` – when filter removed all workspaces (even if only one workspace is opened)
  */
 export const getCurrentWorkspace = async ({
     showSelect = true,
     filterWorkspaces,
+    mapQuickPickItem = item => item,
     showSelectIfOnlyOne = true,
 }: {
+    /** Pass false to not show quickPick and return preselected as described in method description */
     showSelect?: boolean
-    filterWorkspaces?: (
-        workspaceFolder: vscode.WorkspaceFolder,
-    ) => MaybePromise<boolean> /** Applies only for workspaces */
+    /** Applies only for all types of workspaces */
+    filterWorkspaces?: (workspaceFolder: vscode.WorkspaceFolder) => MaybePromise<boolean>
+    mapQuickPickItem?: <T extends VSCodeQuickPickItem<vscode.WorkspaceFolder>>(item: T) => T
+    /** Applies only for multi-root workspaces */
     showSelectIfOnlyOne?: boolean
 } = {}) => {
     if (!vscode.workspace.workspaceFolders) return undefined
-    if (vscode.workspace.workspaceFolders.length === 1) return vscode.workspace.workspaceFolders[0]!
+    if (vscode.workspace.workspaceFolders.length === 1) {
+        if (filterWorkspaces && !(await filterWorkspaces(vscode.workspace.workspaceFolders[0]!))) return false
+        return vscode.workspace.workspaceFolders[0]!
+    }
 
     const workspacesToPick = [...vscode.workspace.workspaceFolders]
     if (filterWorkspaces)
@@ -47,11 +52,13 @@ export const getCurrentWorkspace = async ({
 
     if (!showSelect) return workspacesToPick.find(({ index }) => index === preselectedWorkspaceIndex)!
     const selectedWorkspace = await showQuickPick(
-        workspacesToPick.map(workspace => ({
-            label: workspace.name,
-            value: workspace,
-            picked: workspace.index === preselectedWorkspaceIndex,
-        })),
+        workspacesToPick.map(workspace =>
+            mapQuickPickItem({
+                label: `$(file-directory) ${workspace.name}`,
+                value: workspace,
+                picked: workspace.index === preselectedWorkspaceIndex,
+            }),
+        ),
     )
     return selectedWorkspace
 }
