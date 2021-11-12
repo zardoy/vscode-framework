@@ -1,5 +1,14 @@
 # vscode-framework
 
+## 0.0.11
+
+### Patch Changes
+
+-   c1d8819: Fix critical regression where extensions were unable to launch because injected variable was removed. I knew that it might happen, but unforunately I updated snapshot of injected code carelessly
+-   Updated dependencies [bcbce6d]
+-   Updated dependencies [bcbce6d]
+    -   vscode-extra@0.0.4
+
 ## 0.0.10
 
 ### Patch Changes
