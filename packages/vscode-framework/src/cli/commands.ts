@@ -92,7 +92,8 @@ commander.command(
                 // TODO use config's default
                 defaultValue: false,
                 // reformat description
-                description: 'If --web is present, you can launch web extension in desktop VSCode, instead of in browser',
+                description:
+                    'If --web is present, you can launch web extension in desktop VSCode, instead of in browser',
             },
             '--skip-launching': {
                 defaultValue: false,
@@ -102,12 +103,17 @@ commander.command(
                 defaultValue: false,
                 description: 'Do not generate types',
             },
+            '--sourcemap': {
+                defaultValue: false,
+                description: 'Forcefully enable sourcemap (needed for debugging)',
+            },
             ...commonBuildStartOptions,
         },
         loadConfig: true,
     },
-    async ({ skipLaunching, path, web, webDesktop, skipGeneratingTypes }, { config }) => {
+    async ({ skipLaunching, path, web, webDesktop, skipGeneratingTypes, sourcemap }, { config }) => {
         try {
+            if (sourcemap) config = defaultsDeep({ esbuild: { sourcemap: true } }, config)
             const target: BuildTargetType = web ? 'web' : 'desktop'
             await startExtensionDevelopment({
                 mode: 'development',
@@ -152,7 +158,8 @@ commander.command(
 
         // TODO build path
         // TODO move check to schema
-        if (!config.target.desktop && !config.target.web) throw new Error('Both targets are disabled in config. Enable either desktop or wb')
+        if (!config.target.desktop && !config.target.web)
+            throw new Error('Both targets are disabled in config. Enable either desktop or wb')
 
         if (!skipTypechecking && fsExtra.existsSync('./tsconfig.json')) {
             const date = Date.now()
