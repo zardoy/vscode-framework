@@ -58,11 +58,14 @@ jobs:
         #   TODO! add back --strict-peer-dependencies
           run_install: |
             args: [--frozen-lockfile]
+      - run: pnpm i -g tsm
+      - run: tsm scripts/update-changeset-branch.ts next-pre
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release Pull Request
         uses: changesets/action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Change base branch to main
-        run: pnpx -y tsm scripts/update-changeset-branch.ts
+      - run: tsm scripts/update-changeset-branch.ts next-post
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -34,3 +34,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: pnpx -y tsm scripts/update-changeset-branch.ts main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

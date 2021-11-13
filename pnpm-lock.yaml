@@ -127,7 +127,7 @@ importers:
       ttypescript: ^1.5.12
       typed-jsonfile: ^0.2.0
       typescript-json-schema: ^0.51.0
-      vscode-extra: workspace:0.0.3
+      vscode-extra: workspace:0.0.4
       vscode-manifest: workspace:0.0.6
       ws: ^8.2.3
     dependencies:

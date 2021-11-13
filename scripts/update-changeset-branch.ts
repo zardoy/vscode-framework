@@ -8,22 +8,45 @@ const octokit = new Octokit({
 
 const repoSlug = process.env.GITHUB_REPOSITORY!
 const [owner, repo] = repoSlug.split('/') as [string, string]
-const { data } = await octokit.search.issuesAndPullRequests({
-    q: `Version Packages in:title+repo:${repoSlug}+state:open+author:app/github-actions`,
-})
-const prNumber = data.items[0]?.number
-if (prNumber === undefined) throw new Error('Cannot find the PR!')
-await octokit.pulls.update({
-    owner,
-    repo,
-    pull_number: prNumber,
-    base: 'main',
-})
+const action = process.argv[2]!
+if (action.startsWith('next')) {
+    const { data } = await octokit.search.issuesAndPullRequests({
+        q: `Version Packages in:title+repo:${repoSlug}+state:open+author:app/github-actions`,
+    })
+    const prNumber = data.items[0]?.number
+    if (action === 'next-pre') {
+        // change base branch to next (default) to let the action pickup and update the PR
+        if (prNumber)
+            await octokit.pulls.update({
+                owner,
+                repo,
+                pull_number: prNumber,
+                base: 'next',
+            })
+    } else if (action === 'next-post') {
+        // change base branch to main
+        if (prNumber === undefined) throw new Error('Cannot find the PR!')
+        await octokit.pulls.update({
+            owner,
+            repo,
+            pull_number: prNumber,
+            base: 'main',
+        })
+    }
+}
 
-await octokit.pulls.create({
-    owner,
-    repo,
-    head: 'main',
-    base: 'next',
-    title: 'Update changelogs',
-})
+if (action === 'main') {
+    // create pr main -> next with updated version and removed changesets
+    const { data } = await octokit.pulls.create({
+        owner,
+        repo,
+        head: 'main',
+        base: 'next',
+        title: 'Update changelogs',
+    })
+    await octokit.pulls.merge({
+        owner,
+        repo,
+        pull_number: data.number,
+    })
+}
