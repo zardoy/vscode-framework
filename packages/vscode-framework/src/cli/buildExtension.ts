@@ -206,6 +206,9 @@ export const buildExtension = async ({
     skipGeneratingTypes: boolean
     define?: Record<string, any>
 } & Pick<Parameters<typeof runEsbuild>[0], 'afterSuccessfulBuild'>) => {
+    // ensure always on top of function
+    await fsExtra.ensureDir(outDir)
+
     // -> ASSETS
     // Pick icons from here https://github.com/microsoft/vscode-codicons/tree/main/src/icons
     /** should be absolute */
@@ -220,8 +223,6 @@ export const buildExtension = async ({
         await (mode === 'production'
             ? fsExtra.copy(resourcesPaths.from, resourcesPaths.to)
             : fs.promises.symlink(resourcesPaths.from, resourcesPaths.to, 'junction'))
-
-    await fsExtra.ensureDir(outDir)
 
     // -> MANIFEST
     const { generatedManifest, sourceManifest } =
