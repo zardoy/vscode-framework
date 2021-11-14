@@ -33,7 +33,7 @@ describe('Integration', () => {
         )
         await fs.promises.writeFile(fromFixture('package.json'), eslintManifest, 'utf-8')
         // should do all the work within 2 sec
-        const process = execa('node', [binPath, 'start'], { cwd: fromFixture() })
+        const process = execa('node', [binPath, 'start'], { stdio: 'inherit', cwd: fromFixture() })
         await delay(3000)
         process.kill()
         // Snapshot generated types

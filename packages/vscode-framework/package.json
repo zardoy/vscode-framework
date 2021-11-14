@@ -67,6 +67,7 @@
         "nanoid": "^3.1.30",
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.3.1",
+        "quicktype": "^15.0.260",
         "ts-morph": "^12.2.0",
         "typed-jsonfile": "^0.2.0",
         "typescript-json-schema": "^0.51.0",

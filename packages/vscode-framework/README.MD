@@ -1,4 +1,4 @@
-# VSCode Framework
+# VSCode Framework<sup>beta</sup>
 
 <!-- > :fire: The fastest way to develop extensions for VSCode -->
 
@@ -11,10 +11,6 @@
 - 🚀 Use `console` methods in production (creates extension output for you)
 - 🛠️ Verbose Configuration
 - ⚙️ Use TypeScript type for `configuration` instead of schema in *package.json*
-
-<!-- And even more: pnpm support, CI, [API wrappers](packages/vscode-extra/). -->
-
-Note: still WIP, not all functionality are available. Issues are welcome.
 
 ## Usage
 
@@ -49,19 +45,9 @@ export const activate = () => {
 }
 ```
 
-## More Features
+## Even More Features
 
 - access extension context anywhere via `extensionCtx` export
-
-<!-- There is a hot reload feature, but you can manually restart editor with pressing <kdb>R</kbd> in console. -->
-<!--
-Don't confuse `description` from commands above with description from VSCode's `Feature Contributes` tab:
-
-![VSCode-Feature-Contributes](media/vscode-contribution-points.png)
-
-#### About Keywords
-
-Note, that VSCode doesn't support keywords for the commands, so --> -->
 
 ## Why it was Created?
 

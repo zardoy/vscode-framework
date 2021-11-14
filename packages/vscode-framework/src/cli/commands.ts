@@ -4,15 +4,15 @@ import { cosmiconfig } from 'cosmiconfig'
 import fsExtra from 'fs-extra'
 import { defaultsDeep } from 'lodash'
 import Debug from '@prisma/debug'
-import pkdDir from 'pkg-dir'
 import execa from 'execa'
 import kleur from 'kleur'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { buildExtension, startExtensionDevelopment } from './buildExtension'
 import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
-import { generateTypes } from './typesGenerator'
+import { quicktype, JSONSchemaInput, FetchingJSONSchemaStore, InputData } from 'quicktype-core'
 import { generateAndWriteManifest } from '.'
+import { readDirectoryManifest } from 'vscode-manifest'
 
 const debug = Debug('vscode-framework:cli')
 
@@ -204,6 +204,31 @@ commander.command('gitignore', 'Add ignore entries to .gitignore of cwd', {}, as
     `
     await fsExtra.promises.appendFile('./.gitignore', contents, 'utf-8')
 })
+
+commander.command(
+    'generate-types',
+    '',
+    {
+        loadConfig: true,
+    },
+    async ({}, { config }) => {
+        console.time('generate')
+        const manifest = await readDirectoryManifest({ prependIds: config.prependIds })
+        // TODO run contributes.configuration generators
+
+        await fsExtra.writeFile('generateConf.json', JSON.stringify(manifest.contributes.configuration), 'utf-8')
+        await execa(
+            'quicktype',
+            [
+                ...'--out generatedTest.ts --no-runtime-typecheck --top-level Configuration --src generateConf.json --just-types --src-lang schema'.split(
+                    ' ',
+                ),
+            ],
+            { stdio: 'inherit' },
+        )
+        console.timeEnd('generate')
+    },
+)
 
 addStandaloneCommands(commander)
 

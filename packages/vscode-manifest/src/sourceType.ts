@@ -1,3 +1,4 @@
+/* eslint-disable zardoy-config/@typescript-eslint/ban-types */
 import { JSONSchema } from 'json-schema-typed'
 import { SetRequired } from 'type-fest'
 // manually
@@ -11,12 +12,37 @@ interface ICommand {
     category?: string
 }
 
+interface IJSONSchemaSnippet {
+    label?: string
+    description?: string
+    body?: any // a object that will be JSON stringified
+    bodyText?: string // an already stringified JSON object that can contain new lines (\n) and tabs (\t)
+}
+
+interface VSCodeJsonSchema {
+    defaultSnippets?: IJSONSchemaSnippet[]
+    errorMessage?: string
+    patternErrorMessage?: string
+    deprecationMessage?: string
+    markdownDeprecationMessage?: string
+    enumDescriptions?: string[]
+    markdownEnumDescriptions?: string[]
+    markdownDescription?: string
+    doNotSuggest?: boolean
+    suggestSortText?: string
+}
+
+interface IJSONSchemaMap {
+    [name: string]: PropertySchema
+}
+
 // TODO combine with JSONSchemaType<any> from ajv
 interface PropertySchema
-    extends SetRequired<Omit<JSONSchema, `$${string}` | 'definitions' | 'readOnly'>, 'type' | 'default'> {
+    extends SetRequired<Omit<JSONSchema, `$${string}` | 'definitions' | 'readOnly'>, 'type' | 'default'>,
+        VSCodeJsonSchema {
     scope?: 'application' | 'machine' | 'machine-overridable' | 'window' | 'resource' | 'language-overridable'
-    patternErrorMessage?: string
-    enumDescription?: string[]
+    properties?: IJSONSchemaMap
+    dependencies?: IJSONSchemaMap | { [prop: string]: string[] }
 }
 
 interface IConfiguration {
