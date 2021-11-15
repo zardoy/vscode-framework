@@ -16,16 +16,17 @@ if (action.startsWith('next')) {
     const prNumber = data.items[0]?.number
     if (action === 'next-pre') {
         // change base branch to next (default) to let the action pickup and update the PR
-        if (prNumber)
+        if (prNumber !== undefined)
             await octokit.pulls.update({
                 owner,
                 repo,
                 pull_number: prNumber,
                 base: 'next',
             })
-    } else if (action === 'next-post') {
-        // change base branch to main
-        if (prNumber === undefined) throw new Error('Cannot find the PR!')
+    } else if (
+        action === 'next-post' && // changesets can skip creating PR if not needed
+        prNumber !== undefined
+    ) {
         await octokit.pulls.update({
             owner,
             repo,
