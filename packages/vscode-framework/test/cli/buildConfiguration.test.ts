@@ -1,5 +1,5 @@
 /// <reference types="jest" />
 
-import { runConfigurationGenerator } from '../../src/cli/buildConfiguration'
+import { runConfigurationGenerator } from '../../src/cli/configurationFromType'
 
 test.todo('Generates config from type')

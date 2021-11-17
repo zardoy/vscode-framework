@@ -6,13 +6,14 @@ import { defaultsDeep } from 'lodash'
 import Debug from '@prisma/debug'
 import execa from 'execa'
 import kleur from 'kleur'
+import { quicktype, JSONSchemaInput, FetchingJSONSchemaStore, InputData } from 'quicktype-core'
+import { readDirectoryManifest } from 'vscode-manifest'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { buildExtension, startExtensionDevelopment } from './buildExtension'
 import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
-import { quicktype, JSONSchemaInput, FetchingJSONSchemaStore, InputData } from 'quicktype-core'
 import { generateAndWriteManifest } from '.'
-import { readDirectoryManifest } from 'vscode-manifest'
+import { generateContributesTypes } from './commands/generateTypes'
 
 const debug = Debug('vscode-framework:cli')
 
@@ -54,17 +55,16 @@ commander.command(
     },
 )
 
-// OLD types generator, isn't ready for this TS world
-// commander.command(
-//     'generate-types',
-//     'Generate TypeScript typings (from contribution points) and place them to nearest node_modules for working with framework',
-//     {
-//         hidden: true,
-//     },
-//     async () => {
-//         await generateTypes({ nodeModulesDir: __DEV__ ? (await pkdDir(__dirname))! : process.cwd() })
-//     },
-// )
+commander.command(
+    'generate-types',
+    'Generate TypeScript typings (from contribution points) into src/generated.ts for working with framework',
+    {
+        loadConfig: true,
+    },
+    async (_, { config }) => {
+        await generateContributesTypes(undefined, config)
+    },
+)
 
 const useOutForDebugging = true
 const relativePath = useOutForDebugging ? 'out' : 'node_modules/.vscode-extension'
@@ -115,7 +115,7 @@ commander.command(
         try {
             if (sourcemap) config = defaultsDeep({ esbuild: { sourcemap: true } }, config)
             const target: BuildTargetType = web ? 'web' : 'desktop'
-            await startExtensionDevelopment({
+            const { restartCommand } = (await startExtensionDevelopment({
                 mode: 'development',
                 config,
                 launchVscodeParams: skipLaunching
@@ -127,6 +127,21 @@ commander.command(
                 target,
                 skipGeneratingTypes,
                 outDir: join(process.cwd(), path),
+            }))!
+            process.stdin.setRawMode(true)
+            process.stdin.on('data', async data => {
+                let input = String(data)
+                let ctrlKey = false
+
+                // copied from `ink` module
+                if (input <= '\u001A' && input !== '\r') {
+                    input = String.fromCharCode(input.charCodeAt(0) + 'a'.charCodeAt(0) - 1)
+                    ctrlKey = true
+                }
+
+                if (ctrlKey && input === 'c') process.exit()
+
+                if (input === 'r') await restartCommand()
             })
         } catch (error) {
             // eslint-disable-next-line zardoy-config/unicorn/no-process-exit
@@ -211,23 +226,7 @@ commander.command(
     {
         loadConfig: true,
     },
-    async ({}, { config }) => {
-        console.time('generate')
-        const manifest = await readDirectoryManifest({ prependIds: config.prependIds })
-        // TODO run contributes.configuration generators
-
-        await fsExtra.writeFile('generateConf.json', JSON.stringify(manifest.contributes.configuration), 'utf-8')
-        await execa(
-            'quicktype',
-            [
-                ...'--out generatedTest.ts --no-runtime-typecheck --top-level Configuration --src generateConf.json --just-types --src-lang schema'.split(
-                    ' ',
-                ),
-            ],
-            { stdio: 'inherit' },
-        )
-        console.timeEnd('generate')
-    },
+    async ({}, { config }) => {},
 )
 
 addStandaloneCommands(commander)

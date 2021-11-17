@@ -15,5 +15,5 @@ export type ExtensionManifestRequired = SetRequired<
 /** All manifest and package.json fields */
 export type ManifestType = PackageJson & ExtensionManifestRequired
 
-/** type of `contributes.configuration` (if not array) */
+/** type of `contributes.configuration` (not array) */
 export type ContributesConfigurationType = NonNullable<Exclude<ManifestType['contributes']['configuration'], any[]>>

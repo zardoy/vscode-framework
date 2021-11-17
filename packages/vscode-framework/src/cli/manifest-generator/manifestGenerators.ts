@@ -7,7 +7,7 @@ import { parseJsoncString } from 'typed-jsonfile/build/parseJsonc'
 import { ManifestType } from 'vscode-manifest'
 import { Config, ExtensionBootstrapConfig, PickContributes } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
-import { cachedGeneratedConfigurationPath, configurationTypeFile } from '../buildConfiguration'
+import { cachedGeneratedConfigurationPath, configurationTypeFile } from '../configurationFromType'
 import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
 
 // They're generating package.json properties

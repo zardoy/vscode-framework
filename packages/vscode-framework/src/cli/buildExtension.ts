@@ -8,17 +8,16 @@ import exitHook from 'exit-hook'
 import fsExtra from 'fs-extra'
 import { compilerOptions } from 'generated-module/build/ts-morph-utils'
 import kleur from 'kleur'
-// import { Server as IpcServer } from 'net-ipc'
 import { Project } from 'ts-morph'
 import { Except } from 'type-fest'
+import { WebSocketServer } from 'ws'
 import { BuildTargetType, Config, ExtensionBootstrapConfig } from '../config'
 import { getFileHash } from '../util'
-import { configurationTypeFile, runConfigurationGenerator } from './buildConfiguration'
+import { configurationTypeFile, runConfigurationGenerator } from './configurationFromType'
 import { runEsbuild } from './esbuild/esbuild'
-import { LauncherCLIParams, launchVscode } from './launcher'
+import { LauncherCLIParams, launchVscode as launchVscodeOuter } from './launcher'
 import { generateAndWriteManifest } from './manifest-generator'
-import { newTypesGenerator } from './typesGenerator'
-import { WebSocketServer } from 'ws'
+import { generateContributesTypes } from './commands/generateTypes'
 
 const debug = Debug('vscode-framework:bulid-extension')
 
@@ -63,7 +62,7 @@ export const startExtensionDevelopment = async (
         return
     }
 
-    // TODO! why do we need to stop esbuild?
+    // TODO why do we need to stop esbuild?
     let stopEsbuild: (() => void) | undefined
 
     // #region Spin up WebSocket
@@ -110,21 +109,25 @@ export const startExtensionDevelopment = async (
             sendMessage('action:close')
         })
     }
-
     // #endregion
+
+    const launchVscode = async () => {
+        if (!params.launchVscodeParams) return
+        await launchVscodeOuter(outDir, {
+            ...params.launchVscodeParams,
+            // TODO ...params.config
+            development: config.development,
+        })
+    }
+
     const restartBuild = async () => {
         if (stopEsbuild) stopEsbuild()
         stopEsbuild = (
             await buildExtension({
                 ...params,
                 async afterSuccessfulBuild(rebuildCount) {
-                    if (rebuildCount === 0 && !stopEsbuild) {
-                        if (params.launchVscodeParams)
-                            await launchVscode(outDir, {
-                                ...params.launchVscodeParams,
-                                // TODO ...params.config
-                                development: config.development,
-                            })
+                    if (rebuildCount === 0 && !stopEsbuild && params.launchVscodeParams) {
+                        await launchVscode()
                         return
                     }
 
@@ -138,9 +141,6 @@ export const startExtensionDevelopment = async (
     }
 
     const manifestPath = 'package.json'
-    // it would still restart esbuild on ctrl+s on file
-    // previous was settingsType.ts thinking about renaming it back
-    console.log('watching', [manifestPath, configurationTypeFile])
     const watcher = watch([manifestPath, configurationTypeFile])
     const prevHashes = new Map<string, string>()
     const neededFileWasChanged = async (changedFilePath: string, neededPath: string) => {
@@ -173,9 +173,15 @@ export const startExtensionDevelopment = async (
             console.log(kleur.red('[vscode-framework] Manifest is missing! Return it back.'))
         // TODO! run typesGenerator configurationType.ts was removed, for now need to rerun start script
     })
+
     return {
         watcher,
         stopEsbuild,
+        /** Would launch vscode, if connection not found */
+        async restartCommand() {
+            if (activeWebSocket) sendMessage('action:reload')
+            else await launchVscode()
+        },
     }
 }
 
@@ -246,12 +252,15 @@ export const buildExtension = async ({
 
     // -> GENERATE TYPES
     if (mode !== 'production' && !skipGeneratingTypes)
-        await newTypesGenerator({
-            // commands can have additional generated variants
-            commands: sourceManifest!.contributes.commands,
-            // configuration don't additional generated variants for now
-            configuration: generatedManifest.contributes.configuration,
-        })
+        await generateContributesTypes(
+            {
+                // commands can have additional generated variants
+                commands: sourceManifest!.contributes.commands,
+                // configuration don't have additional generated variants for now
+                configuration: generatedManifest.contributes.configuration,
+            },
+            config,
+        )
 
     // -> EXTENSION ENTRYPOINT
     return runEsbuild({
