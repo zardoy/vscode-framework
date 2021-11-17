@@ -1,5 +1,11 @@
 # vscode-manifest
 
+## 0.0.7
+
+### Patch Changes
+
+-   65e1a03: fix: loose contributes schema. Contributes schema is not even full and also was not correct. Since I don't have source of truth I just temporarily simplifed typings. It obviously affects schema validatioin and typing
+
 ## 0.0.6
 
 ### Patch Changes
