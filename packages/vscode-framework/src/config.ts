@@ -42,6 +42,15 @@ export interface Config {
     /** Configuration for auto-prepanding IDs in contribution */
     prependIds: ReadManifestOptions['prependIds']
     /** Development-only settings. They don't affect production build */
+    contributions: {
+        /**
+         * `contributes.configuration`: What to do when markdown is used in non-markdown property and when there is markdown property
+         * - 'warn' - Just print warning
+         * - 'replace' - Automatically rename these properties to markdown* (if you're lazy)
+         * - false - Disable
+         */
+        markdownProperties: 'warn' | 'replace' | false
+    }
     development: {
         // TODO-current investigate or remove
         /**
@@ -129,6 +138,9 @@ export const defaultConfig: Config = {
     extendPropsGenerators: [],
     prependIds: {
         style: 'camelCase',
+    },
+    contributions: {
+        markdownProperties: 'warn',
     },
     development: {
         executable: 'code',

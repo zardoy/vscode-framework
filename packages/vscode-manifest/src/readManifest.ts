@@ -93,7 +93,6 @@ export const readManifest = async ({
         if (commands)
             manifest.contributes.commands = commands.map(c => ({
                 ...c,
-                // TODO ensure that command is required in schema
                 command: ensureHasId('commands', c.command),
             }))
 

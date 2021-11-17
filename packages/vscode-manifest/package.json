@@ -1,6 +1,6 @@
 {
     "name": "vscode-manifest",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "files": [
@@ -25,7 +25,7 @@
         "validator"
     ],
     "devDependencies": {
-        "ajv": "^8.7.1",
+        "ajv": "^8.8.1",
         "chalk": "^4.1.2",
         "path-exists-cli": "^2.0.0",
         "pinst": "^2.1.6",

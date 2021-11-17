@@ -38,7 +38,6 @@ await fsExtra.copy(
 const { outputFiles } = await build({
     platform: 'node',
     format: 'cjs',
-    logLevel: 'info',
     entryPoints: ['packages/vscode-framework/src/cli/esbuild/consoleInject.ts'],
     outfile: 'packages/vscode-framework/build/cli/esbuild/consoleInject.js',
 })

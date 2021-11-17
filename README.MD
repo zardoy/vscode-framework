@@ -1,6 +1,4 @@
-# VSCode Framework
-
-Warning: still WIP, not all functionality are available.
+# VSCode Framework<sup>beta</sup>
 
 - 💡 Not Boilerplated
 <!-- - ⚡️ Hot Reload (WIP) -->

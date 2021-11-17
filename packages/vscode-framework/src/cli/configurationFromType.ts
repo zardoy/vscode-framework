@@ -3,6 +3,7 @@ import { parseJsoncString } from 'typed-jsonfile/build/parseJsonc'
 import * as TJS from 'typescript-json-schema'
 import { getFileHash } from '../util'
 
+// previous was settingsType.ts thinking about renaming it back
 export const configurationTypeFile = 'src/configurationType.ts'
 export const cachedGeneratedConfigurationPath = 'src/configurationTypeGenerated.jsonc'
 

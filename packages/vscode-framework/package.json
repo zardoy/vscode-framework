@@ -1,6 +1,6 @@
 {
     "name": "vscode-framework",
-    "version": "0.0.12",
+    "version": "0.0.13",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
@@ -32,28 +32,28 @@
         "@hediet/node-reload": "^0.7.3",
         "@types/fs-extra": "^9.0.13",
         "@types/jsonfile": "^6.0.1",
-        "@types/lodash": "^4.14.176",
+        "@types/lodash": "^4.14.177",
         "@types/semver": "^7.3.9",
         "@types/vscode": "^1.62.0",
         "@types/ws": "^8.2.0",
         "kleur": "^4.1.4",
         "pinst": "^2.1.6",
         "semver": "^7.3.5",
-        "terser": "^5.9.0",
         "ttypescript": "^1.5.12"
     },
     "peerDependencies": {
         "@types/vscode": "^1.58.1"
     },
     "dependencies": {
-        "@prisma/debug": "^3.4.2",
+        "@prisma/debug": "^3.5.0",
         "@vscode/test-web": "^0.0.15",
         "change-case": "^4.1.2",
         "chokidar": "^3.5.2",
+        "code-block-writer": "^11.0.0",
         "commander": "^8.3.0",
         "cosmiconfig": "^7.0.1",
         "del": "^6.0.0",
-        "esbuild": "^0.13.13",
+        "esbuild": "^0.13.14",
         "escape-string-regexp": "^4.0.0",
         "execa": "^5.1.1",
         "exit-hook": "^2.2.1",
@@ -67,11 +67,13 @@
         "nanoid": "^3.1.30",
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.3.1",
+        "quicktype": "^15.0.260",
+        "quicktype-core": "^6.0.70",
         "ts-morph": "^12.2.0",
         "typed-jsonfile": "^0.2.0",
         "typescript-json-schema": "^0.51.0",
         "vscode-extra": "workspace:0.0.4",
-        "vscode-manifest": "workspace:0.0.6",
+        "vscode-manifest": "workspace:0.0.7",
         "ws": "^8.2.3"
     }
 }
