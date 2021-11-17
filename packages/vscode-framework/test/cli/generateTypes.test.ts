@@ -27,15 +27,15 @@ describe('New simple types generator', () => {
                     /**
                      * Record quality
                      */
-                    \\"screenRecorder.recordQuality\\"?: ScreenRecorderRecordQuality;
+                    recordQuality?: RecordQuality;
                     /**
                      * Record sound
                      */
-                    \\"screenRecorder.recordSound\\"?: boolean;
-                    \\"screenRecorder.saveDir\\"?:     string;
+                    recordSound?: boolean;
+                    saveDir?:     string;
                 }
 
-                type ScreenRecorderRecordQuality =
+                type RecordQuality =
                     \\"FullHD\\" |
                     \\"HD\\" |
                     \\"4K\\"
