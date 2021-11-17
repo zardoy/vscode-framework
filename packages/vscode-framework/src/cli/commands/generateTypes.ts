@@ -85,8 +85,14 @@ const generateConfigurationFromSchema = async ({
             justTypes: 'true',
         },
     })
-    // remove leading export for root type
-    return lines.join('\n').replace('export ', '')
+    return (
+        lines
+            // we don't need trailing whitespaces
+            .map(line => line.trimEnd())
+            .join('\n')
+            // remove leading export for root type
+            .replace('export ', '')
+    )
 }
 
 class CustomTypeScriptTargetLanguage extends TypeScriptTargetLanguage {
