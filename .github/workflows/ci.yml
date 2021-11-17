@@ -36,8 +36,6 @@ jobs:
           version: latest
           run_install: |
             args: [--frozen-lockfile, --strict-peer-dependencies]
-    # TODO: idea generate changeset from title of pr ?
-      - run: pnpm changeset status
       - run: pnpm build
       - run: pnpm test
   releasePr:
