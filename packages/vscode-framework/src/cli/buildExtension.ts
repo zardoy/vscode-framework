@@ -159,7 +159,6 @@ export const startExtensionDevelopment = async (
 
         if (await neededFileWasChanged(path, configurationTypeFile)) {
             await runConfigurationGenerator(process.cwd())
-            // TODO! doesn't restart
             await restartBuild()
             console.log('[vscode-framework] Configuration updated.')
         }
@@ -289,7 +288,7 @@ export const EXTENSION_ENTRYPOINTS = {
 }
 
 /** Check that entrypoint exists and `activate` function is exported. Not used for now, as it's slow */
-export const checkEntrypoint = (config: Config) => {
+const checkEntrypoint = (config: Config) => {
     // TODO
     // 1. default export is still fine
     // 2. warning: enforce to use export before const. otherwise it takes > 1s to check

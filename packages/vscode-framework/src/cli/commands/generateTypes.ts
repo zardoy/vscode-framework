@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { join } from 'path'
 import CodeBlockWriter from 'code-block-writer'
 import {
     EnumType,
@@ -15,9 +16,11 @@ import {
 } from 'quicktype-core'
 import { utf16StringEscape } from 'quicktype-core/dist/support/Strings.js'
 import { ExtensionManifest, readDirectoryManifest } from 'vscode-manifest'
+import fsExtra from 'fs-extra'
 import { Config } from '../../config'
 import { ensureArray } from '../../util'
 import { configurationTypeFile } from '../configurationFromType'
+import { mapKeys } from 'lodash'
 
 export const generateContributesTypes = async (
     contributePoints: Pick<NonNullable<ExtensionManifest['contributes']>, 'commands' | 'configuration'> | undefined,
@@ -27,7 +30,7 @@ export const generateContributesTypes = async (
     if (!contributePoints)
         contributePoints = (await readDirectoryManifest({ prependIds: config.prependIds })).contributes
     const { commands, configuration } = contributePoints
-    const withoutId = (arg: string) => arg.slice(arg.indexOf('.') + 1)
+    const withoutExtensionId = (id: string) => (config.prependIds === false ? id : id.slice(id.indexOf('.') + 1))
     const writer = new CodeBlockWriter()
 
     const hasConfigurationTypeFile = fs.existsSync(configurationTypeFile)
@@ -36,7 +39,7 @@ export const generateContributesTypes = async (
     writer.write("declare module 'vscode-framework'").block(() => {
         writer.write('interface RegularCommands').block(() => {
             if (!commands) return
-            for (const { command } of commands) writer.quote(withoutId(command)).write(': true').newLine()
+            for (const { command } of commands) writer.quote(withoutExtensionId(command)).write(': true').newLine()
         })
 
         if (hasConfigurationTypeFile || configuration)
@@ -48,23 +51,29 @@ export const generateContributesTypes = async (
     })
     writer.blankLine()
     if (!hasConfigurationTypeFile && configuration)
-        writer.writeLine(await generateConfigurationFromSchema({ configuration }))
+        writer.writeLine(await generateConfigurationFromSchema({ configuration }, withoutExtensionId))
 
     writer.writeLine('export {}')
     const contents = writer.toString()
-    if (writeFilePath) await fs.promises.writeFile(writeFilePath, contents, 'utf-8')
+    if (writeFilePath) {
+        await fsExtra.ensureDir(join(writeFilePath, '..'))
+        await fs.promises.writeFile(writeFilePath, contents, 'utf-8')
+    }
 
     return contents
 }
 
-const generateConfigurationFromSchema = async ({
-    configuration,
-}: Pick<NonNullable<ExtensionManifest['contributes']>, 'configuration'>) => {
+const generateConfigurationFromSchema = async (
+    { configuration }: Pick<NonNullable<ExtensionManifest['contributes']>, 'configuration'>,
+    withoutExtensionId: (id: string) => string,
+) => {
     // TODO run contributes.configuration generators
     const allConfigProperties = {
         // merge all properties into one object
         properties: Object.fromEntries(
-            ensureArray(configuration!).flatMap(({ properties }) => Object.entries(properties)),
+            ensureArray(configuration!).flatMap(({ properties }) =>
+                Object.entries(mapKeys(properties, (_val, name) => withoutExtensionId(name))),
+            ),
         ),
     }
 
