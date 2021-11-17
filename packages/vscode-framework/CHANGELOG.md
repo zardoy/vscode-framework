@@ -1,5 +1,16 @@
 # vscode-framework
 
+## 0.0.13
+
+### Patch Changes
+
+-   16df6b2: Fix issues where start command was failing due to absence of out dir
+-   3ced0b0: fix: enable back postinstall script to generate types on framework install
+-   3ced0b0: Introduce absolutely new and clean configuration type generator which should be precise and fast for any configuration schema.
+-   3ced0b0: Now you can type R in console to reload extension development window or launch vscode if extension connection is not found. Extension might be disconnected because development window isn't open or because extension encountered an error and connection was lost
+-   Updated dependencies [65e1a03]
+    -   vscode-manifest@0.0.7
+
 ## 0.0.12
 
 ### Patch Changes
