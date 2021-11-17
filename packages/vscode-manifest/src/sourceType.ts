@@ -53,7 +53,7 @@ interface IConfiguration {
 
 interface IDebugger {
     label?: string
-    type: string
+    type?: string
     runtime?: string
 }
 
@@ -62,13 +62,13 @@ interface IGrammar {
 }
 
 interface IJSONValidation {
-    fileMatch: string | string[]
-    url: string
+    fileMatch?: string | string[]
+    url?: string
 }
 
 interface IKeyBinding {
     command: string
-    key: string
+    key?: string
     when?: string
     mac?: string
     linux?: string
@@ -77,8 +77,8 @@ interface IKeyBinding {
 
 interface ILanguage {
     id: string
-    extensions: string[]
-    aliases: string[]
+    extensions?: string[]
+    aliases?: string[]
 }
 
 interface IMenu {
@@ -98,20 +98,21 @@ interface ITheme {
 
 interface IViewContainer {
     id: string
-    title: string
+    title?: string
 }
 
 interface IView {
     id: string
-    name: string
+    name?: string
 }
 
 interface IColor {
     id: string
-    description: string
-    defaults: { light: string; dark: string; highContrast: string }
+    description?: string
+    defaults?: { light: string; dark: string; highContrast: string }
 }
 
+// Extremely not precise
 interface IExtensionContributions {
     commands?: ICommand[]
     configuration?: IConfiguration | IConfiguration[]

@@ -6,7 +6,7 @@
         "eslint": "eslint packages/*/src/**/*.ts",
         "test": "jest packages",
         "test-not-ready-version": "jest",
-        "test-integration": "jest integration-tests/runTests.ts",
+        "test-integration": "jest integration-tests/index.test.ts",
         "build": "node scripts/prepare.mjs && tsc -b tsconfig.prod.json && tsc -p tsconfig.only-typechecking.json && node scripts/postBuild.mjs"
     },
     "devDependencies": {
