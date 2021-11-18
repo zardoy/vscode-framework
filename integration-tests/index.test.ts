@@ -4,9 +4,9 @@ import got from 'got'
 import fsExtra from 'fs-extra'
 import { writeJsonFile } from 'typed-jsonfile'
 import execa from 'execa'
+import delay from 'delay'
 import type { ManifestType } from '../packages/vscode-manifest/src'
 import type { MaybePromise } from '../packages/vscode-framework/src/util'
-import delay from 'delay'
 
 // cwd must be root of the repository
 // @link-source-path

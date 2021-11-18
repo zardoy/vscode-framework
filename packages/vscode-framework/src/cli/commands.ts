@@ -6,21 +6,19 @@ import { defaultsDeep } from 'lodash'
 import Debug from '@prisma/debug'
 import execa from 'execa'
 import kleur from 'kleur'
-import { quicktype, JSONSchemaInput, FetchingJSONSchemaStore, InputData } from 'quicktype-core'
-import { readDirectoryManifest } from 'vscode-manifest'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { buildExtension, startExtensionDevelopment } from './buildExtension'
 import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
-import { generateAndWriteManifest } from '.'
 import { generateContributesTypes } from './commands/generateTypes'
+import { generateAndWriteManifest } from '.'
 
 const debug = Debug('vscode-framework:cli')
 
 const program = new Command()
 
 // and again, we lose type even here (config?)
-const commander = new SuperCommander<Config>(program, async () => {
+export const commander = new SuperCommander<Config>(program, async () => {
     const explorer = cosmiconfig('vscode-framework')
     const userConfig = await explorer.search()
     debug('load-config', userConfig)
@@ -220,18 +218,7 @@ commander.command('gitignore', 'Add ignore entries to .gitignore of cwd', {}, as
     await fsExtra.promises.appendFile('./.gitignore', contents, 'utf-8')
 })
 
-commander.command(
-    'generate-types',
-    '',
-    {
-        loadConfig: true,
-    },
-    async ({}, { config }) => {},
-)
-
 addStandaloneCommands(commander)
-
-commander.process()
 
 // const packageCommand = program.command('package', 'Launch VSCode development with extension (no launch.json needed)');
 
