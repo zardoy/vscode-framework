@@ -107,9 +107,7 @@ export const runEsbuild = async ({
                             await fs.promises.writeFile(sourcemap.path, sourcemap.contents)
 
                         const outputFile = jsFiles[0]!
-                        console.time('get output hash')
                         const newHashOutput = getHashFromString(outputFile.text)
-                        console.timeEnd('get output hash')
                         // 1. Sometimes esbuild does rebulid when you change file outside src/ (suppose it's a bug)
                         // 2. Esbulid emits rebuild when you save file, but output size remains the same e.g. you if you format the file
                         // size isn't changed = code isn't changed so we don't need to emit reload
