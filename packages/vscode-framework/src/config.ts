@@ -1,6 +1,5 @@
 import { BuildOptions } from 'esbuild'
-import { Except } from 'type-fest'
-import { PartialDeep } from 'type-fest'
+import { Except, PartialDeep } from 'type-fest'
 import { ManifestType } from 'vscode-manifest'
 import { ReadManifestOptions } from 'vscode-manifest/src/readManifest'
 import type { manifestGenerators, ManifestGeneratorsMeta } from './cli/manifest-generator/manifestGenerators'
@@ -10,7 +9,10 @@ import { MaybePromise } from './util'
 
 export interface Config {
     /** Override (extend) esbuild config for development and production */
-    esbuild: EsbuildConfig
+    esbuild: EsbuildConfig & {
+        development?: EsbuildConfig
+        production?: EsbuildConfig
+    }
     /** Effects only `build` command */
     target: Record<BuildTargetType, boolean>
     /** Category that will be used in `contibutes.commands` by default */
