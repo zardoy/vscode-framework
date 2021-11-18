@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { join } from 'path'
 import Debug from '@prisma/debug'
-import { build as esbuildBuild } from 'esbuild'
+import { build as esbuildBuild, analyzeMetafile } from 'esbuild'
 import escapeStringRegexp from 'escape-string-regexp'
 import filesize from 'filesize'
 import kleur from 'kleur'
@@ -217,8 +217,9 @@ export const runEsbuild = async ({
         ...(esbuildConfig.plugins ?? []),
     })
     // TODO output packed file and this file sizes at prod
-    if (mode === 'production') {
-        const outputSize = Object.entries(metafile!.outputs)[0]![1]!.bytes
+    if (mode === 'production' && metafile) {
+        const outputSize = Object.entries(metafile.outputs)[0]![1]!.bytes
+        console.log(await analyzeMetafile(metafile))
         // TODO output real size
         console.log('Production build size:', kleur.bold().cyan(filesize(outputSize)))
     }
