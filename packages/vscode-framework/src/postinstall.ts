@@ -1,4 +1,5 @@
+import { commander } from './cli/commands'
 ;(async () => {
-    process.argv[2] = 'generate-types'
-    await import('./cli/commands')
+    if (process.env.INIT_CWD) process.chdir(process.env.INIT_CWD)
+    await commander.processAsync(['generate-types'])
 })().catch(() => {})

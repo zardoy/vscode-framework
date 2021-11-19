@@ -1,6 +1,7 @@
 {
     "extends": "./tsconfig.prod.json",
     "compilerOptions": {
-        "declarationMap": true
+        "declarationMap": true,
+        "sourceMap": true
     }
 }

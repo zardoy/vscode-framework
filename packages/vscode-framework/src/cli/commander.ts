@@ -112,7 +112,13 @@ export class SuperCommander<C extends Record<string, any> | undefined = undefine
     }
 
     /** must be called at the end, to process added commands */
-    process() {
-        this.program.parse(process.argv)
+    process(args?: string[]) {
+        if (args) this.program.parse(args, { from: 'user' })
+        else this.program.parse(process.argv)
+    }
+
+    /** For testing */
+    async processAsync(args: string[]) {
+        return this.program.parseAsync(args, { from: 'user' })
     }
 }

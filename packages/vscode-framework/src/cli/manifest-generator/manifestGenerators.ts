@@ -8,7 +8,7 @@ import { ManifestType } from 'vscode-manifest'
 import { Config, ExtensionBootstrapConfig, PickContributes } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
 import { cachedGeneratedConfigurationPath, configurationTypeFile } from '../configurationFromType'
-import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
+import { ModeType, EXTENSION_ENTRYPOINTS } from '../commands/build'
 
 // They're generating package.json properties
 // If you with you can use them directly

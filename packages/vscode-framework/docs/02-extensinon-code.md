@@ -114,14 +114,19 @@ Here we're importing module that doesn't have browser support, in browser bundle
 
 ## TypeChecking
 
-<!-- > The fix is coming -->
+Extension development flow should be *fast*, that's why `start` command doesn't report TypeScript issues. This is because esbuild doesn't perform type-checking of your project. However, `build` command still does perform typechecking by running `tsc --noEmit` from your project, but only if you have `tsconfig.json` (not jsconfig) at the root. You can also pass `--skip-typechecking` to disable it.
 
-You might noticed the speed of bundling. This is because esbuild doesn't perform type-checking of your project. But don't worry this affects only development workflow, with `build` command it will perform typechecking by using `tsc` from your project, but only if you have `tsconfig.json` (but not jsconfig) at the root. You can also pass `--skip-typechecking` to disable it.
-
-<!-- ## Hot Reload -->
-## Reload
+## Window Reload
 
 <!-- Every time you hit save in your  -->
 
-- [ ] Hot reload is coming soon, for now you can quickly reload the development window by pressing `CMD+R` in it.
-Or you can enable option `reloadWindow: true` in config.
+By default, every time when extension code, manifest or other parts of extension are changed. Development window will reload.
+
+### Disabling Auto Reload
+
+In some cases this behavior can lead to losing state, so you can disable it in config by setting `config.development.extensionBootstrap.autoReload = false`.
+To reload window you can also press `CMD+R` in development window (probably need to define it first) or `R` in console.
+
+> TIP! If you closed development window, instead of relaunching `start` command, press `R` in console.
+
+- Hot reload is coming.

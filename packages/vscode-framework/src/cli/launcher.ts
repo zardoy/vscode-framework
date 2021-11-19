@@ -12,7 +12,6 @@ export type LauncherCLIParams = {
     webOpen: WebOpenType
 }
 
-// TODO turn into interface
 type LaunchParams = Pick<Config, 'development'> & LauncherCLIParams
 
 export type WebOpenType = 'desktop' | 'web'

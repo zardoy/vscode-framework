@@ -1,6 +1,6 @@
 {
     "name": "vscode-framework",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
