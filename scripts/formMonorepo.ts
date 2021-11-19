@@ -24,6 +24,7 @@ import { getMonorepoPackages } from './common'
                     extends: `./${packageTsconfigs.prod}`,
                     compilerOptions: {
                         declarationMap: true,
+                        sourceMap: true,
                     },
                 },
             },
