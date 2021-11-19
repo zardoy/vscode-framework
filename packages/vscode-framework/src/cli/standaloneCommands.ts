@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import globby from 'globby'
 import { readDirectoryManifest } from 'vscode-manifest'
 import { SuperCommander } from './commander'
@@ -8,14 +8,21 @@ import { manifestGenerators } from './manifest-generator/manifestGenerators'
 export const addStandaloneCommands = (commander: SuperCommander<any>) => {
     commander.command(
         'launch',
-        // TODO update command
+        // TODO update desc
         'Launch VSCode on defined path without building',
         {
+            // TODO disable config. move to options
             loadConfig: true,
-            arguments: ['[dir]'] as ['[dir]'],
+            options: {
+                '--cwd': {
+                    defaultValue: process.cwd(),
+                    description: 'cwd to launch',
+                },
+            },
+            // arguments: ['[dir]'] as ['[dir]'],
         },
-        async (_, { config, arguments: { dir = process.cwd() } }) => {
-            await launchVscode(dir, config)
+        async ({ cwd }, { config }) => {
+            await launchVscode(resolve(process.cwd(), cwd), config)
         },
     )
 

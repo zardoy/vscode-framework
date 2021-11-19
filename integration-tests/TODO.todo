@@ -1,0 +1,9 @@
+Test these cases:
+stop = stop at [build] in console
+- start -> stop -> ensure map -> build -> ensure no map
+- start -> ensure map -> change config (esbuild.development.sourcemap: false) -> ensure no map
+- start -> on build -> 100ms -> change package.json: remove configuration prop -> ensure generated changed
+- build -> fails on ts errors
+
+It might become hard to test:
+- config.development.closeWindowOnExit = false

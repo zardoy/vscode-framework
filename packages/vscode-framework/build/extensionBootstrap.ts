@@ -4,7 +4,7 @@
 // file that placed into output directory as-is
 
 import vscode from 'vscode'
-import type { BootstrapConfig, IpcEvents } from '../src/cli/buildExtension'
+import type { BootstrapConfig, IpcEvents } from '../src/cli/commands/start'
 import type { MaybePromise } from '../src/util'
 
 type AsyncVoid = MaybePromise<void>
@@ -16,7 +16,7 @@ interface Extension {
 }
 const activateFunctions: Array<Extension['activate']> = []
 
-declare const VSCODE_FRAMEWORK_OUTPUT: any | undefined
+declare const VSCODE_FRAMEWORK_OUTPUT: { channel: vscode.OutputChannel } | undefined
 declare const vscode_framework_set_debug_enabled: any
 declare let __VSCODE_FRAMEWORK_CONTEXT: any
 if (typeof VSCODE_FRAMEWORK_OUTPUT !== 'undefined')
@@ -37,6 +37,7 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
                     VSCODE_FRAMEWORK_OUTPUT.channel.show(true)
                 }),
             )
+            if (bootstrapConfig.revealOutputChannel) VSCODE_FRAMEWORK_OUTPUT.channel.show(true)
         })
 
     if (bootstrapConfig.webSocketPort) {
@@ -79,30 +80,30 @@ if (process.env.EXTENSION_BOOTSTRAP_CONFIG) {
         }
     }
 
-    if (bootstrapConfig?.autoReload && bootstrapConfig.autoReload.type === 'hot') {
-        // const { enableHotReload, hotRequire } = require('@hediet/node-reload') as typeof import('@hediet/node-reload')
-        // enableHotReload({ entryModule: module })
-        // // TODO return type
-        // activateFunctions.push(ctx => {
-        //     hotRequire<Extension>(module, './extension-node.js', ({ activate, deactivate }) => {
-        //         // console.log('activating')
-        //         void activate(ctx)
-        //         return {
-        //             dispose: () => {
-        //                 for (const { dispose } of ctx.subscriptions) dispose()
-        //                 console.log('deactivating')
-        //                 const promise = deactivate?.()
-        //                 if (deactivate) console.log('deactivate for disposing is called')
-        //                 // if (promise)
-        //                 //     console.log(
-        //                 //         kleur.yellow().bold('Warning: '),
-        //                 //         kleur.yellow("deactivate promises can't be handled gracefully consider sync disposing"),
-        //                 //     )
-        //             },
-        //         }
-        //     })
-        // })
-    }
+    // if (bootstrapConfig?.autoReload && bootstrapConfig.autoReload.type === 'hot') {
+    // const { enableHotReload, hotRequire } = require('@hediet/node-reload') as typeof import('@hediet/node-reload')
+    // enableHotReload({ entryModule: module })
+    // // TODO return type
+    // activateFunctions.push(ctx => {
+    //     hotRequire<Extension>(module, './extension-node.js', ({ activate, deactivate }) => {
+    //         // console.log('activating')
+    //         void activate(ctx)
+    //         return {
+    //             dispose: () => {
+    //                 for (const { dispose } of ctx.subscriptions) dispose()
+    //                 console.log('deactivating')
+    //                 const promise = deactivate?.()
+    //                 if (deactivate) console.log('deactivate for disposing is called')
+    //                 // if (promise)
+    //                 //     console.log(
+    //                 //         kleur.yellow().bold('Warning: '),
+    //                 //         kleur.yellow("deactivate promises can't be handled gracefully consider sync disposing"),
+    //                 //     )
+    //             },
+    //         }
+    //     })
+    // })
+    // }
 }
 
 export const activate: Extension['activate'] = ctx => {

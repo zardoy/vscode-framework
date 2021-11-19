@@ -10,17 +10,16 @@ import { MaybePromise } from './util'
 export interface Config {
     /** Override (extend) esbuild config for development and production */
     esbuild: EsbuildConfig & {
-        development?: EsbuildConfig
-        production?: EsbuildConfig
+        development?: Partial<EsbuildConfig>
+        production?: Partial<EsbuildConfig>
     }
-    /** Effects only `build` command */
+    /** Effects only `build` command. If specified both, esbuild will output two independent JS entrypoints */
     target: Record<BuildTargetType, boolean>
     /** Category that will be used in `contibutes.commands` by default */
     defaultCategory: 'extensionName' | { custom: string }
     /**
      * What to do with `console` calls in your code?
      * - outputChannel - pipe to outputChannel with the name of your extension
-     * TODO
      * - strip - completely remove all `console` statements
      * - false - disable feature. Leave console statements as-is (not recommended)
      */
@@ -86,10 +85,10 @@ export interface Config {
                    *
                    * Whether to reveal outputChannel with logs at start (it still won't take focus)
                    */
-                  // TODO
                   revealOutputChannel: boolean
                   // IPC
-                  /** Whether to display all console calls in console from you launched the extension */
+                  /** Whether to display all extension `console` calls in console from where you launched the extension */
+                  //   TODO
                   pipeConsole: boolean
                   /** Whether to close extension development window on development process exit (e.g. when you stop `vscode-framework start`) */
                   closeWindowOnExit: boolean
@@ -103,17 +102,18 @@ export interface Config {
                       | {
                             type: 'forced'
                         }
-                      | {
-                            type: 'hot'
-                            /** Mocks `vscode` import with auto disposing */
-                            automaticDispose: {
-                                enabled: boolean
-                                // TODO
-                                ignore: string[]
-                            }
-                        }
+                      //   | {
+                      //         type: 'hot'
+                      //         /** Mocks `vscode` import with auto disposing */
+                      //         automaticDispose: {
+                      //             enabled: boolean
+                      //             // TODO
+                      //             ignore: string[]
+                      //         }
+                      //     }
                       | false
                   /** Displays whether reload is needed as statusbar item in development window. Applied only when `autoReload.type != forced` */
+                  //   TODO
                   statusbarReloadInfo: boolean
                   /** Add additional commands for development:
                    * - `runActiveDevelopmentCommand` - run command that is regestired with `registerActiveDevelopmentCommand`
@@ -128,6 +128,9 @@ export interface Config {
 export const defaultConfig: Config = {
     esbuild: {
         entryPoint: 'src/extension.ts',
+        development: {
+            sourcemap: true,
+        },
     },
     defaultCategory: 'extensionName',
     target: { desktop: true, web: false },

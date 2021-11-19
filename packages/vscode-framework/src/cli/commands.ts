@@ -7,11 +7,12 @@ import Debug from '@prisma/debug'
 import execa from 'execa'
 import kleur from 'kleur'
 import { BuildTargetType, Config, defaultConfig } from '../config'
-import { buildExtension, startExtensionDevelopment } from './buildExtension'
 import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
 import { generateContributesTypes } from './commands/generateTypes'
+import { buildExtension } from './commands/build'
 import { generateAndWriteManifest } from '.'
+import { startExtensionDevelopment } from './commands/start'
 
 const debug = Debug('vscode-framework:cli')
 
@@ -69,9 +70,10 @@ const relativePath = useOutForDebugging ? 'out' : 'node_modules/.vscode-extensio
 const devExtensionPath = resolve(process.cwd(), relativePath)
 
 const commonBuildStartOptions = {
-    '--path': {
+    '--out': {
         defaultValue: relativePath,
-        description: 'Output path, in which package.json will be placed (or overrided!) for launching VSCode',
+        description:
+            'Output directory, in which package.json will be placed (or overrided!) for launching/building VSCode extension',
     },
 }
 
@@ -103,28 +105,31 @@ commander.command(
             },
             '--sourcemap': {
                 defaultValue: false,
-                description: 'Forcefully enable sourcemap (needed for debugging)',
+                description: 'Forcefully enable sourcemaps (needed for debugging)',
             },
             ...commonBuildStartOptions,
         },
         loadConfig: true,
     },
-    async ({ skipLaunching, path, web, webDesktop, skipGeneratingTypes, sourcemap }, { config }) => {
+    async ({ skipLaunching, out, web, webDesktop, skipGeneratingTypes, sourcemap }, { config }) => {
         try {
             if (sourcemap) config = defaultsDeep({ esbuild: { sourcemap: true } }, config)
             const target: BuildTargetType = web ? 'web' : 'desktop'
             const { restartCommand } = (await startExtensionDevelopment({
-                mode: 'development',
                 config,
+                outDir: resolve(process.cwd(), out),
                 launchVscodeParams: skipLaunching
                     ? false
                     : {
                           target,
                           webOpen: webDesktop ? 'desktop' : 'web',
                       },
-                target,
-                skipGeneratingTypes,
-                outDir: join(process.cwd(), path),
+                targets: target,
+                participants: {
+                    skipGeneratingTypes,
+                    skipTypechecking: true,
+                },
+                defineEnv: {},
             }))!
             process.stdin.setRawMode(true)
             process.stdin.on('data', async data => {
@@ -166,34 +171,17 @@ commander.command(
         },
         loadConfig: true,
     },
-    async ({ skipTypechecking, path }, { config }) => {
-        // TODO apply same process.exit as above here
-
-        // TODO build path
-        // TODO move check to schema
-        if (!config.target.desktop && !config.target.web)
-            throw new Error('Both targets are disabled in config. Enable either desktop or wb')
-
-        if (!skipTypechecking && fsExtra.existsSync('./tsconfig.json')) {
-            const date = Date.now()
-            console.log(kleur.green('Executing tsc for type-checking...'))
-            // just for simplicity, don't see a reason for programmatic usage
-            await execa('tsc', { stdio: 'inherit' })
-            console.log(kleur.green('Type-checking done in '), `${Date.now() - date}ms`)
-        }
-
-        for (const [platform, enablement] of Object.entries(config.target)) {
-            if (!enablement) continue
-            // TODO does read manifest twice
-            // eslint-disable-next-line no-await-in-loop
-            await buildExtension({
-                mode: 'production',
-                config,
-                target: platform,
-                skipGeneratingTypes: true,
-                outDir: join(process.cwd(), path),
-            })
-        }
+    async ({ skipTypechecking, out }, { config }) => {
+        await buildExtension({
+            mode: 'production',
+            outDir: resolve(process.cwd(), out),
+            config,
+            participants: { skipGeneratingTypes: false, skipTypechecking },
+            targets: Object.entries(config.target)
+                .filter(([, enablement]) => enablement)
+                .map(([target]) => target),
+            defineEnv: {},
+        })
     },
 )
 

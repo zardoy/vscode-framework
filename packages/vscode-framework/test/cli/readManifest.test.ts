@@ -19,7 +19,12 @@ test('Places IDs in contributes props', async () => {
     // CONFIGURATION IDS
     expect(
         Object.entries(
-            (generatedManifest.contributes.configuration! as Exclude<NonNullable<typeof generatedManifest.contributes.configuration>, any[]>).properties,
+            (
+                generatedManifest.contributes.configuration! as Exclude<
+                    NonNullable<typeof generatedManifest.contributes.configuration>,
+                    any[]
+                >
+            ).properties,
         ).map(([id]) => id),
     ).toMatchInlineSnapshot(`
         Array [
@@ -29,7 +34,8 @@ test('Places IDs in contributes props', async () => {
         ]
     `)
     // MENUS IDS
-    expect(mapValues(generatedManifest.contributes.menus, arr => arr.map(({ command }) => command))).toMatchInlineSnapshot(`
+    expect(mapValues(generatedManifest.contributes.menus, arr => arr.map(({ command }) => command)))
+        .toMatchInlineSnapshot(`
         Object {
           "commandPalette": Array [
             "screenRecorder.startRecording",

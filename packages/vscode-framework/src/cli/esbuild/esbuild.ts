@@ -8,11 +8,10 @@ import kleur from 'kleur'
 import { defaultsDeep, omit, partition } from 'lodash'
 import { ManifestType } from 'vscode-manifest'
 import { BuildTargetType, Config, getBootstrapFeature } from '../../config'
-import { getHashFromString } from '../../util'
-import { EXTENSION_ENTRYPOINTS, ModeType } from '../buildExtension'
+import { getHashFromString, MaybePromise } from '../../util'
 import { clearConsole, logConsole } from '../logger'
+import { ModeType, EXTENSION_ENTRYPOINTS } from '../commands/build'
 import { esbuildDefineEnv } from './utils'
-type MaybePromise<T> = Promise<T> | T
 
 const debug = Debug('vscode-framework:esbuild')
 
@@ -38,7 +37,10 @@ export const runEsbuild = async ({
     injectConsole: boolean
     config: Config
 }) => {
-    const esbuildConfig: Config['esbuild'] = defaultsDeep(config.esbuild[mode] ?? {}, config.esbuild)
+    const esbuildConfig: Config['esbuild'] = defaultsDeep(
+        config.esbuild[mode] ?? {},
+        omit(config.esbuild, ['development', 'production']),
+    )
     const extensionEntryPoint = esbuildConfig.entryPoint
     const realEntryPoint = join(__dirname, '../../extensionBootstrap.ts')
     debug('Esbuild starting...')
@@ -141,9 +143,9 @@ export const runEsbuild = async ({
                                     ? 'build'
                                     : reloadType === 'forced'
                                     ? 'reload'
-                                    : reloadType === 'hot'
-                                    ? 'hot-reload'
-                                    : 'rebuild',
+                                    : // : reloadType === 'hot'
+                                      // ? 'hot-reload'
+                                      'rebuild',
                             ),
                             kleur.gray(`${Date.now() - date}ms`),
                             // ...(reloadType === 'force'
