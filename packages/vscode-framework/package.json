@@ -26,7 +26,7 @@
     "scripts": {
         "_postinstall": "node build/postinstall.js",
         "prepublishOnly": "pinst --enable",
-        "postpublish": "pinst --disable"
+        "postpack": "pinst --disable"
     },
     "devDependencies": {
         "@hediet/node-reload": "^0.7.3",
