@@ -1,5 +1,5 @@
 const config = {
-    testPathIgnorePatterns: ['/build/'],
+    testPathIgnorePatterns: ['/build/', '/fixture/'],
     transform: {
         '^.+\\.tsx?$': 'esbuild-runner/jest',
     },

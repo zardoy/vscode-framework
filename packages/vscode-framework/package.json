@@ -63,7 +63,6 @@
         "github-remote-info": "^1.0.3",
         "globby": "^11.0.4",
         "jsonfile": "^6.1.0",
-        "lodash": "^4.17.21",
         "nanoid": "^3.1.30",
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.3.1",

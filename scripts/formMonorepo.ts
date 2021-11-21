@@ -3,7 +3,7 @@ import fs from 'fs'
 import { join } from 'path'
 import { getGithubRemoteInfo } from 'github-remote-info'
 import jsonfile from 'jsonfile'
-import { modifyPackageJsonFile, modifyTsConfigJsonFile } from 'modify-json-file'
+import { modifyTsConfigJsonFile } from 'modify-json-file'
 import { PackageJson, TsConfigJson } from 'type-fest'
 import { getMonorepoPackages } from './common'
 ;(async () => {
