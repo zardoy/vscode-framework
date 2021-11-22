@@ -160,6 +160,9 @@ describe('Integration', () => {
         {
             repo: 'microsoft/vscode-docker#f59728db476e432752f5e3f1aed07e6341509b60',
         },
+        // {
+        //     repo: 'microsoft/omnisharp-vscode#3ffc2963ab5519fa4498c9fe0bea62ac13e56142',
+        // },
         // TODO invalid schema
         // {
         //     repo: 'microsoft/vscode-java-test#e3ac973678b3bbaef8259bd1e73f345be9b5a222',
@@ -187,9 +190,9 @@ describe('Integration', () => {
             repo: 'prettier/prettier-vscode#4a9ad9d27c23d200e8103a09bbb0f78cc5b0570b',
         },
         // TODO the same thing as with XO
-        {
-            repo: 'redhat-developer/vscode-java#b4f8b07d774acb17bee19f3b06f4d0364a72c682',
-        },
+        // {
+        //     repo: 'redhat-developer/vscode-java#b4f8b07d774acb17bee19f3b06f4d0364a72c682',
+        // },
         {
             repo: 'lostintangent/gistpad#3a0ac31478d8ecc845ad981ebe242f0bb9c98085',
         },
