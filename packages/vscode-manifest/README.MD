@@ -14,16 +14,8 @@ Schema is available (json is coming soon) via `require('vscode-manifest/build/vs
 
 > Obsolete, needs review
 
-The extracted file from vscode sources is `vscode-manifest-schema.json` (raw). But most complete is `sourceType.ts`.
+The extracted file from vscode sources is `vscode-manifest-schema.json` (out of sync, don't use). But most complete and real schema that is used for validation is in `sourceType.ts`.
 
-See [script](scripts/generateSchemaValidator.ts), that used for extraction
+See [script](scripts/generateSchemaValidator.ts), that used for generating the schema.
 
-<!-- Approx proccess of generating types (desired, TBD):
-
-- Extract code from with mocking `src/vs/workbench/services/extensions/common/extensionsRegistry.ts` target = `schema` export.
-- `typescript-json-schema` on code (it generates JSON schema from TS)
-- Manually Adjust Schema
-- Generate TS (`src/sourceType.ts`) from schema via ``
-- `scripts/generateSchemaValidator.ts`: Generate JSON schemas back for validation
-- Generate TS for actual runtime validation
-- the output file of this process should appear in `generated/extensionManifestValidator.ts` -->
+Most of code originally came from `src/vs/workbench/services/extensions/common/extensionsRegistry.ts` target = `schema` export.
