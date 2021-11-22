@@ -4,8 +4,7 @@
     "scripts": {
         "start": "node scripts/prepare.mjs && tsc-watch -b tsconfig.dev.json --onSuccess \"node scripts/postBuild.mjs\"",
         "eslint": "eslint packages/*/src/**/*.ts",
-        "test": "jest packages",
-        "test-not-ready-version": "jest",
+        "test": "jest",
         "test-integration": "jest integration-tests/index.test.ts",
         "build": "node scripts/prepare.mjs && tsc -b tsconfig.prod.json && tsc -p tsconfig.only-typechecking.json && node scripts/postBuild.mjs"
     },
@@ -30,7 +29,7 @@
         "execa": "^5.1.1",
         "fs-extra": "^10.0.0",
         "github-remote-info": "^1.0.3",
-        "globby": "^12.0.2",
+        "globby": "^11.0.4",
         "got": "^11.8.2",
         "jest": "^27.3.1",
         "jsonfile": "^6.1.0",

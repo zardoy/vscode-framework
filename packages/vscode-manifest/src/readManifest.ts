@@ -124,7 +124,10 @@ export const readManifest = async ({
             manifest.contributes.menus = Object.fromEntries(
                 Object.entries(menus).map(([menuName, menuEntries]) => [
                     menuName,
-                    menuEntries.map(({ command, ...rest }) => ({ ...rest, command: ensureHasId('menus', command) })),
+                    menuEntries.map(({ command, ...rest }) => ({
+                        ...rest,
+                        command: command && ensureHasId('menus', command),
+                    })),
                 ]),
             )
     }
