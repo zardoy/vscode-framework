@@ -29,14 +29,6 @@ const setupFixture = async (fixtureName: string) => {
 }
 
 const fromPackages = (...path: string[]) => join(__dirname, '../packages', ...path)
-let frameworkPackagePath = join(__dirname, 'fixture')
-
-// pnpm seems doesn't support disabling workspace detection.
-// TODO resolve it
-const pnpmWorkspaceFilePath = {
-    current: 'pnpm-workspace.yaml',
-    old: 'pnpm-workspace.old.yaml',
-}
 
 // TODO use actual snapshot testing? (snapshotResolver with snapshotSerializers)
 // The reason why I prefer this because I can just remove failing snapshots, which is faster than --watch or -u in case of several failing snapshots
@@ -67,77 +59,6 @@ const runTypesGenerator = async (cwd: string) => {
 }
 
 describe('Integration', () => {
-    describe('Installs without fails', () => {
-        const { CI } = process.env
-
-        if (CI)
-            beforeAll(async () => {
-                const packageJsonDir = fromPackages('vscode-framework')
-                const { version: oldVersion } = await readPackageJsonFile({ dir: packageJsonDir })
-                const newVersion = `${oldVersion!}-testing`
-                await modifyPackageJsonFile(
-                    { dir: packageJsonDir },
-                    {
-                        version: newVersion,
-                    },
-                )
-                console.log(`Packaging... ${newVersion}`)
-                await execa('pnpm', ['pack', '--pack-destination', frameworkPackagePath], {
-                    cwd: fromPackages('vscode-framework'),
-                    stdio: 'inherit',
-                })
-                await modifyPackageJsonFile(
-                    { dir: packageJsonDir },
-                    {
-                        version: oldVersion,
-                    },
-                )
-                const [tgzName] = await globby('*.tgz', { cwd: frameworkPackagePath })
-                // eslint-disable-next-line zardoy-config/@typescript-eslint/no-unnecessary-type-assertion
-                frameworkPackagePath = join(frameworkPackagePath, tgzName!)
-            })
-
-        test(
-            CI ? 'Installs without fails and postinstall generates correctly' : 'Generates src/generated.ts',
-            async () => {
-                const { fromFixture } = await setupFixture('eslint')
-
-                // TODO ESLint build not in framework-way, so its need additionlal config
-                const eslintManifest = await downloadPackageJson(
-                    'Microsoft/vscode-eslint#7753f3a96d53b47ba49ea3428950f63fe8ddb415',
-                )
-                await writeJsonFile(
-                    fromFixture('package.json'),
-                    {
-                        ...(packageJsonCleanDeps(eslintManifest) as any),
-                        devDependencies: {
-                            '@types/vscode': '*',
-                        },
-                    },
-                    { spaces: 4 },
-                )
-                if (CI) {
-                    // ENSURE renames only once
-                    await fsExtra.rename(pnpmWorkspaceFilePath.current, pnpmWorkspaceFilePath.old)
-                    await execa('pnpm', ['i', frameworkPackagePath, '--strict-peer-dependencies'], {
-                        cwd: fromFixture(),
-                        stdio: 'inherit',
-                    })
-                } else {
-                    await runTypesGenerator(fromFixture())
-                }
-            },
-            CI ? 20_000 : 5000,
-        )
-
-        if (CI)
-            afterAll(async () => {
-                await fsExtra.rename(pnpmWorkspaceFilePath.old, pnpmWorkspaceFilePath.current).catch(() => {})
-            })
-    })
-    test('ESLint contribution points', async () => {
-        await toMatchFileSnapshot('eslint', 'src-generated.ts')
-    })
     const getNameFromRepo = (repoFullSlug: string) => /.+\/(.+)#/.exec(repoFullSlug)![1]!
     // TODO! detect updates on CI. write to issue
     test.each([
@@ -145,6 +66,9 @@ describe('Integration', () => {
         // TODO! quicktype doesn't work with XO figure out what's wrong with schema err: type must be string
         // repo: 'xojs/vscode-linter-xo#6b765c12adb0d93ca7e2b67720ac5a7ed6a62e8f',
         // },
+        {
+            repo: 'Microsoft/vscode-eslint#7753f3a96d53b47ba49ea3428950f63fe8ddb415',
+        },
         {
             repo: 'Axosoft/vscode-gitlens#5dee2e97b08df1198c7afd8034476b277d613729',
         },
