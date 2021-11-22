@@ -3,12 +3,24 @@ import { join } from 'path'
 import execa from 'execa'
 import fsExtra from 'fs-extra'
 import got from 'got'
-import { getUserReposJson } from 'repos-json'
-import { readPackageJsonFile, writeJsonFile } from 'typed-jsonfile'
+import { readPackageJsonFile, writeJsonFile, writePackageJsonFile } from 'typed-jsonfile'
 import globby from 'globby'
+import { modifyPackageJsonFile } from 'modify-json-file'
 import { ManifestType } from '../packages/vscode-manifest'
 import { packageJsonCleanDeps } from './utils'
-import { modifyPackageJsonFile } from 'modify-json-file'
+
+// TODO still doesn't fail when some packages are in devDeps and not in deps
+// commit: b281e9998d1f9d1209477c6dbed61b1221b2fcf6 where kleur in devDeps
+
+beforeAll(async () => {
+    // Ensure that start and build script outputs the same code
+    // @link-source-path
+    if (!fs.existsSync('packages/vscode-framework/build/cli/commands.js'))
+        throw new Error('These tests require build. Run pnpm build/start')
+    await fsExtra.emptyDir(join(__dirname, 'fixture'))
+})
+
+const BIN_ENTRYPOINT = join(__dirname, '../packages/vscode-framework/bin.js')
 
 const setupFixture = async (fixtureName: string) => {
     const fromFixture = (...path: string[]) => join(__dirname, 'fixture', fixtureName, ...path)
@@ -19,95 +31,177 @@ const setupFixture = async (fixtureName: string) => {
 const fromPackages = (...path: string[]) => join(__dirname, '../packages', ...path)
 let frameworkPackagePath = join(__dirname, 'fixture')
 
-beforeAll(async () => {
-    await fsExtra.emptyDir(join(__dirname, 'fixture'))
-})
-
+// pnpm seems doesn't support disabling workspace detection.
+// TODO resolve it
 const pnpmWorkspaceFilePath = {
     current: 'pnpm-workspace.yaml',
     old: 'pnpm-workspace.old.yaml',
 }
 
-describe.only('Integration', () => {
-    beforeAll(async () => {
-        // Ensure that start and build script outputs the same code
-        // @link-source-path
-        if (!fs.existsSync('packages/vscode-framework/build/cli/commands.js'))
-            throw new Error('These tests require build. Run pnpm build/start')
-        const packageJsonDir = fromPackages('vscode-framework')
-        const { version: oldVersion } = await readPackageJsonFile({ dir: packageJsonDir })
-        const newVersion = `${oldVersion!}-testing`
-        await modifyPackageJsonFile(
-            { dir: packageJsonDir },
-            {
-                version: newVersion,
+// TODO use actual snapshot testing? (snapshotResolver with snapshotSerializers)
+// The reason why I prefer this because I can just remove failing snapshots, which is faster than --watch or -u in case of several failing snapshots
+const toMatchFileSnapshot = async (fixtureName: string, file: 'src-generated.ts') => {
+    const fixturePath = join(__dirname, 'fixture-snapshots', fixtureName, file)
+    await fsExtra.ensureDir(join(fixturePath, '..'))
+    const actualPathMap = {
+        'src-generated.ts': 'src/generated.ts',
+    }
+    const actualCode = await fs.promises.readFile(join(__dirname, 'fixture', fixtureName, actualPathMap[file]), 'utf-8')
+    if (fs.existsSync(fixturePath)) expect(await fs.promises.readFile(fixturePath, 'utf-8')).toBe(actualCode)
+    else await fs.promises.writeFile(fixturePath, actualCode, 'utf-8')
+}
+
+const downloadPackageJson = async (repo: string, writeDir?: string) => {
+    const { body: eslintManifest } = await got<ManifestType>(
+        `https://cdn.jsdelivr.net/gh/${repo.replace('#', '@')}/package.json`,
+        {
+            responseType: 'json',
+        },
+    )
+    if (writeDir) await writePackageJsonFile({ dir: writeDir }, eslintManifest)
+    return eslintManifest
+}
+
+const runTypesGenerator = async (cwd: string) => {
+    await execa.node(BIN_ENTRYPOINT, ['generate-types'], { cwd, stdio: 'inherit' })
+}
+
+describe('Integration', () => {
+    describe('Installs without fails', () => {
+        const { CI } = process.env
+
+        if (CI)
+            beforeAll(async () => {
+                const packageJsonDir = fromPackages('vscode-framework')
+                const { version: oldVersion } = await readPackageJsonFile({ dir: packageJsonDir })
+                const newVersion = `${oldVersion!}-testing`
+                await modifyPackageJsonFile(
+                    { dir: packageJsonDir },
+                    {
+                        version: newVersion,
+                    },
+                )
+                console.log(`Packaging... ${newVersion}`)
+                await execa('pnpm', ['pack', '--pack-destination', frameworkPackagePath], {
+                    cwd: fromPackages('vscode-framework'),
+                    stdio: 'inherit',
+                })
+                await modifyPackageJsonFile(
+                    { dir: packageJsonDir },
+                    {
+                        version: oldVersion,
+                    },
+                )
+                const [tgzName] = await globby('*.tgz', { cwd: frameworkPackagePath })
+                // eslint-disable-next-line zardoy-config/@typescript-eslint/no-unnecessary-type-assertion
+                frameworkPackagePath = join(frameworkPackagePath, tgzName!)
+            })
+
+        test(
+            CI ? 'Installs without fails and postinstall generates correctly' : 'Generates src/generated.ts',
+            async () => {
+                const { fromFixture } = await setupFixture('eslint')
+
+                // TODO ESLint build not in framework-way, so its need additionlal config
+                const eslintManifest = await downloadPackageJson(
+                    'Microsoft/vscode-eslint#7753f3a96d53b47ba49ea3428950f63fe8ddb415',
+                )
+                await writeJsonFile(
+                    fromFixture('package.json'),
+                    {
+                        ...(packageJsonCleanDeps(eslintManifest) as any),
+                        devDependencies: {
+                            '@types/vscode': '*',
+                        },
+                    },
+                    { spaces: 4 },
+                )
+                if (CI) {
+                    // ENSURE renames only once
+                    await fsExtra.rename(pnpmWorkspaceFilePath.current, pnpmWorkspaceFilePath.old)
+                    await execa('pnpm', ['i', frameworkPackagePath, '--strict-peer-dependencies'], {
+                        cwd: fromFixture(),
+                        stdio: 'inherit',
+                    })
+                } else {
+                    await runTypesGenerator(fromFixture())
+                }
             },
+            CI ? 20_000 : 5000,
         )
-        console.log(`Packaging... ${newVersion}`)
-        await execa('pnpm', ['pack', '--pack-destination', frameworkPackagePath], {
-            cwd: fromPackages('vscode-framework'),
-            stdio: 'inherit',
-        })
-        await modifyPackageJsonFile(
-            { dir: packageJsonDir },
-            {
-                version: oldVersion,
-            },
-        )
-        const [tgzName] = await globby('*.tgz', { cwd: frameworkPackagePath })
-        // eslint-disable-next-line zardoy-config/@typescript-eslint/no-unnecessary-type-assertion
-        frameworkPackagePath = join(frameworkPackagePath, tgzName!)
+
+        if (CI)
+            afterAll(async () => {
+                await fsExtra.rename(pnpmWorkspaceFilePath.old, pnpmWorkspaceFilePath.current).catch(() => {})
+            })
     })
     test('ESLint contribution points', async () => {
-        const { fromFixture } = await setupFixture('eslint')
-
-        // ENSURE renames only once
-        await fsExtra.rename(pnpmWorkspaceFilePath.current, pnpmWorkspaceFilePath.old)
-        // ESLint build not in framework-way, so its need additionlal config
-        const { body: eslintManifest } = await got<ManifestType>(
-            'https://cdn.jsdelivr.net/gh/Microsoft/vscode-eslint@7753f3a96d53b47ba49ea3428950f63fe8ddb415/package.json',
-            {
-                responseType: 'json',
-            },
-        )
-        await writeJsonFile(
-            fromFixture('package.json'),
-            {
-                ...(packageJsonCleanDeps(eslintManifest) as any),
-                devDependencies: {
-                    '@types/vscode': '*',
-                },
-            },
-            { spaces: 4 },
-        )
-        await execa('pnpm', ['i', frameworkPackagePath, '--strict-peer-dependencies'], {
-            cwd: fromFixture(),
-            stdio: 'inherit',
-        })
-        // const process = execa.node(binPath, ['start'], { stdio: 'inherit', cwd: fromFixture() })
-        // await delay(3000)
-        // process.kill()
-        // Snapshot generated types
-        // expect(await fs.promises.readFile(fromFixture('src/generated.ts'), 'utf-8')).toMatchInlineSnapshot()
-    }, 20_000)
-    afterAll(async () => {
-        await fsExtra.rename(pnpmWorkspaceFilePath.old, pnpmWorkspaceFilePath.current).catch(() => {})
+        await toMatchFileSnapshot('eslint', 'src-generated.ts')
     })
+    const getNameFromRepo = (repoFullSlug: string) => /.+\/(.+)#/.exec(repoFullSlug)![1]!
+    // TODO! detect updates on CI. write to issue
+    test.each([
+        // {
+        // TODO! quicktype doesn't work with XO figure out what's wrong with schema err: type must be string
+        // repo: 'xojs/vscode-linter-xo#6b765c12adb0d93ca7e2b67720ac5a7ed6a62e8f',
+        // },
+        {
+            repo: 'Axosoft/vscode-gitlens#5dee2e97b08df1198c7afd8034476b277d613729',
+        },
+
+        {
+            repo: 'microsoft/vscode-python#24fb1c22763663055655f237510f82148250bb48',
+        },
+        // impossible type in your schema? - of course
+        // TODO!
+        // {
+        //     repo: 'microsoft/vscode-jupyter#de235e0046676a74c178991fe2f232992b4f890a',
+        // },
+        {
+            repo: 'microsoft/vscode-docker#f59728db476e432752f5e3f1aed07e6341509b60',
+        },
+        // TODO invalid schema
+        // {
+        //     repo: 'microsoft/vscode-java-test#e3ac973678b3bbaef8259bd1e73f345be9b5a222',
+        // },
+        // All these disabled cause failing:
+        // {
+        //     repo: 'microsoft/vscode-react-native#48ca0c6243e4cda833290b57fec530369e205179',
+        // },
+        // {
+        //     repo: 'microsoft/vscode-java-debug#0289e29e6cbb2758e6c9626ba6349625fdd00163',
+        // },
+        // TODO support path https://github.com/microsoft/vscode-cpptools/blob/main/Extension/package.json
+
+        {
+            repo: 'redhat-developer/vscode-yaml#653baee6427ca37e3adaa689c15d27ed454d8c2d',
+        },
+        {
+            repo: 'redhat-developer/vscode-xml#70024545886d9f9cc19bc804361192d5c00821ab',
+        },
+        {
+            repo: 'redhat-developer/vscode-xml#70024545886d9f9cc19bc804361192d5c00821ab',
+        },
+
+        {
+            repo: 'prettier/prettier-vscode#4a9ad9d27c23d200e8103a09bbb0f78cc5b0570b',
+        },
+        // TODO the same thing as with XO
+        {
+            repo: 'redhat-developer/vscode-java#b4f8b07d774acb17bee19f3b06f4d0364a72c682',
+        },
+        {
+            repo: 'lostintangent/gistpad#3a0ac31478d8ecc845ad981ebe242f0bb9c98085',
+        },
+    ] as Array<{
+        repo: string
+    }>)('Integration with $repo', async ({ repo }) => {
+        const fixtureName = getNameFromRepo(repo)
+        const { fromFixture } = await setupFixture(fixtureName)
+        await downloadPackageJson(repo, fromFixture())
+        await runTypesGenerator(fromFixture())
+        // TODO! automatically read and report `any` types
+        await toMatchFileSnapshot(fixtureName, 'src-generated.ts')
+    })
+    // TODO test also every vscode builtin extension
 })
-
-// let reposExtensions: { repos: string[] } = undefined!
-
-// beforeAll(async () => {
-//     reposExtensions = (await getUserReposJson('zardoy'))['vscode-extensions']!
-// })
-
-// // I got exploded after last installation failure due to abondened quicktype-core
-// // This test ensures that Evertything works with my every project
-// test('Evertything works in real projects', async () => {
-//     const getFixturePath = (repoName: string) => join(__dirname, 'fixture', repoName)
-
-//     for (const repo of reposExtensions.repos) {
-//         const fixtureRoot = getFixturePath(repo)
-//         await execa('git', ['clone', `https://github.com/${repo}.git`, fixtureRoot, '--depth=1'], { stderr: 'inherit' })
-//     }
-// })
