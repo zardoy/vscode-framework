@@ -1,14 +1,5 @@
 # vscode-framework
 
-## 0.0.15
-
-### Patch Changes
-
--   625a8ff: fix: add missing kleur dep...
--   625a8ff: add `vscf` shortcut to `vscode-framework` (bin)
--   Updated dependencies [a61d44f]
-    -   vscode-manifest@0.0.8
-
 ## 0.0.14
 
 ### Patch Changes

@@ -1,11 +1,5 @@
 # vscode-manifest
 
-## 0.0.8
-
-### Patch Changes
-
--   a61d44f: fix some contribution fields
-
 ## 0.0.7
 
 ### Patch Changes
