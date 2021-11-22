@@ -8,7 +8,7 @@ interface ICommand {
     command: string
     title: string
     shortTitle?: string
-    icon?: string
+    icon?: string | Record<'dark' | 'light', string>
     category?: string
 }
 

@@ -5,11 +5,15 @@
     "types": "build/index.d.ts",
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
     "license": "MIT",
-    "bin": "bin.js",
-    "replaceKeywords": [
+    "bin": {
+        "vscode-framework": "bin.js",
+        "vscf": "bin.js"
+    },
+    "keywords": [
         "vscode",
         "Visual Studio Code",
         "code",
+        "api",
         "ide",
         "framework",
         "extensions",
@@ -17,6 +21,9 @@
         "tools",
         "utils",
         "typed",
+        "typescript",
+        "configuration",
+        "contriutions",
         "webview"
     ],
     "files": [
@@ -36,7 +43,6 @@
         "@types/semver": "^7.3.9",
         "@types/vscode": "^1.62.0",
         "@types/ws": "^8.2.0",
-        "kleur": "^4.1.4",
         "pinst": "^2.1.6",
         "semver": "^7.3.5",
         "ttypescript": "^1.5.12"
@@ -63,7 +69,7 @@
         "github-remote-info": "^1.0.3",
         "globby": "^11.0.4",
         "jsonfile": "^6.1.0",
-        "lodash": "^4.17.21",
+        "kleur": "^4.1.4",
         "nanoid": "^3.1.30",
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.3.1",
