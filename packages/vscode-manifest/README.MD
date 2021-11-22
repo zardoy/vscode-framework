@@ -1,6 +1,6 @@
 # Extension Manifest
 
-Contains TypeScript types, JSON schema and compiled validator for [VSCode Extension Manifest](https://code.visualstudio.com/api/references/extension-manifest).
+Contains TypeScript types, JSON schema and compiled validator for [VSCode Extension Manifest](https://code.visualstudio.com/api/references/extension-manifest) (NOT ACCURATE!).
 
 For types and methods, see [API](https://paka.dev/npm/vscode-manifest)
 
