@@ -6,10 +6,11 @@
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
     "license": "MIT",
     "bin": "bin.js",
-    "replaceKeywords": [
+    "keywords": [
         "vscode",
         "Visual Studio Code",
         "code",
+        "api",
         "ide",
         "framework",
         "extensions",
@@ -17,6 +18,9 @@
         "tools",
         "utils",
         "typed",
+        "typescript",
+        "configuration",
+        "contriutions",
         "webview"
     ],
     "files": [
