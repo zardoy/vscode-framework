@@ -10,7 +10,7 @@
     "scripts": {
         "postinstall": "path-exists src/generated/validate.js || pnpm generate-validator",
         "prepublishOnly": "pinst --disable",
-        "postpublish": "pinst --enable",
+        "postpack": "pinst --enable",
         "generate-validator": "ts-node scripts/generateSchemaValidator.ts"
     },
     "keywords": [

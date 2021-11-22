@@ -17,10 +17,10 @@ import {
 import { utf16StringEscape } from 'quicktype-core/dist/support/Strings.js'
 import { ExtensionManifest, readDirectoryManifest } from 'vscode-manifest'
 import fsExtra from 'fs-extra'
+import { mapKeys } from 'lodash'
 import { Config } from '../../config'
 import { ensureArray } from '../../util'
 import { configurationTypeFile } from '../configurationFromType'
-import { mapKeys } from 'lodash'
 
 export const generateContributesTypes = async (
     contributePoints: Pick<NonNullable<ExtensionManifest['contributes']>, 'commands' | 'configuration'> | undefined,

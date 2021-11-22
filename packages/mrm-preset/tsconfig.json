@@ -1,0 +1,7 @@
+{
+    "extends": "@zardoy/tsconfig/node",
+    "compilerOptions": {
+        "noEmit": false
+    },
+    "include": ["*/index.ts"]
+}
