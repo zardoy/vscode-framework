@@ -19,13 +19,19 @@ for (const packageDir of packagesDirs) {
 
     const commonDeps = intersection(rootDeps, packageDeps)
     if (commonDeps.length > 0) {
-        console.warn('Must be removed from', packageDir, commonDeps)
+        console.warn('Redundant deps. Must be removed from', packageDir, commonDeps)
         if (action) await execa('pnpm', ['remove', ...commonDeps], { cwd: dir, stdio: 'inherit' })
     }
 
     // TODO remove them
     const packagesCommonDeps = intersection(Object.values(monorepoDeps).flat(1), packageDeps)
-    if (packagesCommonDeps.length > 0) console.warn('Duplicate deps', packageDir, packagesCommonDeps)
+    if (packagesCommonDeps.length > 0) {
+        console.warn('Duplicate devDeps', packageDir, packagesCommonDeps)
+        // if (action) {
+        //     await execa('pnpm', ['remove', ...packagesCommonDeps], { cwd: dir, stdio: 'inherit' })
+        //     await execa('pnpm', ['add', '-DW', ...packagesCommonDeps], { stdio: 'inherit' })
+        // }
+    }
 
     monorepoDeps[packageDir] = packageDeps
 }

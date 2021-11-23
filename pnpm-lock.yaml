@@ -30,6 +30,7 @@ importers:
       jsonfile: ^6.1.0
       lodash-es: ^4.17.21
       modify-json-file: ^1.2.1
+      pinst: ^2.1.6
       prettier: ^2.4.1
       quicktype-core: ^6.0.70
       ts-node: ^10.4.0
@@ -64,6 +65,7 @@ importers:
       jsonfile: 6.1.0
       lodash-es: 4.17.21
       modify-json-file: 1.2.1
+      pinst: 2.1.6
       prettier: 2.4.1
       quicktype-core: 6.0.70
       ts-node: 10.4.0_ee928ac548ac44c173bf0d4654ae2c29
@@ -120,7 +122,6 @@ importers:
     specifiers:
       '@hediet/node-reload': ^0.7.3
       '@prisma/debug': ^3.5.0
-      '@types/fs-extra': ^9.0.13
       '@types/jsonfile': ^6.0.1
       '@types/lodash': ^4.14.177
       '@types/semver': ^7.3.9
@@ -154,7 +155,7 @@ importers:
       typed-vscode: workspace:*
       typescript-json-schema: ^0.51.0
       vscode-extra: workspace:0.0.4
-      vscode-manifest: workspace:0.0.7
+      vscode-manifest: workspace:0.0.8
       ws: ^8.2.3
     dependencies:
       '@prisma/debug': 3.5.0
@@ -187,7 +188,6 @@ importers:
       ws: 8.2.3
     devDependencies:
       '@hediet/node-reload': 0.7.3
-      '@types/fs-extra': 9.0.13
       '@types/jsonfile': 6.0.1
       '@types/lodash': 4.14.177
       '@types/semver': 7.3.9
@@ -205,7 +205,6 @@ importers:
       json-schema-typed: ^7.0.3
       lodash: ^4.17.21
       path-exists-cli: ^2.0.0
-      pinst: ^2.1.6
       ts-json-schema-generator: ^0.97.0
       type-fest: 2.3.4
       typescript-json-schema: ^0.51.0
@@ -218,7 +217,6 @@ importers:
       ajv: 8.8.1
       chalk: 4.1.2
       path-exists-cli: 2.0.0
-      pinst: 2.1.6
       ts-json-schema-generator: 0.97.0
       typescript-json-schema: 0.51.0
 

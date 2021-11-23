@@ -35,6 +35,7 @@
         "jsonfile": "^6.1.0",
         "lodash-es": "^4.17.21",
         "modify-json-file": "^1.2.1",
+        "pinst": "^2.1.6",
         "prettier": "^2.4.1",
         "quicktype-core": "^6.0.70",
         "ts-node": "^10.4.0",
