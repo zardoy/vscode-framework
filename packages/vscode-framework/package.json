@@ -1,6 +1,6 @@
 {
     "name": "vscode-framework",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
@@ -37,7 +37,6 @@
     },
     "devDependencies": {
         "@hediet/node-reload": "^0.7.3",
-        "@types/fs-extra": "^9.0.13",
         "@types/jsonfile": "^6.0.1",
         "@types/lodash": "^4.14.177",
         "@types/semver": "^7.3.9",
@@ -75,9 +74,10 @@
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.3.1",
         "typed-jsonfile": "^0.2.0",
+        "typed-vscode": "workspace:*",
         "typescript-json-schema": "^0.51.0",
         "vscode-extra": "workspace:0.0.4",
-        "vscode-manifest": "workspace:0.0.7",
+        "vscode-manifest": "workspace:0.0.8",
         "ws": "^8.2.3"
     }
 }
