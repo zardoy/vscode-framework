@@ -5,7 +5,7 @@ import path from 'path'
 import { readDirectoryManifest } from 'vscode-manifest'
 import { configurationTypeFile } from '../../src/cli/configurationFromType'
 import { defaultConfig } from '../../src/config'
-import { generateContributesTypes } from '../../src/cli/commands/generateTypes'
+import { generateFile } from 'typed-vscode'
 import { mockManifestOnce, screenRecorderManifest } from './fixtures'
 
 describe('New simple types generator', () => {
@@ -45,7 +45,14 @@ describe('New simple types generator', () => {
             `)
         })
         // all source, configuration not generated
-        await generateContributesTypes({ ...generatedManifest.contributes }, defaultConfig)
+        await generateFile({
+            contributionPoints: generatedManifest.contributes,
+            config: {
+                trimIds: defaultConfig.prependIds !== false,
+            },
+            framework: { useConfigurationType: false },
+            outputPath: 'src/generated.ts',
+        })
     })
     test('Links to configurationType.ts', async () => {
         mockManifestOnce(screenRecorderManifest)
@@ -75,6 +82,13 @@ describe('New simple types generator', () => {
                 "
             `)
         })
-        await generateContributesTypes({ ...generatedManifest.contributes }, defaultConfig)
+        await generateFile({
+            contributionPoints: generatedManifest.contributes,
+            config: {
+                trimIds: defaultConfig.prependIds !== false,
+            },
+            framework: { useConfigurationType: true },
+            outputPath: 'src/generated.ts',
+        })
     })
 })

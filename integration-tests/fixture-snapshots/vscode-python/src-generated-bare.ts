@@ -1,40 +1,38 @@
-declare module 'vscode-framework' {
-    interface RegularCommands {
-        "analysis.restartLanguageServer": true
-        "clearPersistentStorage": true
-        "clearWorkspaceInterpreter": true
-        "configureTests": true
-        "createTerminal": true
-        "enableLinting": true
-        "enableSourceMapSupport": true
-        "execInTerminal": true
-        "execInTerminal-icon": true
-        "debugInTerminal": true
-        "execSelectionInDjangoShell": true
-        "execSelectionInTerminal": true
-        "goToPythonObject": true
-        "launchTensorBoard": true
-        "refreshTensorBoard": true
-        "refreshTests": true
-        "refreshingTests": true
-        "stopRefreshingTests": true
-        "reportIssue": true
-        "testing.reRunFailTests": true
-        "runLinting": true
-        "setInterpreter": true
-        "setLinter": true
-        "sortImports": true
-        "startREPL": true
-        "switchOffInsidersChannel": true
-        "switchToDailyChannel": true
-        "switchToWeeklyChannel": true
-        "viewLanguageServerOutput": true
-        "viewOutput": true
-    }
-    interface Settings extends Required<ConfigurationObject> {}
+export interface RegularCommands {
+    "analysis.restartLanguageServer": true
+    "clearPersistentStorage": true
+    "clearWorkspaceInterpreter": true
+    "configureTests": true
+    "createTerminal": true
+    "enableLinting": true
+    "enableSourceMapSupport": true
+    "execInTerminal": true
+    "execInTerminal-icon": true
+    "debugInTerminal": true
+    "execSelectionInDjangoShell": true
+    "execSelectionInTerminal": true
+    "goToPythonObject": true
+    "launchTensorBoard": true
+    "refreshTensorBoard": true
+    "refreshTests": true
+    "refreshingTests": true
+    "stopRefreshingTests": true
+    "reportIssue": true
+    "reRunFailTests": true
+    "runLinting": true
+    "setInterpreter": true
+    "setLinter": true
+    "sortImports": true
+    "startREPL": true
+    "switchOffInsidersChannel": true
+    "switchToDailyChannel": true
+    "switchToWeeklyChannel": true
+    "viewLanguageServerOutput": true
+    "viewOutput": true
 }
 
-interface ConfigurationObject {
+
+export interface Configuration {
     /**
      * List of paths to libraries and the like that need to be imported by auto complete engine.
      * E.g. when using Google App SDK, the paths are not in system path, hence need to be added
@@ -73,12 +71,12 @@ interface ConfigurationObject {
      * List of experiment to opt into. If empty, user is assigned the default experiment groups.
      * See https://github.com/microsoft/vscode-python/wiki/Experiments for more details.
      */
-    "experiments.optInto"?: ExperimentsOpt[];
+    "experiments.optInto"?: "All" | "pythonDeprecatePythonPath" | "pythonSurveyNotification" | "pythonTensorboardExperiment"[];
     /**
      * List of experiment to opt out of. If empty, user is assigned the default experiment
      * groups. See https://github.com/microsoft/vscode-python/wiki/Experiments for more details.
      */
-    "experiments.optOutFrom"?: ExperimentsOpt[];
+    "experiments.optOutFrom"?: "All" | "pythonDeprecatePythonPath" | "pythonSurveyNotification" | "pythonTensorboardExperiment"[];
     /**
      * Arguments passed in. Each argument is a separate item in the array.
      */
@@ -100,7 +98,7 @@ interface ConfigurationObject {
     /**
      * Provider for formatting. Possible options include 'autopep8', 'black', and 'yapf'.
      */
-    "formatting.provider"?: FormattingProvider;
+    "formatting.provider"?: "autopep8" | "black" | "none" | "yapf";
     /**
      * Arguments passed in. Each argument is a separate item in the array.
      */
@@ -118,11 +116,11 @@ interface ConfigurationObject {
      * Set to "weekly" or "daily" to automatically download and install the latest Insiders
      * builds of the python extension, which include upcoming features and bug fixes.
      */
-    insidersChannel?: InsidersChannel;
+    insidersChannel?: "daily" | "off" | "weekly";
     /**
      * Defines type of the language server.
      */
-    languageServer?: LanguageServer;
+    languageServer?: "Default" | "Jedi" | "None" | "Pylance";
     /**
      * Arguments passed in. Each argument is a separate item in the array.
      */
@@ -151,15 +149,15 @@ interface ConfigurationObject {
     /**
      * Severity of Flake8 message type 'E'.
      */
-    "linting.flake8CategorySeverity.E"?: Linting;
+    "linting.flake8CategorySeverity.E"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of Flake8 message type 'F'.
      */
-    "linting.flake8CategorySeverity.F"?: Linting;
+    "linting.flake8CategorySeverity.F"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of Flake8 message type 'W'.
      */
-    "linting.flake8CategorySeverity.W"?: Linting;
+    "linting.flake8CategorySeverity.W"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Whether to lint Python files using flake8
      */
@@ -188,11 +186,11 @@ interface ConfigurationObject {
     /**
      * Severity of Mypy message type 'Error'.
      */
-    "linting.mypyCategorySeverity.error"?: Linting;
+    "linting.mypyCategorySeverity.error"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of Mypy message type 'Note'.
      */
-    "linting.mypyCategorySeverity.note"?: Linting;
+    "linting.mypyCategorySeverity.note"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Whether to lint Python files using mypy.
      */
@@ -222,11 +220,11 @@ interface ConfigurationObject {
     /**
      * Severity of pycodestyle message type 'E'.
      */
-    "linting.pycodestyleCategorySeverity.E"?: Linting;
+    "linting.pycodestyleCategorySeverity.E"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of pycodestyle message type 'W'.
      */
-    "linting.pycodestyleCategorySeverity.W"?: Linting;
+    "linting.pycodestyleCategorySeverity.W"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Whether to lint Python files using pycodestyle
      */
@@ -269,23 +267,23 @@ interface ConfigurationObject {
     /**
      * Severity of Pylint message type 'Convention/C'.
      */
-    "linting.pylintCategorySeverity.convention"?: Linting;
+    "linting.pylintCategorySeverity.convention"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of Pylint message type 'Error/E'.
      */
-    "linting.pylintCategorySeverity.error"?: Linting;
+    "linting.pylintCategorySeverity.error"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of Pylint message type 'Fatal/F'.
      */
-    "linting.pylintCategorySeverity.fatal"?: Linting;
+    "linting.pylintCategorySeverity.fatal"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of Pylint message type 'Refactor/R'.
      */
-    "linting.pylintCategorySeverity.refactor"?: Linting;
+    "linting.pylintCategorySeverity.refactor"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Severity of Pylint message type 'Warning/W'.
      */
-    "linting.pylintCategorySeverity.warning"?: Linting;
+    "linting.pylintCategorySeverity.warning"?: "Error" | "Hint" | "Information" | "Warning";
     /**
      * Whether to lint Python files using pylint.
      */
@@ -298,7 +296,7 @@ interface ConfigurationObject {
     /**
      * The logging level the extension logs at, defaults to 'error'
      */
-    "logging.level"?: LoggingLevel;
+    "logging.level"?: "debug" | "error" | "info" | "off" | "warn";
     /**
      * Path to the pipenv executable to use for activation.
      */
@@ -391,41 +389,4 @@ interface ConfigurationObject {
      */
     venvPath?: string;
 }
-
-type ExperimentsOpt =
-    "All" |
-    "pythonDeprecatePythonPath" |
-    "pythonSurveyNotification" |
-    "pythonTensorboardExperiment"
-
-type FormattingProvider =
-    "autopep8" |
-    "black" |
-    "none" |
-    "yapf"
-
-type InsidersChannel =
-    "daily" |
-    "off" |
-    "weekly"
-
-type LanguageServer =
-    "Default" |
-    "Jedi" |
-    "None" |
-    "Pylance"
-
-type Linting =
-    "Error" |
-    "Hint" |
-    "Information" |
-    "Warning"
-
-type LoggingLevel =
-    "debug" |
-    "error" |
-    "info" |
-    "off" |
-    "warn"
-
 export {}
