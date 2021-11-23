@@ -74,7 +74,6 @@
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.3.1",
         "typed-jsonfile": "^0.2.0",
-        "typed-vscode": "workspace:*",
         "typescript-json-schema": "^0.51.0",
         "vscode-extra": "workspace:0.0.4",
         "vscode-manifest": "workspace:0.0.8",
