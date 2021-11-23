@@ -2,7 +2,8 @@ import fs from 'fs'
 import { join } from 'path'
 import fsExtra from 'fs-extra'
 import got from 'got'
-import { writePackageJsonFile } from 'typed-jsonfile'
+import { readPackageJsonFile, writePackageJsonFile } from 'typed-jsonfile'
+import gitly from 'gitly'
 import { generateFile } from '../packages/vscode-framework/node_modules/typed-vscode/build'
 import { ManifestType, readDirectoryManifest } from '../packages/vscode-manifest/build'
 
@@ -14,7 +15,8 @@ beforeAll(async () => {
     // @link-source-path
     if (!fs.existsSync('packages/vscode-framework/build/cli/commands.js'))
         throw new Error('These tests require build. Run pnpm build/start')
-    await fsExtra.emptyDir(join(__dirname, 'fixture'))
+    // No need to make it clean, since only generated types are tested at the moment
+    // await fsExtra.emptyDir(join(__dirname, 'fixture'))
 })
 
 const EXTENSIONS: Array<{
@@ -75,6 +77,11 @@ const EXTENSIONS: Array<{
     },
 ]
 
+export const ensureVScodeDir = async (path: string) => {
+    if (fs.existsSync(path)) return
+    await gitly('microsoft/vscode#96c7611280c859f271d716a108e39e736eaff2b4', path, {})
+}
+
 const BIN_ENTRYPOINT = join(__dirname, '../packages/vscode-framework/bin.js')
 
 const setupFixture = async (fixtureName: string) => {
@@ -112,12 +119,20 @@ const downloadPackageJson = async (repo: string, writeDir?: string) => {
     return eslintManifest
 }
 
-const runTypesGenerator = async (cwd: string, variant: string) => {
+const TEST_BUILTIN_EXTENSIONS = ['html-language-features', 'git', 'emmet', 'css-language-features']
+
+const runTypesGenerator = async (cwd: string, variant: string, write = true) => {
+    // const contributes = validate
+    //     ? (await readDirectoryManifest({ directory: cwd, prependIds: false })).contributes
+    //     : (await readPackageJsonFile({ dir: cwd }))[
+    //           // eslint-disable-next-line zardoy-config/@typescript-eslint/dot-notation
+    //           'contributes'
+    //       ]
     // await execa.node(BIN_ENTRYPOINT, ['generate'], { cwd, stdio: 'inherit' })
     const content = await generateFile({
         config: { trimIds: true },
         contributionPoints: (await readDirectoryManifest({ directory: cwd, prependIds: false })).contributes,
-        outputPath: join(cwd, `src/generated-${variant}.ts`),
+        outputPath: write && join(cwd, `src/generated-${variant}.ts`),
         ...(variant === 'framework'
             ? {
                   framework: {
@@ -137,25 +152,33 @@ describe('Integration', () => {
     const hasOnly = EXTENSIONS.some(({ only }) => only)
     if (process.env.CI && hasOnly) throw new Error('EXTENSIONS must not have only')
     // TODO detect updates on CI. write to issue
-    describe.each(EXTENSIONS)(
-        'Integration with $repo',
-        ({ repo, only, allVariants = false }) => {
-            const fixtureName = getNameFromRepo(repo)
-            let fromFixture: (...path: string[]) => string
-            beforeAll(async () => {
-                fromFixture = (await setupFixture(fixtureName)).fromFixture
-                await downloadPackageJson(repo, fromFixture())
-            })
-            ;(hasOnly && !only ? test.skip : test).each(allVariants ? ['native', 'bare', 'framework'] : ['bare'])(
-                'Variant %s',
-                async variant => {
-                    const { content, fixtureFilePath } = await runTypesGenerator(fromFixture(), variant)
-                    // TODO! automatically read and report `any` types
-                    await toMatchFileSnapshot(fixtureName, content, fixtureFilePath)
-                },
-            )
-        },
-        10_000,
-    )
-    // TODO test also every vscode builtin extension
+    describe.each(EXTENSIONS)('Integration with $repo', ({ repo, only, allVariants = false }) => {
+        const fixtureName = getNameFromRepo(repo)
+        let fromFixture: (...path: string[]) => string
+        beforeAll(async () => {
+            fromFixture = (await setupFixture(fixtureName)).fromFixture
+            await downloadPackageJson(repo, fromFixture())
+        })
+        ;(hasOnly && !only ? test.skip : test).each(allVariants ? ['native', 'bare', 'framework'] : ['bare'])(
+            'Variant %s',
+            async variant => {
+                const { content, fixtureFilePath } = await runTypesGenerator(fromFixture(), variant)
+                // TODO! automatically read and report `any` types
+                await toMatchFileSnapshot(fixtureName, content, fixtureFilePath)
+            },
+        )
+    })
+
+    describe('Builtin Extensions', () => {
+        let vscodeDir = join(__dirname, 'fixture', 'vscode')
+        const fromExtensions = (...path: string[]) => join(vscodeDir, 'extensions', ...path)
+        beforeAll(async () => {
+            await ensureVScodeDir(vscodeDir)
+        }, 10_000)
+
+        test.each(TEST_BUILTIN_EXTENSIONS)('Builtin Extension %s', async ext => {
+            const { content, fixtureFilePath } = await runTypesGenerator(fromExtensions(ext), 'bare', false)
+            await toMatchFileSnapshot(`vscode/${ext}`, content, fixtureFilePath)
+        })
+    })
 })
