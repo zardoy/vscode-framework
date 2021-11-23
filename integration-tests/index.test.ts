@@ -62,9 +62,6 @@ const EXTENSIONS: Array<{
     {
         repo: 'redhat-developer/vscode-xml#70024545886d9f9cc19bc804361192d5c00821ab',
     },
-    {
-        repo: 'redhat-developer/vscode-xml#70024545886d9f9cc19bc804361192d5c00821ab',
-    },
 
     {
         repo: 'prettier/prettier-vscode#4a9ad9d27c23d200e8103a09bbb0f78cc5b0570b',
