@@ -3,6 +3,7 @@
         "runTests": false
     },
     "preset": {
-        "publishTag": "next"
+        "publishTag": "next",
+        "minimumNodeVersion": "^14.13.1 || >=16.0.0"
     }
 }
