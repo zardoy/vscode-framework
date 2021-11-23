@@ -210,8 +210,9 @@ module.exports = config
 
 commander.command('gitignore', 'Add ignore entries to .gitignore of cwd', {}, async () => {
     const contents = `
-        out
-        src/generated.ts
+out
+src/generated.ts
+src/configurationTypeGenerated.jsonc
     `
     await fsExtra.promises.appendFile('./.gitignore', contents, 'utf-8')
 })

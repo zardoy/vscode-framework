@@ -119,7 +119,7 @@ export const startExtensionDevelopment = async (
     // WATCHER
     const watchedFiles = {
         manifest: 'package.json',
-        configurationType: configurationTypeFile,
+        configurationType: join(process.cwd(), configurationTypeFile),
         config: 'vscode-framework.config.js',
     }
     // TODO resources couldn't be watched since chokidar locks would lock it
@@ -148,13 +148,13 @@ export const startExtensionDevelopment = async (
         }
 
         const fileChangedAction: Record<keyof typeof watchedFiles, () => MaybePromise<void>> = {
-            async manifest() {
-                await restartBuildFromWatcher(firstManifestChange ? undefined : 'Manifest updated')
-                if (!firstManifestChange) firstManifestChange = false
-            },
             async configurationType() {
                 await runConfigurationGenerator(process.cwd())
                 await restartBuildFromWatcher('Configuration type updated')
+            },
+            async manifest() {
+                await restartBuildFromWatcher(firstManifestChange ? undefined : 'Manifest updated')
+                if (!firstManifestChange) firstManifestChange = false
             },
             async config() {
                 await restartBuildFromWatcher(`${watchedFiles.config} updated`)
@@ -163,6 +163,7 @@ export const startExtensionDevelopment = async (
 
         for (const [key, runAction] of Object.entries(fileChangedAction))
             if (await neededFileWasChanged(path, watchedFiles[key])) {
+                debug('File changed:running action', key)
                 await runAction()
                 break
             }
