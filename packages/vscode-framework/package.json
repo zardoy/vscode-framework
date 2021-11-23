@@ -53,6 +53,7 @@
     "dependencies": {
         "@prisma/debug": "^3.5.0",
         "@vscode/test-web": "^0.0.15",
+        "typed-vscode": "workspace:*",
         "change-case": "^4.1.2",
         "chokidar": "^3.5.2",
         "code-block-writer": "^11.0.0",
@@ -73,9 +74,6 @@
         "nanoid": "^3.1.30",
         "pkg-dir": "^5.0.0",
         "pretty-format": "^27.3.1",
-        "quicktype": "^15.0.260",
-        "quicktype-core": "^6.0.70",
-        "ts-morph": "^12.2.0",
         "typed-jsonfile": "^0.2.0",
         "typescript-json-schema": "^0.51.0",
         "vscode-extra": "workspace:0.0.4",

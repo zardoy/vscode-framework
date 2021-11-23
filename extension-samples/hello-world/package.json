@@ -21,7 +21,7 @@
     "dependencies": {
         "@types/vscode": "^1.62.0",
         "@zardoy/tsconfig": "^1.2.2",
-        "vscode-framework": "workspace:*"
+        "vscode-framework": "^0.0.14"
     },
     "scripts": {
         "start": "vscode-framework start"

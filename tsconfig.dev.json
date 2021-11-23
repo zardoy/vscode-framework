@@ -2,6 +2,9 @@
     "extends": "@zardoy/tsconfig/node",
     "references": [
         {
+            "path": "packages/typed-vscode/tsconfig.dev.json"
+        },
+        {
             "path": "packages/vscode-extra/tsconfig.dev.json"
         },
         {

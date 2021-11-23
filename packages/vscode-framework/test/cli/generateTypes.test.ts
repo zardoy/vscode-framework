@@ -5,7 +5,7 @@ import path from 'path'
 import { readDirectoryManifest } from 'vscode-manifest'
 import { configurationTypeFile } from '../../src/cli/configurationFromType'
 import { defaultConfig } from '../../src/config'
-import { generateContributesTypes } from '../../src/cli/commands/generateTypes'
+import { generateFile } from 'typed-vscode'
 import { mockManifestOnce, screenRecorderManifest } from './fixtures'
 
 describe('New simple types generator', () => {
@@ -20,49 +20,52 @@ describe('New simple types generator', () => {
                         \\"startRecording\\": true
                         \\"editRecording\\": true
                     }
-                    interface Settings extends Required<ConfigurationObject> {}
+                    interface Settings extends Required<Configuration> {}
                 }
 
-                interface ConfigurationObject {
+                interface Configuration {
                     /**
                      * Record quality
                      */
-                    recordQuality?: RecordQuality;
+                    recordQuality?: \\"FullHD\\" | \\"HD\\" | \\"4K\\";
                     /**
                      * Record sound
                      */
                     recordSound?: boolean;
                     saveDir?:     string;
                 }
-
-                type RecordQuality =
-                    \\"FullHD\\" |
-                    \\"HD\\" |
-                    \\"4K\\"
-
                 export {}
                 "
             `)
         })
         // all source, configuration not generated
-        await generateContributesTypes({ ...generatedManifest.contributes }, defaultConfig)
+        await generateFile({
+            contributionPoints: generatedManifest.contributes,
+            config: {
+                trimIds: defaultConfig.prependIds !== false,
+            },
+            framework: { useConfigurationType: false },
+            outputPath: 'src/generated.ts',
+        })
     })
     test('Links to configurationType.ts', async () => {
         mockManifestOnce(screenRecorderManifest)
         const generatedManifest = await readDirectoryManifest()
-        const spyExists = jest.spyOn(fs, 'existsSync')
-        spyExists.mockImplementation(path => {
-            if (path === configurationTypeFile) {
-                spyExists.mockRestore()
-                return true
-            }
+        // TODO
+        // const spyExists = jest.spyOn(fs, 'existsSync')
+        // spyExists.mockImplementation(path => {
+        //     if (path === configurationTypeFile) {
+        //         spyExists.mockRestore()
+        //         return true
+        //     }
 
-            return fs.existsSync(path)
-        })
+        //     return fs.existsSync(path)
+        // })
         const spy = jest.spyOn(fs.promises, 'writeFile')
         spy.mockImplementationOnce(async (_path, content) => {
             expect(content).toMatchInlineSnapshot(`
                 "import { Configuration } from './configurationType'
+
                 declare module 'vscode-framework' {
                     interface RegularCommands {
                         \\"startRecording\\": true
@@ -75,6 +78,13 @@ describe('New simple types generator', () => {
                 "
             `)
         })
-        await generateContributesTypes({ ...generatedManifest.contributes }, defaultConfig)
+        await generateFile({
+            contributionPoints: generatedManifest.contributes,
+            config: {
+                trimIds: defaultConfig.prependIds !== false,
+            },
+            framework: { useConfigurationType: true },
+            outputPath: 'src/generated.ts',
+        })
     })
 })

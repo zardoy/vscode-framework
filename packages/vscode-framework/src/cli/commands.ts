@@ -4,15 +4,15 @@ import { cosmiconfig } from 'cosmiconfig'
 import fsExtra from 'fs-extra'
 import { defaultsDeep } from 'lodash'
 import Debug from '@prisma/debug'
-import execa from 'execa'
-import kleur from 'kleur'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
-import { generateContributesTypes } from './commands/generateTypes'
 import { buildExtension } from './commands/build'
-import { generateAndWriteManifest } from '.'
+import { generateFile } from 'typed-vscode'
 import { startExtensionDevelopment } from './commands/start'
+import { generateAndWriteManifest } from '.'
+import { readDirectoryManifest } from 'vscode-manifest'
+import { configurationTypeFile } from './configurationFromType'
 
 const debug = Debug('vscode-framework:cli')
 
@@ -55,13 +55,23 @@ commander.command(
 )
 
 commander.command(
-    'generate-types',
-    'Generate TypeScript typings (from contribution points) into src/generated.ts for working with framework',
+    'generate',
+    'Generate files with typings from contribution points of manifest',
     {
         loadConfig: true,
+        options: {},
     },
     async (_, { config }) => {
-        await generateContributesTypes(undefined, config)
+        const manifest = await readDirectoryManifest({ prependIds: config.prependIds })
+        await generateFile({
+            config: { trimIds: config.prependIds !== false },
+            contributionPoints: manifest.contributes,
+            framework: {
+                useConfigurationType: fsExtra.existsSync(configurationTypeFile),
+            },
+            // TODO
+            outputPath: 'src/generated.ts',
+        })
     },
 )
 

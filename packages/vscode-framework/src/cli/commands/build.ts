@@ -2,18 +2,17 @@ import fs from 'fs'
 import { join } from 'path'
 import { camelCase } from 'change-case'
 import fsExtra from 'fs-extra'
-import { compilerOptions } from 'generated-module/build/ts-morph-utils'
-import { Project } from 'ts-morph'
 import Debug from '@prisma/debug'
 import { ManifestType } from 'vscode-manifest'
 import { Except } from 'type-fest'
 import kleur from 'kleur'
 import execa from 'execa'
 import del from 'del'
+import { generateFile } from 'typed-vscode'
 import { BuildTargetType, Config } from '../../config'
-import { generateContributesTypes } from '../commands/generateTypes'
 import { runEsbuild } from '../esbuild/esbuild'
 import { generateAndWriteManifest } from '../manifest-generator'
+import { configurationTypeFile } from '../configurationFromType'
 
 const debug = Debug('vscode-framework:build')
 
@@ -136,15 +135,20 @@ const buildParticipants = makeBuildParticipants({
         { generatedManifest, sourceManifest }: Record<'sourceManifest' | 'generatedManifest', ManifestType>,
     ) {
         if (commandArgs.skipGeneratingTypes) return
-        await generateContributesTypes(
-            {
+        await generateFile({
+            config: { trimIds: config.prependIds !== false },
+            contributionPoints: {
                 // commands can have additional generated variants
                 commands: sourceManifest.contributes.commands,
                 // configuration don't have additional generated variants for now
                 configuration: generatedManifest.contributes.configuration,
             },
-            config,
-        )
+            framework: {
+                useConfigurationType: fsExtra.existsSync(configurationTypeFile),
+            },
+            // TODO
+            outputPath: 'src/generated.ts',
+        })
     },
     async typechecking({ participants: { skipTypechecking } }) {
         if (skipTypechecking || fsExtra.existsSync('./tsconfig.json')) return
@@ -162,21 +166,21 @@ export const EXTENSION_ENTRYPOINTS = {
 }
 
 /** Check that entrypoint exists and `activate` function is exported. Not used for now, as it's slow */
-const checkEntrypoint = (config: Config) => {
-    // TODO
-    // 1. default export is still fine
-    // 2. warning: enforce to use export before const. otherwise it takes > 1s to check
-    // 3. doesn't work with functions
-    console.time('check')
-    const { entryPoint } = config.esbuild
-    const project = new Project({
-        skipAddingFilesFromTsConfig: true,
-        compilerOptions,
-    })
-    const source = project.addSourceFileAtPath(entryPoint)
-    // TODO fancy errors
-    if (!source.getVariableDeclarationOrThrow('activate').isExported())
-        throw new Error("activate function isn't exported")
+// const checkEntrypoint = (config: Config) => {
+//     // TODO
+//     // 1. default export is still fine
+//     // 2. warning: enforce to use export before const. otherwise it takes > 1s to check
+//     // 3. doesn't work with functions
+//     console.time('check')
+//     const { entryPoint } = config.esbuild
+//     const project = new Project({
+//         skipAddingFilesFromTsConfig: true,
+//         compilerOptions,
+//     })
+//     const source = project.addSourceFileAtPath(entryPoint)
+//     // TODO fancy errors
+//     if (!source.getVariableDeclarationOrThrow('activate').isExported())
+//         throw new Error("activate function isn't exported")
 
-    console.timeEnd('check')
-}
+//     console.timeEnd('check')
+// }

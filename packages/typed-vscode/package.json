@@ -1,0 +1,36 @@
+{
+    "name": "typed-vscode",
+    "version": "0.0.1",
+    "author": "Vitaly Turovsky <vital2580@icloud.com>",
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
+    "license": "MIT",
+    "bin": "bin.js",
+    "files": [
+        "build",
+        "bin.js"
+    ],
+    "scripts": {
+        "_postinstall": "node build/postinstall.js",
+        "prepublishOnly": "pinst --enable",
+        "postpack": "pinst --disable"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.62.0",
+        "vscode-manifest": "workspace:*"
+    },
+    "peerDependencies": {
+        "@types/vscode": "^1.62.0"
+    },
+    "dependencies": {
+        "code-block-writer": "^11.0.0",
+        "commander": "^8.3.0",
+        "cosmiconfig": "^7.0.1",
+        "fs-extra": "^10.0.0",
+        "generated-module": "^0.0.2",
+        "lodash": "^4.17.21",
+        "quicktype-core": "^6.0.70",
+        "type-fest": "^2.5.4",
+        "typed-jsonfile": "^0.2.0"
+    }
+}

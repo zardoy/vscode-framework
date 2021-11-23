@@ -82,7 +82,7 @@ interface ILanguage {
 }
 
 interface IMenu {
-    command: string
+    command?: string
     alt?: string
     when?: string
     group?: string

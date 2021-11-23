@@ -8,6 +8,7 @@
 -   5856aec: add `vscf` shortcut to `vscode-framework` (bin)
 -   Updated dependencies [5856aec]
     -   vscode-manifest@0.0.8
+    -   typed-vscode@0.0.1
 
 ## 0.0.14
 
