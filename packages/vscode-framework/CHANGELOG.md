@@ -1,5 +1,15 @@
 # vscode-framework
 
+## 0.0.16
+
+### Patch Changes
+
+-   d4d743f: Fix: don't crash on configurationType.ts and generate types properly
+-   d4d743f: Fix gitignore command output. Also add generated variant of configuration
+-   d4d743f: Update typed-vscode to fix postinstall
+-   Updated dependencies [d4d743f]
+    -   typed-vscode@0.0.3
+
 ## 0.0.15
 
 ### Patch Changes
