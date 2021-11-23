@@ -20,26 +20,20 @@ describe('New simple types generator', () => {
                         \\"startRecording\\": true
                         \\"editRecording\\": true
                     }
-                    interface Settings extends Required<ConfigurationObject> {}
+                    interface Settings extends Required<Configuration> {}
                 }
 
-                interface ConfigurationObject {
+                interface Configuration {
                     /**
                      * Record quality
                      */
-                    recordQuality?: RecordQuality;
+                    recordQuality?: \\"FullHD\\" | \\"HD\\" | \\"4K\\";
                     /**
                      * Record sound
                      */
                     recordSound?: boolean;
                     saveDir?:     string;
                 }
-
-                type RecordQuality =
-                    \\"FullHD\\" |
-                    \\"HD\\" |
-                    \\"4K\\"
-
                 export {}
                 "
             `)
@@ -57,19 +51,21 @@ describe('New simple types generator', () => {
     test('Links to configurationType.ts', async () => {
         mockManifestOnce(screenRecorderManifest)
         const generatedManifest = await readDirectoryManifest()
-        const spyExists = jest.spyOn(fs, 'existsSync')
-        spyExists.mockImplementation(path => {
-            if (path === configurationTypeFile) {
-                spyExists.mockRestore()
-                return true
-            }
+        // TODO
+        // const spyExists = jest.spyOn(fs, 'existsSync')
+        // spyExists.mockImplementation(path => {
+        //     if (path === configurationTypeFile) {
+        //         spyExists.mockRestore()
+        //         return true
+        //     }
 
-            return fs.existsSync(path)
-        })
+        //     return fs.existsSync(path)
+        // })
         const spy = jest.spyOn(fs.promises, 'writeFile')
         spy.mockImplementationOnce(async (_path, content) => {
             expect(content).toMatchInlineSnapshot(`
                 "import { Configuration } from './configurationType'
+
                 declare module 'vscode-framework' {
                     interface RegularCommands {
                         \\"startRecording\\": true

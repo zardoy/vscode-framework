@@ -147,11 +147,11 @@ describe('Integration', () => {
             let fromFixture: (...path: string[]) => string
             beforeAll(async () => {
                 fromFixture = (await setupFixture(fixtureName)).fromFixture
+                await downloadPackageJson(repo, fromFixture())
             })
             ;(hasOnly && !only ? test.skip : test).each(allVariants ? ['native', 'bare', 'framework'] : ['bare'])(
                 'Variant %s',
                 async variant => {
-                    await downloadPackageJson(repo, fromFixture())
                     const { content, fixtureFilePath } = await runTypesGenerator(fromFixture(), variant)
                     // TODO! automatically read and report `any` types
                     await toMatchFileSnapshot(fixtureName, content, fixtureFilePath)
