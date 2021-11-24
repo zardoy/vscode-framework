@@ -155,7 +155,7 @@ importers:
       semver: ^7.3.5
       ttypescript: ^1.5.12
       typed-jsonfile: ^0.2.0
-      typed-vscode: workspace:0.0.3
+      typed-vscode: workspace:0.0.5
       typescript-json-schema: ^0.51.0
       vscode-extra: workspace:0.0.4
       vscode-manifest: workspace:0.0.8
