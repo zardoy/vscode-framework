@@ -12,7 +12,7 @@ You can make your vscode extension codebase typed by automatically generating ty
 ## Add to Your Project
 
 ```console
-npm i typed-vscode@next -D
+npm i typed-vscode -D
 ```
 
 ## `generate` command

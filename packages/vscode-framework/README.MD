@@ -14,7 +14,7 @@
 
 ## Usage
 
-- Install it in your project: `npm i vscode-framework@next -D`
+- Install it in your project: `npm i vscode-framework -D`
 <!-- TODO: autofix it via release action -->
 - Read the [DOCS](https://github.com/zardoy/vscode-framework/tree/main/packages/vscode-framework/docs)
 
