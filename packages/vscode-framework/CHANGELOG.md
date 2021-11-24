@@ -1,5 +1,31 @@
 # vscode-framework
 
+## 0.0.18
+
+### Patch Changes
+
+-   4a62337: fix: make `config.esbuild.defineEnv` possible to use
+
+## 0.0.17
+
+### Patch Changes
+
+-   b8fca07: Fix: prepend ids to configuration properties correctly when using configuration from type
+-   7333af5: docs: update readme and fix link to docs
+-   b8fca07: BREAKING rename configurationTypeGenerated.ts to configurationTypeCache.ts
+-   Updated dependencies [e65bed3]
+    -   typed-vscode@0.0.4
+
+## 0.0.16
+
+### Patch Changes
+
+-   d4d743f: Fix: don't crash on configurationType.ts and generate types properly
+-   d4d743f: Fix gitignore command output. Also add generated variant of configuration
+-   d4d743f: Update typed-vscode to fix postinstall
+-   Updated dependencies [d4d743f]
+    -   typed-vscode@0.0.3
+
 ## 0.0.15
 
 ### Patch Changes

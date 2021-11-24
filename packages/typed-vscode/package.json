@@ -1,11 +1,18 @@
 {
     "name": "typed-vscode",
-    "version": "0.0.2",
+    "version": "0.0.5",
     "author": "Vitaly Turovsky <vital2580@icloud.com>",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "license": "MIT",
     "bin": "bin.js",
+    "keywords": [
+        "vscode",
+        "typescript",
+        "typed",
+        "contriutions",
+        "manifest"
+    ],
     "files": [
         "build",
         "bin.js"

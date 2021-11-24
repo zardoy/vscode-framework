@@ -210,14 +210,13 @@ module.exports = config
 
 commander.command('gitignore', 'Add ignore entries to .gitignore of cwd', {}, async () => {
     const contents = `
-        out
-        src/generated.ts
+out
+src/generated.ts
+src/configurationTypeCache.jsonc
     `
     await fsExtra.promises.appendFile('./.gitignore', contents, 'utf-8')
 })
 
 addStandaloneCommands(commander)
-
-// const packageCommand = program.command('package', 'Launch VSCode development with extension (no launch.json needed)');
 
 // const migrateCommand = program.command('migrate [path to package.json]', 'Migrate from regular package.json in interactive way (cleans contribution points, adds config)');

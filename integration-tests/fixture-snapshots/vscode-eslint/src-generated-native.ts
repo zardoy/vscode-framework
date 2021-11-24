@@ -1,10 +1,15 @@
 declare module "vscode" {
-    type OrdinaryCommands = "eslint.executeAutofix" | "eslint.createConfig" | "eslint.showOutputChannel" | "eslint.migrateSettings" | "eslint.restart"
+    type ExtensionCommands = "eslint.executeAutofix" | "eslint.createConfig" | "eslint.showOutputChannel" | "eslint.migrateSettings" | "eslint.restart"
     export namespace commands {
-        export function executeCommand<T = unknown>(command: OrdinaryCommands, ...rest: any[]): Thenable<T>
+        export function executeCommand<T = unknown>(command: ExtensionCommands, ...rest: any[]): Thenable<T>
         export function registerCommand(
-            command: OrdinaryCommands,
+            command: ExtensionCommands,
             callback: (...args: any[]) => any,
+            thisArg?: any,
+        ): Disposable
+        export function registerTextEditorCommand(
+            command: ExtensionCommands,
+            callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void,
             thisArg?: any,
         ): Disposable
     }

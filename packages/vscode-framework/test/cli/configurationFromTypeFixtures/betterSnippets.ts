@@ -1,7 +1,6 @@
 type SnippetLocation = 'lineStart' | 'topLineStart' | 'fileStart' | 'stringLiteral' | 'inComments'
 
 export type Configuration = {
-    /** @default {} */
     customSnippets?: {
         [snippet: string]: {
             body: string
@@ -20,7 +19,7 @@ export type Configuration = {
                           afterSymbol: string
                       }
                 >
-                /** @markdownDescriptions  */
+                /** Its **really** cool, `true`  */
                 location2?: SnippetLocation
                 /** @default ["*"] */
                 languages?: string[]
@@ -37,5 +36,9 @@ export type Configuration = {
      * Enable opinionated builtin snippets
      * @default false
      *  */
-    builtinSnippets?: boolean
+    builtinSnippets:
+        | false
+        | {
+              something?: true
+          }
 }

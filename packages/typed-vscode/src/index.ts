@@ -16,7 +16,7 @@ import {
     TypeScriptTargetLanguage,
 } from 'quicktype-core'
 import { utf16StringEscape } from 'quicktype-core/dist/support/Strings.js'
-import { mapKeys } from 'lodash'
+import { mapKeys, mapValues } from 'lodash'
 import type { ContributesConfigurationType, ExtensionManifest } from 'vscode-manifest'
 import { StringWriters } from 'generated-module'
 import fsExtra from 'fs-extra'
@@ -89,7 +89,8 @@ export const generateFile = async ({ contributionPoints, outputPath, config, ...
             })
         }
 
-    const writeRegularCommands = () => {
+    const writeCommandsType = () => {
+        // TODO change to just Commands
         writer.write('interface RegularCommands').block(() => {
             if (!commandsArr) return
             for (const command of commandsArr) writer.quote(command).write(': true').newLine()
@@ -104,23 +105,28 @@ export const generateFile = async ({ contributionPoints, outputPath, config, ...
         }
 
         writer.write("declare module 'vscode-framework'").block(() => {
-            writeRegularCommands()
+            writeCommandsType()
             if (useConfigurationType || allConfigProperties)
                 writer.writeLine(`interface Settings extends Required<Configuration> {}`)
         })
     } else if (rest.target === 'native') {
         writer.write('declare module "vscode"').block(() => {
             if (commandsArr) {
-                writer.write('type OrdinaryCommands = ')
+                writer.write('type ExtensionCommands = ')
                 StringWriters.union(commandsArr)(writer)
                 writer
                     .write(
                         `
 export namespace commands {
-    export function executeCommand<T = unknown>(command: OrdinaryCommands, ...rest: any[]): Thenable<T>
+    export function executeCommand<T = unknown>(command: ExtensionCommands, ...rest: any[]): Thenable<T>
     export function registerCommand(
-        command: OrdinaryCommands,
+        command: ExtensionCommands,
         callback: (...args: any[]) => any,
+        thisArg?: any,
+    ): Disposable
+    export function registerTextEditorCommand(
+        command: ExtensionCommands,
+        callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void,
         thisArg?: any,
     ): Disposable
 }`,
@@ -134,7 +140,7 @@ export namespace commands {
                 writer.write(`
 export namespace workspace {
     export function getConfiguration(
-        section: '${extensionId}',
+        section: '${extensionId!}',
         scope?: ConfigurationScope | null,
     ): {
         /**
@@ -236,7 +242,7 @@ export namespace workspace {
         })
     } else {
         writer.write('export ')
-        writeRegularCommands()
+        writeCommandsType()
         writer.blankLine()
     }
 
@@ -273,6 +279,13 @@ export namespace workspace {
 export const generateConfigurationFromSchema = async (
     allConfigProperties: Pick<ContributesConfigurationType, 'properties'>,
 ) => {
+    allConfigProperties.properties = Object.fromEntries(
+        Object.entries(allConfigProperties.properties).filter(([, value]) => {
+            const keys = Object.keys(value)
+            return !keys.every(name => ['deprecationMessage', 'markdownDeprecationMessage'].includes(name))
+        }),
+    )
+
     // worst lib ever
     const jsonInput = new JSONSchemaInput(new FetchingJSONSchemaStore())
     await jsonInput.addSource({

@@ -24,6 +24,13 @@ program.action(async ({ manifest: manifestPath = process.cwd(), ...cliConfig }) 
     const isDir = (await fs.promises.stat(manifestPath)).isDirectory()
     const manifest = await readPackageJsonFile(isDir ? { dir: manifestPath } : manifestPath)
     if (manifest['postinstallGenerateTypes'] === false && process.env.INIT_CWD) return
+    if (
+        process.env.INIT_CWD &&
+        [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})].includes(
+            'vscode-framework',
+        )
+    )
+        return
     const configExplorer = cosmiconfig('typed-vscode')
     const userConfig = await configExplorer.search()
     const resolvedConfig: Config = defaultsDeep(cliConfig, userConfig?.config || {}, defaultConfig)
