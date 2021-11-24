@@ -9,6 +9,7 @@ import { Config, ExtensionBootstrapConfig, PickContributes } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
 import { cachedGeneratedConfigurationPath, configurationTypeFile } from '../configurationFromType'
 import { ModeType, EXTENSION_ENTRYPOINTS } from '../commands/build'
+import { camelCase } from 'change-case'
 
 // They're generating package.json properties
 // If you with you can use them directly
@@ -183,18 +184,28 @@ export const manifestGenerators = makeGenerators({
             activationEvents: newActivationEvents,
         }
     },
-    async generatedConfiguration({ contributes: { configuration } }: PickContributes<'configuration'>) {
+    async generatedConfiguration(
+        { name, contributes: { configuration } }: PickManifest<'name'> & PickContributes<'configuration'>,
+        { config },
+    ) {
         if (!fs.existsSync(configurationTypeFile)) return {}
         if (configuration)
             throw new Error(
                 'contributes.configuration property must be removed from package.json when using configuration from configurationType.ts',
             )
-        // TODO! pass config instead of reading it from fs
+        // TODO!-works pass config via async local storage instead of reading it from fs
+        let idPrefix =
+            config.prependIds === false ? '' : config.prependIds!.style === 'camelCase' ? camelCase(name) : name
+        if (idPrefix) idPrefix += '.'
         return {
             contributes: {
                 configuration: {
-                    properties: parseJsoncString(await fs.promises.readFile(cachedGeneratedConfigurationPath, 'utf-8'))
-                        .properties,
+                    properties: Object.fromEntries(
+                        Object.entries(
+                            parseJsoncString(await fs.promises.readFile(cachedGeneratedConfigurationPath, 'utf-8'))
+                                .properties,
+                        ).map(([key, value]) => [`${idPrefix}${key}`, value]) as any,
+                    ),
                 },
             },
         }
