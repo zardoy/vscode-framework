@@ -16,6 +16,7 @@ describe.skip('Generates configuration from type', () => {
             join(__dirname, './configurationFromTypeFixtures/betterSnippets.ts'),
         )
         const spy = jest.spyOn(fs.promises, 'readFile')
+        //@ts-ignore
         spy.mockImplementation(async path => {
             if (path === cachedGeneratedConfigurationPath) throw new Error('No file')
             if (path === configurationTypeFile) return fixtureContent
