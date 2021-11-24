@@ -1,5 +1,15 @@
 # vscode-framework
 
+## 0.0.17
+
+### Patch Changes
+
+-   b8fca07: Fix: prepend ids to configuration properties correctly when using configuration from type
+-   7333af5: docs: update readme and fix link to docs
+-   b8fca07: BREAKING rename configurationTypeGenerated.ts to configurationTypeCache.ts
+-   Updated dependencies [e65bed3]
+    -   typed-vscode@0.0.4
+
 ## 0.0.16
 
 ### Patch Changes
