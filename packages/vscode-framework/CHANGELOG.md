@@ -1,5 +1,11 @@
 # vscode-framework
 
+## 0.0.18
+
+### Patch Changes
+
+-   4a62337: fix: make `config.esbuild.defineEnv` possible to use
+
 ## 0.0.17
 
 ### Patch Changes
