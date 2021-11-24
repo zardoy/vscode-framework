@@ -200,8 +200,7 @@ export interface Configuration {
     /**
      * %config.followTagsWhenSync%
      */
-    followTagsWhenSync?:   boolean;
-    githubAuthentication?: any;
+    followTagsWhenSync?: boolean;
     /**
      * %config.ignoredRepositories%
      */

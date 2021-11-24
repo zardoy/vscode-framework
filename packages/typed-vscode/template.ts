@@ -7,14 +7,19 @@ type Configuration = {
 declare module 'vscode-ignored' {
     // TODO find out how to augment command
 
-    type OrdinaryCommands = 'test'
+    type ExtensionCommands = 'test'
 
     // TODO make sure the signature matches latest vscode.d.ts
     export namespace commands {
-        export function executeCommand<T = unknown>(command: OrdinaryCommands, ...rest: any[]): Thenable<T>
+        export function executeCommand<T = unknown>(command: ExtensionCommands, ...rest: any[]): Thenable<T>
         export function registerCommand(
-            command: OrdinaryCommands,
+            command: ExtensionCommands,
             callback: (...args: any[]) => any,
+            thisArg?: any,
+        ): Disposable
+        export function registerTextEditorCommand(
+            command: ExtensionCommands,
+            callback: (textEditor: TextEditor, edit: TextEditorEdit, ...args: any[]) => void,
             thisArg?: any,
         ): Disposable
     }
