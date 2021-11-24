@@ -396,7 +396,6 @@ export interface Configuration {
     "codeLens.recentChange.command"?:           boolean | "gitlens.copyRemoteCommitUrl" | "gitlens.copyRemoteFileUrl" | "gitlens.diffWithPrevious" | "gitlens.openCommitOnRemote" | "gitlens.openFileOnRemote" | "gitlens.revealCommitInView" | "gitlens.showCommitsInView" | "gitlens.showQuickCommitDetails" | "gitlens.showQuickCommitFileDetails" | "gitlens.showQuickFileHistory" | "gitlens.showQuickRepoHistory" | "gitlens.toggleFileBlame" | "gitlens.toggleFileChanges" | "gitlens.toggleFileChangesOnly" | "gitlens.toggleFileHeatmap";
     "codeLens.recentChange.enabled"?:           boolean;
     "codeLens.scopes"?:                         "blocks" | "containers" | "document"[];
-    "codeLens.scopesByLanguage"?:               any;
     "codeLens.symbolScopes"?:                   string[];
     "currentLine.dateFormat"?:                  null | string;
     "currentLine.enabled"?:                     boolean;
@@ -416,7 +415,6 @@ export interface Configuration {
     "gitCommands.search.matchCase"?:            boolean;
     "gitCommands.search.matchRegex"?:           boolean;
     "gitCommands.search.showResultsInSideBar"?: boolean | null;
-    "gitCommands.search.showResultsInView"?:    any;
     "gitCommands.skipConfirmations"?:           "branch-create:command" | "branch-create:menu" | "co-authors:command" | "co-authors:menu" | "fetch:command" | "fetch:menu" | "pull:command" | "pull:menu" | "push:command" | "push:menu" | "stash-apply:command" | "stash-apply:menu" | "stash-pop:command" | "stash-pop:menu" | "stash-push:command" | "stash-push:menu" | "switch:command" | "switch:menu" | "tag-create:command" | "tag-create:menu"[];
     "gitCommands.sortBy"?:                      "name" | "usage";
     "heatmap.ageThreshold"?:                    number;
@@ -440,7 +438,6 @@ export interface Configuration {
     "hovers.detailsMarkdownFormat"?:            string;
     "hovers.enabled"?:                          boolean;
     "hovers.pullRequests.enabled"?:             boolean;
-    insiders?:                                  any;
     "integrations.enabled"?:                    boolean;
     keymap?:                                    "alternate" | "chorded" | "none";
     /**
@@ -486,10 +483,6 @@ export interface Configuration {
     "views.branches.pullRequests.showForCommits"?:             boolean;
     "views.branches.reveal"?:                                  boolean;
     "views.branches.showBranchComparison"?:                    boolean | "branch";
-    "views.commitDescriptionFormat"?:                          any;
-    "views.commitFileDescriptionFormat"?:                      any;
-    "views.commitFileFormat"?:                                 any;
-    "views.commitFormat"?:                                     any;
     "views.commits.avatars"?:                                  boolean;
     "views.commits.files.compact"?:                            boolean;
     "views.commits.files.layout"?:                             "auto" | "list" | "tree";
@@ -519,7 +512,6 @@ export interface Configuration {
     "views.formats.stashes.description"?:                      string;
     "views.formats.stashes.label"?:                            string;
     "views.lineHistory.avatars"?:                              boolean;
-    "views.lineHistory.enabled"?:                              any;
     "views.pageItemLimit"?:                                    number;
     "views.remotes.avatars"?:                                  boolean;
     "views.remotes.branches.layout"?:                          "list" | "tree";
@@ -536,7 +528,6 @@ export interface Configuration {
     "views.repositories.branches.layout"?:                     "list" | "tree";
     "views.repositories.branches.showBranchComparison"?:       boolean | "branch";
     "views.repositories.compact"?:                             boolean;
-    "views.repositories.enabled"?:                             any;
     "views.repositories.files.compact"?:                       boolean;
     "views.repositories.files.layout"?:                        "auto" | "list" | "tree";
     "views.repositories.files.threshold"?:                     number;
@@ -560,16 +551,10 @@ export interface Configuration {
     "views.searchAndCompare.pullRequests.enabled"?:            boolean;
     "views.searchAndCompare.pullRequests.showForCommits"?:     boolean;
     "views.showRelativeDateMarkers"?:                          boolean;
-    "views.stashDescriptionFormat"?:                           any;
     "views.stashes.files.compact"?:                            boolean;
     "views.stashes.files.layout"?:                             "auto" | "list" | "tree";
     "views.stashes.files.threshold"?:                          number;
     "views.stashes.reveal"?:                                   boolean;
-    "views.stashFileDescriptionFormat"?:                       any;
-    "views.stashFileFormat"?:                                  any;
-    "views.stashFormat"?:                                      any;
-    "views.statusFileDescriptionFormat"?:                      any;
-    "views.statusFileFormat"?:                                 any;
     "views.tags.avatars"?:                                     boolean;
     "views.tags.branches.layout"?:                             "list" | "tree";
     "views.tags.files.compact"?:                               boolean;

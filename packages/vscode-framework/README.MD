@@ -7,15 +7,16 @@
 - 💡 Not Boilerplated
 - ⚡️ Auto Reload
 - 🔑 TypeScript Types from `package.json` Contribution Points
+- ⚙️ Use TypeScript type for `configuration` instead of schema in *package.json*
 - 📦 Publish Production-ready Build with zero config
 - 🚀 Use `console` methods in production (creates extension output for you)
-- 🛠️ Verbose Configuration
-- ⚙️ Use TypeScript type for `configuration` instead of schema in *package.json*
+- 🛠️ Highly Configurable
 
 ## Usage
 
 - Install it in your project: `npm i vscode-framework@next -D`
-- Read the [DOCS](./docs/)
+<!-- TODO: autofix it via release action -->
+- Read the [DOCS](https://github.com/zardoy/vscode-framework/tree/main/packages/vscode-framework/docs)
 
 ## Brief Overview
 
