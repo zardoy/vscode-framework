@@ -174,7 +174,7 @@ describe('Integration', () => {
         const fromExtensions = (...path: string[]) => join(vscodeDir, 'extensions', ...path)
         beforeAll(async () => {
             await ensureVScodeDir(vscodeDir)
-        }, 10_000)
+        }, 15_000)
 
         test.each(TEST_BUILTIN_EXTENSIONS)('Builtin Extension %s', async ext => {
             const { content, fixtureFilePath } = await runTypesGenerator(fromExtensions(ext), 'bare', false)
