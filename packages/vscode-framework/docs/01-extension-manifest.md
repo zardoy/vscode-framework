@@ -23,15 +23,12 @@ However, manifest that used with `vscode-framework` is differs.
 
 ## IDs in contributions
 
+It is called IDs restoration, camelCased id of your extension in `commands` and `configuration` will be added (more in next chapters). Also they are normalized in `menus` contribution, so be aware of that.
 
 ## Manifest Migration
 
-Instead of removing of modifying fields yourself, just run interactive command `vscode-framework migrate`, it will guide you through the steps described above.
-
-It would also propose:
-
-- to create/change scripts in `package.json`:
+- Create scripts in `package.json`:
   - `start`: `vscode-framework start` – just run this script to launch extension
   - `build`: `vscode-framework build` – create optimized build (doesn't create `.vsix` for a moment)
 
-- [ ] But this command for now doesn't perform code migration, if you have big codebase you can wait until this feature is done.
+- [ ] But we don't have codemods for now
