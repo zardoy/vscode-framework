@@ -69,7 +69,7 @@ export const runEsbuild = async ({
         format: 'cjs',
         entryPoints: [realEntryPoint],
         metafile: true,
-        ...omit(esbuildConfig, 'entryPoint'),
+        ...omit(esbuildConfig, 'entryPoint', 'defineEnv'),
         write: false,
         // sourcemap: true,
         external: ['vscode', ...(esbuildConfig.external ?? [])],
