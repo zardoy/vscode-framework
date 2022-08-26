@@ -22,7 +22,7 @@
         "concurrently": "^6.4.0",
         "del": "^6.0.0",
         "delay": "^5.0.0",
-        "esbuild": "^0.13.14",
+        "esbuild": "^0.15.5",
         "esbuild-runner": "^2.2.1",
         "eslint": "^7.32.0",
         "eslint-plugin-zardoy-config": "^0.1.3",

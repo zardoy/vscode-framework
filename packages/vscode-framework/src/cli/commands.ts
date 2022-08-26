@@ -4,15 +4,15 @@ import { cosmiconfig } from 'cosmiconfig'
 import fsExtra from 'fs-extra'
 import { defaultsDeep } from 'lodash'
 import Debug from '@prisma/debug'
+import { generateFile } from 'typed-vscode'
+import { readDirectoryManifest } from 'vscode-manifest'
 import { BuildTargetType, Config, defaultConfig } from '../config'
 import { SuperCommander } from './commander'
 import { addStandaloneCommands } from './standaloneCommands'
 import { buildExtension } from './commands/build'
-import { generateFile } from 'typed-vscode'
 import { startExtensionDevelopment } from './commands/start'
-import { generateAndWriteManifest } from '.'
-import { readDirectoryManifest } from 'vscode-manifest'
 import { configurationTypeFile } from './configurationFromType'
+import { generateAndWriteManifest } from '.'
 
 const debug = Debug('vscode-framework:cli')
 

@@ -61,7 +61,7 @@ export const runEsbuild = async ({
     const { metafile, stop } = await esbuildBuild({
         bundle: true,
         // latest is assumed if web
-        target: target === 'desktop' ? 'node14' : undefined,
+        target: target === 'desktop' ? 'node16' : undefined,
         watch: mode === 'development',
         minify: mode === 'production',
         platform: target === 'desktop' ? 'node' : 'browser',
@@ -159,64 +159,8 @@ export const runEsbuild = async ({
                     })
                 },
             },
-            {
-                // there must be cleaner solution
-                name: 'esbuild-import-alias',
-                setup(build) {
-                    // not used for now, config option will be available
-                    const aliasModule = (aliasName: string | RegExp, target: string) => {
-                        const filter =
-                            aliasModule instanceof RegExp
-                                ? aliasModule
-                                : new RegExp(`^${escapeStringRegexp(aliasName as string)}(\\/.*)?$`)
-                        type PluginData = { resolveDir: string; aliasName: string }
-                        const namespace = 'esbuild-import-alias'
-
-                        build.onResolve({ filter }, async ({ resolveDir, path }) => {
-                            if (resolveDir === '') return
-                            return {
-                                path,
-                                namespace,
-                                pluginData: {
-                                    aliasName,
-                                    resolveDir,
-                                } as PluginData,
-                            }
-                        })
-                        build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: pluginDataUntyped }) => {
-                            const { aliasName, resolveDir }: PluginData = pluginDataUntyped
-                            const contents = [
-                                `export * from '${path.replace(aliasName, target)}'`,
-                                `export { default } from '${path.replace(aliasName, target)}';`,
-                            ].join('\n')
-                            return { contents, resolveDir }
-                        })
-                    }
-                },
-            },
-            {
-                name: 'esbuild-node-alias',
-                setup(build) {
-                    const namespace = 'esbuild-node-alias'
-                    const filter = /^node:(.*)/
-                    build.onResolve({ filter }, async ({ path, resolveDir }) => ({
-                        path,
-                        namespace,
-                        pluginData: {
-                            resolveDir,
-                        },
-                    }))
-                    build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: { resolveDir } }) => {
-                        const target = path.replace(filter, '$1')
-                        const contents = [`export * from '${target}'`, `export { default } from '${target}';`].join(
-                            '\n',
-                        )
-                        return { resolveDir, contents }
-                    })
-                },
-            },
+            ...(esbuildConfig.plugins ?? []),
         ],
-        ...(esbuildConfig.plugins ?? []),
     })
     // TODO output packed file and this file sizes at prod
     if (mode === 'production' && metafile) {

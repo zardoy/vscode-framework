@@ -42,7 +42,7 @@ const VSCODE_FRAMEWORK_OUTPUT = {
 
 const process: NodeJS.Process = {
     ...global.process,
-    //@ts-ignore
+    //@ts-expect-error
     stderr: {
         ...global.process.stderr,
         write(string, cb) {

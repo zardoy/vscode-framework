@@ -5,11 +5,11 @@ import { defaultsDeep } from 'lodash'
 import { UnionToIntersection } from 'type-fest'
 import { parseJsoncString } from 'typed-jsonfile/build/parseJsonc'
 import { ManifestType } from 'vscode-manifest'
+import { camelCase } from 'change-case'
 import { Config, ExtensionBootstrapConfig, PickContributes } from '../../config'
 import { MaybePromise, readModulePackage } from '../../util'
 import { cachedGeneratedConfigurationPath, configurationTypeFile } from '../configurationFromType'
 import { ModeType, EXTENSION_ENTRYPOINTS } from '../commands/build'
-import { camelCase } from 'change-case'
 
 // They're generating package.json properties
 // If you with you can use them directly

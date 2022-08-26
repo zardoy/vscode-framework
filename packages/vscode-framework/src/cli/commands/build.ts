@@ -151,7 +151,7 @@ const buildParticipants = makeBuildParticipants({
         })
     },
     async typechecking({ participants: { skipTypechecking } }) {
-        if (skipTypechecking || fsExtra.existsSync('./tsconfig.json')) return
+        if (skipTypechecking || !fsExtra.existsSync('./tsconfig.json')) return
         const date = Date.now()
         console.log(kleur.green('Executing tsc for type-checking...'))
         // just for simplicity, don't see a reason for programmatic usage
