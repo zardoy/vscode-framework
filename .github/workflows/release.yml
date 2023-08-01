@@ -9,10 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-          registry-url: 'https://registry.npmjs.org'
       - name: Cache pnpm modules
         uses: actions/cache@v2
         with:
@@ -25,10 +21,13 @@ jobs:
           version: latest
           # we already tested with --frozen-lockfile on next when creating pr, now we need to fix bumped pkg by changeset
           run_install: |
-              args: [--no-frozen-lockfile]
-        # for now, skipping eslint
+            args: [--no-frozen-lockfile]
       - run: node scripts/check-changeset.mjs
       - run: git push
+      - name: Set publishing config
+        run: pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       # test, build, add meta fields, perform additional checks and finally publish
       - run: pnpx -y zardoy-release pnpm-monorepo
         env:
