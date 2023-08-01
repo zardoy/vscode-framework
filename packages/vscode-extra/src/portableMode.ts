@@ -1,4 +1,4 @@
-import vscode from 'vscode'
+import * as vscode from 'vscode'
 
 /** note: always `false` in development until `process.env.PRETEND_PORTABLE` is set */
 export const isExtensionInPortableMode = (ctx: vscode.ExtensionContext) => {

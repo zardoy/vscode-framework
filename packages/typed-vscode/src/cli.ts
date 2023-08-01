@@ -1,4 +1,4 @@
-/* eslint-disable zardoy-config/@typescript-eslint/dot-notation */
+/* eslint-disable @typescript-eslint/dot-notation */
 import fs from 'fs'
 import { readPackageJsonFile } from 'typed-jsonfile'
 import { Command } from 'commander'

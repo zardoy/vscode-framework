@@ -82,8 +82,7 @@ const devExtensionPath = resolve(process.cwd(), relativePath)
 const commonBuildStartOptions = {
     '--out': {
         defaultValue: relativePath,
-        description:
-            'Output directory, in which package.json will be placed (or overrided!) for launching/building VSCode extension',
+        description: 'Output directory, in which package.json will be placed (or overrided!) for launching/building VSCode extension',
     },
 }
 
@@ -102,8 +101,7 @@ commander.command(
                 // TODO use config's default
                 defaultValue: false,
                 // reformat description
-                description:
-                    'If --web is present, you can launch web extension in desktop VSCode, instead of in browser',
+                description: 'If --web is present, you can launch web extension in desktop VSCode, instead of in browser',
             },
             '--skip-launching': {
                 defaultValue: false,
@@ -125,7 +123,7 @@ commander.command(
         try {
             if (sourcemap) config = defaultsDeep({ esbuild: { sourcemap: true } }, config)
             const target: BuildTargetType = web ? 'web' : 'desktop'
-            const { restartCommand } = (await startExtensionDevelopment({
+            const { restartCommand, sendMessage } = (await startExtensionDevelopment({
                 config,
                 outDir: resolve(process.cwd(), out),
                 launchVscodeParams: skipLaunching
@@ -148,16 +146,17 @@ commander.command(
 
                 // copied from `ink` module
                 if (input <= '\u001A' && input !== '\r') {
-                    input = String.fromCharCode(input.charCodeAt(0) + 'a'.charCodeAt(0) - 1)
+                    // eslint-disable-next-line unicorn/prefer-code-point
+                    input = String.fromCodePoint(input.charCodeAt(0) + 'a'.charCodeAt(0) - 1)
                     ctrlKey = true
                 }
 
                 if (ctrlKey && input === 'c') process.exit()
 
                 if (input === 'r') await restartCommand()
+                if (input === 'c') sendMessage('action:close')
             })
         } catch (error) {
-            // eslint-disable-next-line zardoy-config/unicorn/no-process-exit
             if (error.message?.startsWith('Build failed with')) process.exit(1)
             throw error
         }

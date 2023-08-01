@@ -36,7 +36,7 @@ export const runConfigurationGenerator = async (cwd: string) => {
                 continue
             }
 
-            // eslint-disable-next-line zardoy-config/@typescript-eslint/no-dynamic-delete
+            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             if (key.startsWith('$')) delete obj[key]
         }
     }

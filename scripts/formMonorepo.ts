@@ -67,7 +67,7 @@ import { getMonorepoPackages } from './common'
         .map(pkg => {
             const packageJson: PackageJson = jsonfile.readFileSync(join('packages', pkg, 'package.json'))
             const { name, description } = packageJson
-            // eslint-disable-next-line zardoy-config/@typescript-eslint/restrict-template-expressions
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             return `| [${name}](${githubBaseUrl}${pkg}) | ${description} | [![${name} version](https://img.shields.io/npm/v/${name}.svg?label=%20)](https://npmjs.com/${name}) |`
         })
         .join('\n')

@@ -91,7 +91,7 @@ export const generateManifest = async ({
               'scripts',
               'main',
               'browser',
-              // eslint-disable-next-line zardoy-config/@typescript-eslint/array-type
+              // eslint-disable-next-line @typescript-eslint/array-type
           ] as (keyof typeof sourceManifest)[]) as any)
         : sourceManifest
     return runGeneratorsOnManifest(

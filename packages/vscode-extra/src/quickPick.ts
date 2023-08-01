@@ -1,4 +1,4 @@
-import vscode from 'vscode'
+import * as vscode from 'vscode'
 import { Except } from 'type-fest'
 import { pickObject } from './utils'
 
@@ -16,7 +16,7 @@ export const showQuickPick = async <T, M extends boolean = false>(
     options: Except<vscode.QuickPickOptions, 'onDidSelectItem'> & {
         canPickMany?: M
         onDidChangeActive?: (items: ReadonlyArray<VSCodeQuickPickItem<T>>) => any
-        // eslint-disable-next-line zardoy-config/@typescript-eslint/ban-types
+        // eslint-disable-next-line @typescript-eslint/ban-types
     } & (M extends true ? { onDidChangeSelection?: (items: ReadonlyArray<VSCodeQuickPickItem<T>>) => any } : {}) = {},
 ): Promise<(M extends true ? T[] : T) | undefined> => {
     const quickPick = vscode.window.createQuickPick<VSCodeQuickPickItem<any>>()
@@ -33,7 +33,7 @@ export const showQuickPick = async <T, M extends boolean = false>(
     quickPick.placeholder = options.placeHolder
     quickPick.canSelectMany = options.canPickMany as boolean
     if ((options as any).onDidChangeSelection) quickPick.onDidChangeSelection((options as any).onDidChangeSelection)
-    if (options.onDidChangeActive) quickPick.onDidChangeSelection(options.onDidChangeActive)
+    if (options.onDidChangeActive) quickPick.onDidChangeActive(options.onDidChangeActive)
 
     const selectedValues = await new Promise<(M extends true ? T[] : T) | undefined>(resolve => {
         quickPick.onDidHide(() => {

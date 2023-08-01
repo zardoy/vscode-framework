@@ -1,4 +1,4 @@
-/* eslint-disable zardoy-config/@typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/ban-types */
 import { JSONSchema } from 'json-schema-typed'
 import { SetRequired } from 'type-fest'
 // manually

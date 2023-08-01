@@ -23,7 +23,7 @@ const VSCODE_FRAMEWORK_OUTPUT = {
     },
     newConsole: new globalThis.console.Console(
         ...((): [internal.PassThrough, internal.PassThrough] => {
-            // eslint-disable-next-line zardoy-config/@typescript-eslint/no-require-imports
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { PassThrough } = require('stream') as typeof import('stream')
 
             const stdout = new PassThrough()
@@ -125,7 +125,7 @@ const console = {
 //             return
 //         }
 
-//         // eslint-disable-next-line zardoy-config/@typescript-eslint/no-dynamic-delete
+//         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
 //         delete timeMarkers[marker]
 //         appendOutput('log', marker, Date.now() - timeMarkers[marker]!)
 //     },

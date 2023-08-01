@@ -1,4 +1,4 @@
-import vscode from 'vscode'
+import * as vscode from 'vscode'
 import type { RegularCommands, Settings } from '../index'
 
 // methods that works with injected env

@@ -21,7 +21,7 @@
 ## Brief Overview
 
 ```ts
-import vscode from 'vscode'
+import * as vscode from 'vscode'
 
 export const activate = (ctx: vscode.ExtensionContext) => {
     ctx.subscriptions.push(
@@ -35,7 +35,7 @@ export const activate = (ctx: vscode.ExtensionContext) => {
 With this framework:
 
 ```ts
-import vscode from 'vscode'
+import * as vscode from 'vscode'
 import { getExtensionSetting, registerExtensionCommand } from 'vscode-framework'
 
 export const activate = () => {
