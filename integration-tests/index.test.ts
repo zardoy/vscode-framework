@@ -125,7 +125,7 @@ const runTypesGenerator = async (cwd: string, variant: string, write = true) => 
     // const contributes = validate
     //     ? (await readDirectoryManifest({ directory: cwd, prependIds: false })).contributes
     //     : (await readPackageJsonFile({ dir: cwd }))[
-    //           // eslint-disable-next-line zardoy-config/@typescript-eslint/dot-notation
+    //           // eslint-disable-next-line @typescript-eslint/dot-notation
     //           'contributes'
     //       ]
     // await execa.node(BIN_ENTRYPOINT, ['generate'], { cwd, stdio: 'inherit' })

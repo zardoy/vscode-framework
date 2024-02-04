@@ -1,8 +1,8 @@
+/* eslint-disable no-await-in-loop */
 import fs from 'fs'
 import { join } from 'path'
 import Debug from '@prisma/debug'
 import { build as esbuildBuild, analyzeMetafile } from 'esbuild'
-import escapeStringRegexp from 'escape-string-regexp'
 import filesize from 'filesize'
 import kleur from 'kleur'
 import { defaultsDeep, omit, partition } from 'lodash'
@@ -56,7 +56,7 @@ export const runEsbuild = async ({
     })
     const consoleInjectCode = injectConsole
         ? await fs.promises.readFile(join(__dirname, './consoleInject.js'), 'utf-8')
-        : undefined
+        : ''
     // lodash-marker
     const { metafile, stop } = await esbuildBuild({
         bundle: true,
@@ -68,6 +68,7 @@ export const runEsbuild = async ({
         outfile: join(outDir, target === 'desktop' ? EXTENSION_ENTRYPOINTS.node : EXTENSION_ENTRYPOINTS.web),
         format: 'cjs',
         entryPoints: [realEntryPoint],
+        mainFields: ['module', 'main'],
         metafile: true,
         ...omit(esbuildConfig, 'entryPoint', 'defineEnv'),
         write: false,
@@ -85,6 +86,12 @@ export const runEsbuild = async ({
                 ...esbuildConfig.defineEnv,
                 ...defineEnv,
             }),
+            ...(mode === 'production'
+                ? {
+                      EXTENSION_BOOTSTRAP_CONFIG: null as any,
+                  }
+                : {}),
+            ...esbuildConfig.define,
         },
         plugins: [
             {
@@ -121,7 +128,7 @@ export const runEsbuild = async ({
 
                         prevHashOutput = newHashOutput
                         // investigate performance
-                        let codeToInject = `${topLevelInjectedCode}${consoleInjectCode ?? ''}\n`
+                        let codeToInject = `${topLevelInjectedCode}${consoleInjectCode}\n`
                         if (sourceMapsEnabled) codeToInject = codeToInject.replace(/\n/g, '')
                         debug('Start writing with inject')
                         await fs.promises.writeFile(

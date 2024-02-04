@@ -2,6 +2,7 @@
     "extends": "@zardoy/tsconfig/node-lib",
     "compilerOptions": {
         "composite": true,
+        "target": "ES2021",
         "rootDir": "src",
         "outDir": "build"
     },

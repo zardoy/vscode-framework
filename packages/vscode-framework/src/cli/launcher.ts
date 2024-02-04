@@ -9,7 +9,7 @@ const debug = Debug('vscode-framework:launcher')
 export type LauncherCLIParams = {
     /** What to launch */
     target: BuildTargetType
-    webOpen: WebOpenType
+    webOpen?: WebOpenType
 }
 
 type LaunchParams = Pick<Config, 'development'> & LauncherCLIParams
@@ -63,7 +63,7 @@ export const launchVscode = async (
         })
         .filter(a => a !== undefined) as string[]
 
-    const vscodeProcess = execa(developmentConfig.executable, [...argsParsed], {
+    const vscodeProcess = execa(developmentConfig.executable, [...argsParsed, ...developmentConfig.executableArgsAdd], {
         preferLocal: false,
         detached: true,
         stdio: 'ignore',

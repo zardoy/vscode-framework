@@ -24,6 +24,6 @@
         "vscode-framework": "^0.0.14"
     },
     "scripts": {
-        "start": "vscode-framework start"
+        "start": "vscode-framework start --skip-launching"
     }
 }

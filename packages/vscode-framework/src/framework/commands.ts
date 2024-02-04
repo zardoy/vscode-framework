@@ -1,11 +1,18 @@
-import vscode from 'vscode'
+import * as vscode from 'vscode'
 import { ManifestType } from 'vscode-manifest'
 import { RegularCommands } from '..'
 import { MaybePromise } from '../util'
 import { getExtensionContributionsPrefix, extensionCtx } from './injected'
 import { getExtensionCommandId } from '.'
 
-export type CommandHandler = (data: { command: keyof RegularCommands }, ...args: any[]) => MaybePromise<void>
+export type CommandHandlerMetadata = {
+    command: keyof RegularCommands
+    commandTitle: string
+}
+
+export type CommandHandler<T extends 'regular' | 'editor' = 'regular'> = T extends 'editor'
+    ? (data: CommandHandlerMetadata, textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => MaybePromise<any>
+    : (data: CommandHandlerMetadata, ...args: any[]) => MaybePromise<any>
 
 const getCommandTitle = (commandId: string) => {
     const fullCommandId = getExtensionCommandId(commandId as any)
@@ -32,44 +39,46 @@ export class GracefulCommandError extends Error {
 
 /** Works only via `vscode-framework start` */
 export const registerExtensionCommand = (command: keyof RegularCommands, handler: CommandHandler) => {
-    extensionCtx.subscriptions.push(
-        vscode.commands.registerCommand(`${getExtensionContributionsPrefix()}${command}`, async (...args) => {
-            try {
-                await handler({ command }, ...args)
-            } catch (error) {
-                // eslint-disable-next-line curly
-                if (error instanceof GracefulCommandError) {
-                    const firstArgs = error.options.modal
-                        ? ([
-                              `Running command '${getCommandTitle(command)}' failed`,
-                              {
-                                  modal: true,
-                                  detail: error.message,
-                              },
-                          ] as const)
-                        : ([error.message] as const)
-                    const action = await vscode.window.showErrorMessage(
-                        ...(firstArgs as [any]),
-                        ...(error.options.actions ? error.options.actions.map(({ label }) => label) : []),
-                    )
-                    if (action) await error.options.actions!.find(({ label }) => label === action)!.action()
-                    return
-                }
-
-                // TODO-low add github report report, like sindresorhus did in module for Electron
-                if (process.env.NODE_ENV === 'development') throw error
-                void vscode.window.showErrorMessage(`Command '${getCommandTitle(command)}' failed`, {
-                    modal: true,
-                    detail: error.message,
-                })
+    const disposable = vscode.commands.registerCommand(`${getExtensionContributionsPrefix()}${command}`, async (...args) => {
+        const commandTitle = getCommandTitle(command)
+        try {
+            return handler({ command, commandTitle }, ...args)
+        } catch (error) {
+            if (error instanceof GracefulCommandError) {
+                const firstArgs = error.options.modal
+                    ? ([
+                          `Running command '${commandTitle}' failed`,
+                          {
+                              modal: true,
+                              detail: error.message,
+                          },
+                      ] as const)
+                    : ([error.message] as const)
+                const action = await vscode.window.showErrorMessage(
+                    ...(firstArgs as [any]),
+                    ...(error.options.actions ? error.options.actions.map(({ label }) => label) : []),
+                )
+                if (action) await error.options.actions!.find(({ label }) => label === action)!.action()
+                return
             }
-        }),
-    )
+
+            // TODO-low add github report button, like in some module for Electron
+            if (process.env.NODE_ENV === 'development') throw error
+            void vscode.window.showErrorMessage(`Command '${commandTitle}' failed`, {
+                modal: true,
+                detail: error.message,
+            })
+        }
+    })
+    extensionCtx.subscriptions.push(disposable)
+    return disposable
 }
 
 /** Works only via `vscode-framework start` */
 export const registerAllExtensionCommands = (commands: { [C in keyof RegularCommands]: CommandHandler }) => {
-    for (const [command, handler] of Object.entries(commands)) registerExtensionCommand(command, handler)
+    const disposables: vscode.Disposable[] = []
+    for (const [command, handler] of Object.entries(commands)) disposables.push(registerExtensionCommand(command, handler))
+    return disposables
 }
 
 // TODO! disallow production
