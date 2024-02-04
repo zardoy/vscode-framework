@@ -63,6 +63,7 @@ export interface Config {
         // TODO implies executable = insiders
         /** code- */
         executable: 'code' | 'code-insiders'
+        executableArgsAdd: string[]
         /**
          *  effects `start` and `launch` commands. whether launch extension with other extensions disabled
          * - it's not possible to get rid of *extensions disabled* notification on every reload
@@ -96,17 +97,17 @@ export interface Config {
                    * What to do when you save changed code:
                    * - forced - reload extension development window (drops unsaved data)
                    * - hot - NOT IMPLEMENTED YET
+                   * - partial - restart extension host on code change
                    * - false - do nothing, but statusbar item will notify you to reload with CTRL+R shortcut
                    */
                   autoReload:
                       | {
-                            type: 'forced'
+                            type: 'forced' | 'partial'
                         }
                       //   | {
                       //         type: 'hot'
                       //         /** Mocks `vscode` import with auto disposing */
-                      //         automaticDispose: {
-                      //             enabled: boolean
+                      //         automaticDispose: false | {
                       //             // TODO
                       //             ignore: string[]
                       //         }
@@ -149,6 +150,7 @@ export const defaultConfig: Config = {
     },
     development: {
         executable: 'code',
+        executableArgsAdd: [],
         disableExtensions: true,
         openDevtools: false,
         alwaysActivationEvent: true,
@@ -158,7 +160,7 @@ export const defaultConfig: Config = {
             closeWindowOnExit: true,
             pipeConsole: false,
             autoReload: {
-                type: 'forced',
+                type: 'partial',
             },
             statusbarReloadInfo: true,
             developmentCommands: true,
@@ -166,7 +168,7 @@ export const defaultConfig: Config = {
     },
 }
 
-type EsbuildConfig = Except<BuildOptions, 'entryPoints' | 'define'> & {
+type EsbuildConfig = Except<BuildOptions, 'entryPoints'> & {
     entryPoint: string
     /** should be used instead of define. will prepend `process.env.` and stringify values */
     defineEnv?: Record<string, string | boolean | number>
@@ -201,10 +203,7 @@ export type PickContributes<T extends keyof ManifestType['contributes']> = {
     contributes: Pick<ManifestType['contributes'], T>
 }
 
-export const getBootstrapFeature = <T>(
-    config: Config,
-    callback: (bootstrapConfig: ExtensionBootstrapConfig) => T,
-): T | undefined => {
+export const getBootstrapFeature = <T>(config: Config, callback: (bootstrapConfig: ExtensionBootstrapConfig) => T): T | undefined => {
     if (!config.development.extensionBootstrap) return undefined
     return callback(config.development.extensionBootstrap)
 }

@@ -8,6 +8,5 @@ import execa from 'execa'
     // WIP
 })().catch(error => {
     console.error(error)
-    // eslint-disable-next-line zardoy-config/unicorn/no-process-exit
     process.exit(1)
 })

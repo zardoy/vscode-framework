@@ -72,7 +72,7 @@ const main = async () => {
         outfile: fromGenerated('validate.js'),
     })
     await fs.promises.unlink(esbuildEntryPoint)
-    const outputSize = Object.entries(metafile!.outputs)[0]![1]!.bytes
+    const outputSize = Object.entries(metafile.outputs)[0]![1]!.bytes
 
     // for now it's around 51
     if (outputSize > 55_000) throw new Error(`esbuild output size exceeded`)
@@ -101,6 +101,5 @@ const main = async () => {
 
 main().catch(error => {
     console.error(error)
-    // eslint-disable-next-line zardoy-config/unicorn/no-process-exit
     process.exit(1)
 })

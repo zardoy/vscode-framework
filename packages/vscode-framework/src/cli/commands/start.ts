@@ -27,7 +27,7 @@ export type BootstrapConfig = ExtensionBootstrapConfig & {
 }
 export type IpcEvents = {
     // app:reload not necessarily reloads window. it means changes happened and new file is on disk
-    extension: 'action:close' | 'action:reload'
+    extension: 'action:close' | 'action:code-reload' | 'action:full-reload'
 }
 
 /** build extension in `development` mode and watch for changes. reuses `build` command */
@@ -108,7 +108,7 @@ export const startExtensionDevelopment = async (
                     return
                 }
 
-                sendMessage('action:reload')
+                sendMessage('action:code-reload')
             },
             defineEnv: {
                 EXTENSION_BOOTSTRAP_CONFIG: extensionBootstrapConfig,
@@ -157,7 +157,8 @@ export const startExtensionDevelopment = async (
                 if (!firstManifestChange) firstManifestChange = false
             },
             async config() {
-                await restartBuildFromWatcher(`${watchedFiles.config} updated`)
+                console.warn(`${watchedFiles.config} was updated, you need to restart the command`)
+                // await restartBuildFromWatcher(`${watchedFiles.config} updated`)
             },
         }
 
@@ -190,9 +191,10 @@ export const startExtensionDevelopment = async (
         stopEsbuild,
         /** Would launch vscode, if connection not found */
         async restartCommand() {
-            if (activeWebSocket) sendMessage('action:reload')
+            if (activeWebSocket) sendMessage('action:full-reload')
             else await launchVscode()
         },
+        sendMessage
     }
 }
 

@@ -1,8 +1,8 @@
+/* eslint-disable no-await-in-loop */
 import fs from 'fs'
 import { join } from 'path'
 import Debug from '@prisma/debug'
 import { build as esbuildBuild, analyzeMetafile } from 'esbuild'
-import escapeStringRegexp from 'escape-string-regexp'
 import filesize from 'filesize'
 import kleur from 'kleur'
 import { defaultsDeep, omit, partition } from 'lodash'
@@ -56,18 +56,19 @@ export const runEsbuild = async ({
     })
     const consoleInjectCode = injectConsole
         ? await fs.promises.readFile(join(__dirname, './consoleInject.js'), 'utf-8')
-        : undefined
+        : ''
     // lodash-marker
     const { metafile, stop } = await esbuildBuild({
         bundle: true,
         // latest is assumed if web
-        target: target === 'desktop' ? 'node14' : undefined,
+        target: target === 'desktop' ? 'node16' : undefined,
         watch: mode === 'development',
         minify: mode === 'production',
         platform: target === 'desktop' ? 'node' : 'browser',
         outfile: join(outDir, target === 'desktop' ? EXTENSION_ENTRYPOINTS.node : EXTENSION_ENTRYPOINTS.web),
         format: 'cjs',
         entryPoints: [realEntryPoint],
+        mainFields: ['module', 'main'],
         metafile: true,
         ...omit(esbuildConfig, 'entryPoint', 'defineEnv'),
         write: false,
@@ -85,6 +86,12 @@ export const runEsbuild = async ({
                 ...esbuildConfig.defineEnv,
                 ...defineEnv,
             }),
+            ...(mode === 'production'
+                ? {
+                      EXTENSION_BOOTSTRAP_CONFIG: null as any,
+                  }
+                : {}),
+            ...esbuildConfig.define,
         },
         plugins: [
             {
@@ -121,7 +128,7 @@ export const runEsbuild = async ({
 
                         prevHashOutput = newHashOutput
                         // investigate performance
-                        let codeToInject = `${topLevelInjectedCode}${consoleInjectCode ?? ''}\n`
+                        let codeToInject = `${topLevelInjectedCode}${consoleInjectCode}\n`
                         if (sourceMapsEnabled) codeToInject = codeToInject.replace(/\n/g, '')
                         debug('Start writing with inject')
                         await fs.promises.writeFile(
@@ -159,64 +166,8 @@ export const runEsbuild = async ({
                     })
                 },
             },
-            {
-                // there must be cleaner solution
-                name: 'esbuild-import-alias',
-                setup(build) {
-                    // not used for now, config option will be available
-                    const aliasModule = (aliasName: string | RegExp, target: string) => {
-                        const filter =
-                            aliasModule instanceof RegExp
-                                ? aliasModule
-                                : new RegExp(`^${escapeStringRegexp(aliasName as string)}(\\/.*)?$`)
-                        type PluginData = { resolveDir: string; aliasName: string }
-                        const namespace = 'esbuild-import-alias'
-
-                        build.onResolve({ filter }, async ({ resolveDir, path }) => {
-                            if (resolveDir === '') return
-                            return {
-                                path,
-                                namespace,
-                                pluginData: {
-                                    aliasName,
-                                    resolveDir,
-                                } as PluginData,
-                            }
-                        })
-                        build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: pluginDataUntyped }) => {
-                            const { aliasName, resolveDir }: PluginData = pluginDataUntyped
-                            const contents = [
-                                `export * from '${path.replace(aliasName, target)}'`,
-                                `export { default } from '${path.replace(aliasName, target)}';`,
-                            ].join('\n')
-                            return { contents, resolveDir }
-                        })
-                    }
-                },
-            },
-            {
-                name: 'esbuild-node-alias',
-                setup(build) {
-                    const namespace = 'esbuild-node-alias'
-                    const filter = /^node:(.*)/
-                    build.onResolve({ filter }, async ({ path, resolveDir }) => ({
-                        path,
-                        namespace,
-                        pluginData: {
-                            resolveDir,
-                        },
-                    }))
-                    build.onLoad({ filter: /.*/, namespace }, async ({ path, pluginData: { resolveDir } }) => {
-                        const target = path.replace(filter, '$1')
-                        const contents = [`export * from '${target}'`, `export { default } from '${target}';`].join(
-                            '\n',
-                        )
-                        return { resolveDir, contents }
-                    })
-                },
-            },
+            ...(esbuildConfig.plugins ?? []),
         ],
-        ...(esbuildConfig.plugins ?? []),
     })
     // TODO output packed file and this file sizes at prod
     if (mode === 'production' && metafile) {

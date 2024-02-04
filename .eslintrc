@@ -1,9 +1,12 @@
 {
-    "extends": ["plugin:zardoy-config/recommended"],
+    "extends": "zardoy",
     "rules": {
+        "curly": "off",
         // doesn't work correctly for TypeScript types
         "no-unused-vars": "off",
         // doesn't work correctly with just falsey values
-        "zardoy-config/@typescript-eslint/prefer-optional-chain": "off"
+        "@typescript-eslint/prefer-optional-chain": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/naming-convention": "off"
     }
 }

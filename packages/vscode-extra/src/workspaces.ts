@@ -1,4 +1,4 @@
-import vscode from 'vscode'
+import * as vscode from 'vscode'
 import { showQuickPick, VSCodeQuickPickItem } from '.'
 type MaybePromise<T> = T | Promise<T>
 

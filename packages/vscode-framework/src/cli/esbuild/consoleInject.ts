@@ -3,9 +3,7 @@ import type internal from 'stream'
 // I am trying to store everything in the object, so esbuild does less renames (possible variable names collisions)
 const VSCODE_FRAMEWORK_OUTPUT = {
     oldConsole: globalThis.console,
-    channel: undefined as
-        | Pick<import('vscode').OutputChannel, 'append' | 'appendLine' | 'clear' | 'hide' | 'show'>
-        | undefined,
+    channel: undefined as Pick<import('vscode').OutputChannel, 'append' | 'appendLine' | 'clear' | 'hide' | 'show'> | undefined,
     consoleTimeFormatter: new Intl.DateTimeFormat('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -23,7 +21,7 @@ const VSCODE_FRAMEWORK_OUTPUT = {
     },
     newConsole: new globalThis.console.Console(
         ...((): [internal.PassThrough, internal.PassThrough] => {
-            // eslint-disable-next-line zardoy-config/@typescript-eslint/no-require-imports
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { PassThrough } = require('stream') as typeof import('stream')
 
             const stdout = new PassThrough()
@@ -42,7 +40,7 @@ const VSCODE_FRAMEWORK_OUTPUT = {
 
 const process: NodeJS.Process = {
     ...global.process,
-    //@ts-ignore
+    //@ts-expect-error weird error dont care
     stderr: {
         ...global.process.stderr,
         write(string, cb) {
@@ -125,7 +123,7 @@ const console = {
 //             return
 //         }
 
-//         // eslint-disable-next-line zardoy-config/@typescript-eslint/no-dynamic-delete
+//         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
 //         delete timeMarkers[marker]
 //         appendOutput('log', marker, Date.now() - timeMarkers[marker]!)
 //     },

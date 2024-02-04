@@ -2,7 +2,7 @@
 
 ## General Tips
 
-- I generally recommend always use default import for `vscode` API, like `import vscode from 'vscode'` or `import vsc from 'vscode'` to exclude collisions with libraries & other code.
+- I generally recommend always use default import for `vscode` API, like `import * as vscode from 'vscode'` or `import vsc from 'vscode'` to exclude collisions with libraries & other code.
 
 ## Example with Commands
 
@@ -10,7 +10,7 @@ If you declare `make-project-awesome` command, you can register it:
 
 ```ts
 //📁 src/extension.ts
-import vscode from 'vscode';
+import * as vscode from 'vscode';
 import { registerExtensionCommand } from 'vscode-framework';
 
 export const activate = () => {

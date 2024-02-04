@@ -1,4 +1,4 @@
-/* eslint-disable zardoy-config/@typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/no-namespace */
 type Configuration = {
     foo: number
     bar: boolean

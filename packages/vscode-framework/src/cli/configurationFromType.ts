@@ -36,6 +36,7 @@ export const runConfigurationGenerator = async (cwd: string) => {
                 continue
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             if (key.startsWith('$')) delete obj[key]
         }
     }
@@ -57,6 +58,8 @@ const generateConfigFromFile = (configurationTypeFilePath: string) => {
         required: true,
         strictNullChecks: true,
         topRef: true,
+        validationKeywords: ['enumDescription', 'suggestSortText', 'defaultSnippets'],
+        ignoreErrors: true,
     }
 
     console.time('TJS generate configuration')
